@@ -1,0 +1,40 @@
+# --- Android / Gradle ---
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+**/build/
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Google Services / signing
+google-services.json
+*.keystore
+*.jks
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account.json
+
+# --- Editor / OS ---
+*.swp
+*~
+Thumbs.db
+
+# --- Python venvs (in case any scripts land here) ---
+__pycache__/
+*.pyc
+.venv/
+venv/
