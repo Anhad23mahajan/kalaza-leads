@@ -1,0 +1,12 @@
+# Copy this file to local.properties (which is gitignored) and fill in real values.
+# local.properties is never committed — this example file just documents what's needed.
+
+sdk.dir=/path/to/your/Android/sdk
+
+# Supabase project for Kalaza Leads (ideally the same Supabase org as Kalaza Care —
+# see docs/PROJECT_SPEC.md section 11, item 2, for that decision).
+# The anon key is safe to ship client-side once Row-Level Security is enabled on every
+# table — same pattern as Kalaza Care. Never put the service-role key here or anywhere
+# in the app; that belongs only in Supabase Edge Function secrets.
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here

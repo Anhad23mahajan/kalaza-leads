@@ -35,4 +35,17 @@ All three run through the Claude API from the serverless layer.
 
 ## Repository layout
 
-Full concept, data model, and phasing plan live in [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md). Android app source lands here as it's scaffolded.
+Full concept, data model, and phasing plan live in [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md) — read that first.
+
+The Android project is scaffolded (Kotlin + Compose, Material 3, `com.kalazacare.leads`), forked from Kalaza Care's structure:
+
+```
+app/src/main/java/com/kalazacare/leads/
+  KalazaLeadsApp.kt          Application class
+  data/remote/               Supabase client, wired to local.properties (never hardcoded)
+  ui/MainActivity.kt         Entry point
+  ui/login/LoginScreen.kt    Placeholder — not yet wired to Supabase Auth
+  ui/theme/                  Material 3 theme (teal, deliberately distinct from Kalaza Care's red)
+```
+
+Not yet built: auth flow, the lead data model, the follow-up-due list, `wa.me` messaging, and the Supabase Edge Functions for AI drafting/parsing/summarization. Copy `local.properties.example` to `local.properties` and fill in a Supabase project's URL/anon key before running.
