@@ -1,11 +1,14 @@
 package com.kalazacare.leads.data.repository
 
+import android.util.Log
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.signInWith
 import io.github.jan.supabase.auth.signOut
 import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.exceptions.RestException
+
+private const val TAG = "KalazaLeadsAuth"
 
 /**
  * Supabase auth implementation. Staff log in by NAME, not email.
@@ -22,6 +25,7 @@ class SupabaseAuthRepository(private val client: SupabaseClient) : AuthRepositor
 
     override suspend fun login(staffName: String, password: String): Result<String> = try {
         val synthesizedEmail = "${staffName.lowercase().replace(" ", "_")}@kalazaleads.app"
+        Log.d(TAG, "Attempting signIn for $synthesizedEmail")
 
         // Try to sign in. If it fails with "Invalid credentials", fall back to sign up.
         val signInResult = runCatching {
@@ -30,20 +34,25 @@ class SupabaseAuthRepository(private val client: SupabaseClient) : AuthRepositor
                 password = password
             )
         }
+        Log.d(TAG, "signIn result: success=${signInResult.isSuccess}, error=${signInResult.exceptionOrNull()}")
 
         if (signInResult.isSuccess) {
             Result.success(client.auth.currentUserOrNull()?.id ?: "")
         } else {
+            Log.d(TAG, "Attempting signUp for $synthesizedEmail")
             // User doesn't exist; create the account
             client.auth.signUpWith(
                 email = synthesizedEmail,
                 password = password
             )
+            Log.d(TAG, "signUp completed, currentUser=${client.auth.currentUserOrNull()?.id}")
             Result.success(client.auth.currentUserOrNull()?.id ?: "")
         }
     } catch (e: RestException) {
+        Log.e(TAG, "RestException during login", e)
         Result.failure(Exception("Auth failed: ${e.message}"))
     } catch (e: Exception) {
+        Log.e(TAG, "Exception during login", e)
         Result.failure(e)
     }
 
