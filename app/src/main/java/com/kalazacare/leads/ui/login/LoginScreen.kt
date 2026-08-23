@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,8 +32,15 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val state by viewModel.state.collectAsState()
 
-    if (state.isLoggedIn) {
-        onLoginSuccess()
+    // A side effect (navigating out) must run in LaunchedEffect, not directly during
+    // composition — a bare `if` here would re-fire every recomposition, including
+    // ones triggered by unrelated state (typing in a field), and would fire again
+    // immediately if this same ViewModel instance is ever shown again with stale
+    // isLoggedIn=true still set (e.g. right after a logout, before its own reset lands).
+    LaunchedEffect(state.isLoggedIn) {
+        if (state.isLoggedIn) {
+            onLoginSuccess()
+        }
     }
 
     Column(

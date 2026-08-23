@@ -57,4 +57,17 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
     fun clearError() {
         _state.value = _state.value.copy(errorMessage = null)
     }
+
+    fun logout() {
+        Log.d(TAG, "logout() called")
+        // Reset synchronously, before the caller flips MainActivity's own isLoggedIn
+        // flag. If this reset happened inside the coroutine below instead, MainActivity
+        // would recompose LoginScreen with this ViewModel's isLoggedIn still stuck at
+        // true (the coroutine hasn't run yet), and its LaunchedEffect would bounce
+        // straight back to LeadsScreen before the reset ever lands.
+        _state.value = LoginState()
+        viewModelScope.launch {
+            authRepository.logout()
+        }
+    }
 }

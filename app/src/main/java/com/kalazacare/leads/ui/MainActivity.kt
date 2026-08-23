@@ -34,6 +34,7 @@ class MainActivity : ComponentActivity() {
                     if (isLoggedIn) {
                         LeadsScreen(
                             onLogout = {
+                                loginViewModel.logout()
                                 isLoggedIn = false
                             }
                         )
