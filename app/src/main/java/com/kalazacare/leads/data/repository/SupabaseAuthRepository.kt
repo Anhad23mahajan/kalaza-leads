@@ -9,7 +9,11 @@ import io.github.jan.supabase.exceptions.RestException
 
 /**
  * Supabase auth implementation. Staff log in by NAME, not email.
- * Synthesizes an email (staff_name@kalaza-leads.internal) for Supabase Auth.
+ * Synthesizes an email (staff_name@kalazaleads.app) for Supabase Auth.
+ *
+ * The domain must be a TLD Supabase's signup validator accepts — reserved/example
+ * TLDs like .internal, .local, .test get rejected outright with email_address_invalid.
+ * No real inbox is needed since "Confirm email" is turned off for this project.
  *
  * TODO (Phase 2): Replace with the security-definer RPC pattern from Kalaza Care
  * once that repo's auth setup is available. The RPC handles synthesis server-side.
@@ -17,7 +21,7 @@ import io.github.jan.supabase.exceptions.RestException
 class SupabaseAuthRepository(private val client: SupabaseClient) : AuthRepository {
 
     override suspend fun login(staffName: String, password: String): Result<String> = try {
-        val synthesizedEmail = "${staffName.lowercase().replace(" ", "_")}@kalaza-leads.internal"
+        val synthesizedEmail = "${staffName.lowercase().replace(" ", "_")}@kalazaleads.app"
 
         // Try to sign in. If it fails with "Invalid credentials", fall back to sign up.
         val signInResult = runCatching {
