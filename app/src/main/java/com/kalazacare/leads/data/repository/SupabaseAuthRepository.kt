@@ -3,9 +3,7 @@ package com.kalazacare.leads.data.repository
 import android.util.Log
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.signInWith
-import io.github.jan.supabase.auth.signOut
-import io.github.jan.supabase.auth.user.UserSession
+import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.exceptions.RestException
 
 private const val TAG = "KalazaLeadsAuth"
@@ -29,10 +27,10 @@ class SupabaseAuthRepository(private val client: SupabaseClient) : AuthRepositor
 
         // Try to sign in. If it fails with "Invalid credentials", fall back to sign up.
         val signInResult = runCatching {
-            client.auth.signInWith(
-                email = synthesizedEmail,
-                password = password
-            )
+            client.auth.signInWith(Email) {
+                this.email = synthesizedEmail
+                this.password = password
+            }
         }
         Log.d(TAG, "signIn result: success=${signInResult.isSuccess}, error=${signInResult.exceptionOrNull()}")
 
@@ -41,10 +39,10 @@ class SupabaseAuthRepository(private val client: SupabaseClient) : AuthRepositor
         } else {
             Log.d(TAG, "Attempting signUp for $synthesizedEmail")
             // User doesn't exist; create the account
-            client.auth.signUpWith(
-                email = synthesizedEmail,
-                password = password
-            )
+            client.auth.signUpWith(Email) {
+                this.email = synthesizedEmail
+                this.password = password
+            }
             Log.d(TAG, "signUp completed, currentUser=${client.auth.currentUserOrNull()?.id}")
             Result.success(client.auth.currentUserOrNull()?.id ?: "")
         }
