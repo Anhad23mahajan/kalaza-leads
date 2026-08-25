@@ -1,5 +1,6 @@
 package com.kalazacare.leads.ui.leads
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import com.kalazacare.leads.data.model.Lead
 fun LeadsScreen(
     viewModel: LeadsViewModel,
     onAddLead: () -> Unit,
+    onLeadClick: (Lead) -> Unit,
     onLogout: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
@@ -89,7 +91,7 @@ fun LeadsScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         items(state.leads) { lead ->
-                            LeadCard(lead)
+                            LeadCard(lead, onClick = { onLeadClick(lead) })
                         }
                     }
                 }
@@ -99,8 +101,12 @@ fun LeadsScreen(
 }
 
 @Composable
-private fun LeadCard(lead: Lead) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+private fun LeadCard(lead: Lead, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = lead.enquirerName,
@@ -114,13 +120,13 @@ private fun LeadCard(lead: Lead) {
                 )
             }
             Text(
-                text = lead.enquirerPhone,
+                text = "${lead.enquirerCountryCode} ${lead.enquirerPhone}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
             Text(
-                text = lead.status,
+                text = STATUS_LABELS[lead.status] ?: lead.status,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )

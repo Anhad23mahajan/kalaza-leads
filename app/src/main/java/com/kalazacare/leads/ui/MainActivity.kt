@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,13 +15,14 @@ import com.kalazacare.leads.data.remote.SupabaseClients
 import com.kalazacare.leads.data.repository.SupabaseAuthRepository
 import com.kalazacare.leads.data.repository.SupabaseLeadsRepository
 import com.kalazacare.leads.ui.leads.AddLeadScreen
+import com.kalazacare.leads.ui.leads.LeadDetailScreen
 import com.kalazacare.leads.ui.leads.LeadsScreen
 import com.kalazacare.leads.ui.leads.LeadsViewModel
 import com.kalazacare.leads.ui.login.LoginScreen
 import com.kalazacare.leads.ui.login.LoginViewModel
 import com.kalazacare.leads.ui.theme.KalazaLeadsTheme
 
-private enum class Screen { LOGIN, LEADS, ADD_LEAD }
+private enum class Screen { LOGIN, LEADS, ADD_LEAD, LEAD_DETAIL }
 
 class MainActivity : ComponentActivity() {
     private var currentScreen by mutableStateOf(Screen.LOGIN)
@@ -48,6 +50,10 @@ class MainActivity : ComponentActivity() {
                         Screen.LEADS -> LeadsScreen(
                             viewModel = leadsViewModel,
                             onAddLead = { currentScreen = Screen.ADD_LEAD },
+                            onLeadClick = { lead ->
+                                leadsViewModel.selectLead(lead)
+                                currentScreen = Screen.LEAD_DETAIL
+                            },
                             onLogout = {
                                 loginViewModel.logout()
                                 currentScreen = Screen.LOGIN
@@ -58,6 +64,23 @@ class MainActivity : ComponentActivity() {
                             onBack = { currentScreen = Screen.LEADS },
                             onSaved = { currentScreen = Screen.LEADS },
                         )
+                        Screen.LEAD_DETAIL -> {
+                            val leadsState by leadsViewModel.state.collectAsState()
+                            val selected = leadsState.selectedLead
+                            if (selected != null) {
+                                LeadDetailScreen(
+                                    lead = selected,
+                                    viewModel = leadsViewModel,
+                                    onBack = {
+                                        leadsViewModel.clearSelection()
+                                        currentScreen = Screen.LEADS
+                                    },
+                                    onSaved = { currentScreen = Screen.LEADS },
+                                )
+                            } else {
+                                currentScreen = Screen.LEADS
+                            }
+                        }
                     }
                 }
             }

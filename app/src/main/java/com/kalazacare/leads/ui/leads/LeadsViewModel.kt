@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalazacare.leads.data.model.Lead
 import com.kalazacare.leads.data.model.NewLeadRequest
+import com.kalazacare.leads.data.model.UpdateLeadRequest
 import com.kalazacare.leads.data.repository.LeadsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 data class LeadsState(
     val isLoading: Boolean = false,
     val leads: List<Lead> = emptyList(),
+    val selectedLead: Lead? = null,
     val errorMessage: String? = null,
 )
 
@@ -52,6 +54,32 @@ class LeadsViewModel(private val repository: LeadsRepository) : ViewModel() {
                     _state.value = _state.value.copy(
                         isLoading = false,
                         errorMessage = error.message ?: "Failed to add lead",
+                    )
+                }
+        }
+    }
+
+    fun selectLead(lead: Lead) {
+        _state.value = _state.value.copy(selectedLead = lead, errorMessage = null)
+    }
+
+    fun clearSelection() {
+        _state.value = _state.value.copy(selectedLead = null)
+    }
+
+    fun updateLead(id: String, update: UpdateLeadRequest, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
+            repository.updateLead(id, update)
+                .onSuccess {
+                    _state.value = _state.value.copy(isLoading = false, selectedLead = null)
+                    refresh()
+                    onSuccess()
+                }
+                .onFailure { error ->
+                    _state.value = _state.value.copy(
+                        isLoading = false,
+                        errorMessage = error.message ?: "Failed to update lead",
                     )
                 }
         }
