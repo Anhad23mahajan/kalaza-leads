@@ -631,7 +631,7 @@ Four parallel tracks. **A is code with no blockers. B and C are NGO-dependent an
 | A3 | **Contact activity log** — the "proof" feature | 1 wk |
 | A4 | **Follow-up-due home screen** + push notifications | 1.5 wk |
 | A5 | Segmented list views (his 4+ lists) + status transitions + not-converted reason capture | 1 wk |
-| A6 | **Excel export + share** (request #7) | 0.5 wk |
+| A6 | ~~**Excel export + share**~~ (request #7) — **Done 2026-08-25**, as CSV (opens in Excel/Sheets) via the Android share sheet | 0.5 wk |
 | A7 | `wa.me` one-tap messaging (interim, works before any API) | 0.5 wk |
 | A8 | Staff table + assignment + basic roles | 0.5 wk |
 | A9 | Reports/analytics screen | 1.5 wk |
