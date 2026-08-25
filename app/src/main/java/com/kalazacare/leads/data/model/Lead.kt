@@ -124,6 +124,7 @@ data class UpdateLeadRequest(
     val comments: String? = null,
 
     val status: String,
+    @SerialName("assigned_staff_id") val assignedStaffId: String? = null,
     @SerialName("planned_visit_date") val plannedVisitDate: String? = null,
     @SerialName("actual_visit_date") val actualVisitDate: String? = null,
     @SerialName("next_follow_up_date") val nextFollowUpDate: String? = null,

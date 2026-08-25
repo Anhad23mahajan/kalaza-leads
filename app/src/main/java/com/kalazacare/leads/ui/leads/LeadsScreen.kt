@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -63,6 +64,7 @@ fun LeadsScreen(
     viewModel: LeadsViewModel,
     onAddLead: () -> Unit,
     onLeadClick: (Lead) -> Unit,
+    onManageStaff: () -> Unit = {},
     onLogout: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
@@ -87,6 +89,9 @@ fun LeadsScreen(
                             enabled = visibleLeads.isNotEmpty(),
                         ) {
                             Icon(Icons.Filled.Share, contentDescription = "Export ${SEGMENTS[selectedTab].label} to CSV")
+                        }
+                        IconButton(onClick = onManageStaff) {
+                            Icon(Icons.Filled.People, contentDescription = "Manage staff")
                         }
                         IconButton(onClick = onLogout) {
                             Text("Logout", modifier = Modifier.padding(end = 12.dp))
