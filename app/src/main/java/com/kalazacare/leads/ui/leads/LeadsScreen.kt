@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
@@ -65,6 +66,7 @@ fun LeadsScreen(
     onAddLead: () -> Unit,
     onLeadClick: (Lead) -> Unit,
     onManageStaff: () -> Unit = {},
+    onViewReports: () -> Unit = {},
     onLogout: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
@@ -92,6 +94,9 @@ fun LeadsScreen(
                         }
                         IconButton(onClick = onManageStaff) {
                             Icon(Icons.Filled.People, contentDescription = "Manage staff")
+                        }
+                        IconButton(onClick = onViewReports) {
+                            Icon(Icons.Filled.Assessment, contentDescription = "Reports")
                         }
                         IconButton(onClick = onLogout) {
                             Text("Logout", modifier = Modifier.padding(end = 12.dp))
