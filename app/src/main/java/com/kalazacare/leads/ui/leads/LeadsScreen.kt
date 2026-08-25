@@ -19,8 +19,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -36,6 +36,25 @@ import androidx.compose.ui.unit.dp
 import com.kalazacare.leads.data.model.Lead
 import java.time.LocalDate
 
+private val ACTIVE_STATUSES = setOf("NEW", "CONTACTED", "INFO_SENT", "VISIT_SCHEDULED", "VISITED", "CONSIDERING")
+private val TERMINAL_STATUSES = setOf("CONVERTED", "NOT_CONVERTED", "DORMANT")
+
+private data class Segment(val label: String, val filter: (List<Lead>, String) -> List<Lead>)
+
+private val SEGMENTS = listOf(
+    Segment("Follow-ups Due") { leads, today ->
+        leads
+            .filter { it.nextFollowUpDate != null && it.nextFollowUpDate <= today && it.status !in TERMINAL_STATUSES }
+            .sortedBy { it.nextFollowUpDate }
+    },
+    Segment("All") { leads, _ -> leads },
+    Segment("Active") { leads, _ -> leads.filter { it.status in ACTIVE_STATUSES } },
+    Segment("Converted") { leads, _ -> leads.filter { it.status == "CONVERTED" } },
+    Segment("Not Converted") { leads, _ -> leads.filter { it.status == "NOT_CONVERTED" } },
+    Segment("Dormant") { leads, _ -> leads.filter { it.status == "DORMANT" } },
+    Segment("Backup") { leads, _ -> leads.filter { it.status == "BACKUP" } },
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeadsScreen(
@@ -48,13 +67,9 @@ fun LeadsScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
     val today = remember { LocalDate.now().toString() }
 
-    val dueLeads = remember(state.leads, today) {
-        state.leads
-            .filter { it.nextFollowUpDate != null && it.nextFollowUpDate <= today && it.status !in TERMINAL_STATUSES }
-            .sortedBy { it.nextFollowUpDate }
+    val visibleLeads = remember(state.leads, today, selectedTab) {
+        SEGMENTS[selectedTab].filter(state.leads, today)
     }
-
-    val visibleLeads = if (selectedTab == 0) dueLeads else state.leads
 
     Scaffold(
         topBar = {
@@ -67,17 +82,15 @@ fun LeadsScreen(
                         }
                     },
                 )
-                TabRow(selectedTabIndex = selectedTab) {
-                    Tab(
-                        selected = selectedTab == 0,
-                        onClick = { selectedTab = 0 },
-                        text = { Text("Follow-ups Due (${dueLeads.size})") },
-                    )
-                    Tab(
-                        selected = selectedTab == 1,
-                        onClick = { selectedTab = 1 },
-                        text = { Text("All Leads (${state.leads.size})") },
-                    )
+                ScrollableTabRow(selectedTabIndex = selectedTab) {
+                    SEGMENTS.forEachIndexed { index, segment ->
+                        val count = remember(state.leads, today) { segment.filter(state.leads, today).size }
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = { Text("${segment.label} ($count)") },
+                        )
+                    }
                 }
             }
         },
@@ -96,25 +109,6 @@ fun LeadsScreen(
                 state.isLoading && state.leads.isEmpty() -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                visibleLeads.isEmpty() && selectedTab == 0 -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = "Nothing due right now.",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                        Text(
-                            text = "Set a next follow-up date on a lead and it'll show up here.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
                 visibleLeads.isEmpty() -> {
                     Column(
                         modifier = Modifier
@@ -124,11 +118,11 @@ fun LeadsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "No enquiries yet.",
+                            text = if (selectedTab == 0) "Nothing due right now." else "No leads in this list.",
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = "Tap + to add the first one.",
+                            text = if (state.leads.isEmpty()) "Tap + to add the first one." else " ",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -149,8 +143,6 @@ fun LeadsScreen(
         }
     }
 }
-
-private val TERMINAL_STATUSES = setOf("CONVERTED", "NOT_CONVERTED", "DORMANT")
 
 @Composable
 private fun LeadCard(lead: Lead, today: String, onClick: () -> Unit) {
@@ -182,6 +174,13 @@ private fun LeadCard(lead: Lead, today: String, onClick: () -> Unit) {
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
+            if (lead.status == "NOT_CONVERTED" && lead.notConvertedReason != null) {
+                Text(
+                    text = "Reason: ${NOT_CONVERTED_REASON_LABELS[lead.notConvertedReason] ?: lead.notConvertedReason}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             if (lead.nextFollowUpDate != null) {
                 val isOverdue = lead.nextFollowUpDate < today
                 val isDueToday = lead.nextFollowUpDate == today
