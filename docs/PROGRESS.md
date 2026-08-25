@@ -4,7 +4,7 @@ Living log of what's actually been built, how it works, and everything a new ses
 
 **Scope note (2026-08-25):** `docs/MASTER_PLAN_V2.md` is now the authoritative source of truth for what this project *is* — it supersedes `docs/PROJECT_SPEC.md` wherever the two disagree (v1 spec is still fine for background). Read the Master Plan before planning any new work; the short version is that the supervisor redefined the project after a review — it's now three systems (Android CRM, a WhatsApp automation backend, and Meta's WhatsApp Cloud API integration), the leads schema needs a real migration, and most remaining blockers are NGO-side paperwork/content, not code. This file (`PROGRESS.md`) remains the engineering log of what's actually been built, how, and why — that hasn't changed.
 
-Last updated: 2026-08-25 (A6 — CSV export — done).
+Last updated: 2026-08-25 (A8 — staff table + assignment — done).
 
 ---
 
@@ -18,7 +18,8 @@ Last updated: 2026-08-25 (A6 — CSV export — done).
 - **Segmented list views (A5 done)**: Leads screen has 7 scrollable tabs, each with a live count — Follow-ups Due, All, Active (in-pipeline), Converted, Not Converted, Dormant, Backup — matching the separate lists the supervisor explicitly asked for. Not Converted cards show the reason inline. Purely client-side filtering on data already fetched. Verified end-to-end on device.
 - **`wa.me` one-tap WhatsApp messaging (A7 done)**: "Send WhatsApp" section on Lead Detail with three templated draft messages (Thank You, Follow-up, Visit Feedback), personalized with the lead's first name and service. Opens WhatsApp via a `wa.me` deep link with the message pre-filled; staff review/edit there before sending. Zero cost, no Meta dependency. Verified end-to-end on device (built ahead of A6 since it was assessed as more valuable/lower-risk).
 - **CSV export + share (A6 done)**: share icon on the Leads screen top bar exports whichever segmented tab is currently open (respects the same filter as the tab, e.g. "Follow-ups Due" exports just those) to a CSV in the app's cache dir, with human-readable labels (status/service/condition/etc. via the existing `*_LABELS` maps, not raw enum codes), then opens the Android share sheet via a new `FileProvider`. Deliberately CSV, not true `.xlsx` — avoids Apache POI's known Android incompatibilities (missing AWT/XML-stream classes, APK bloat) for a format Excel/Sheets/WhatsApp/email all open natively. New files: `ui/leads/LeadExport.kt`, `res/xml/file_paths.xml`; `AndroidManifest.xml` got a `FileProvider` entry. No new Gradle dependencies. Verified end-to-end on device.
-- **Not built yet**: push notifications (A4 part 2), staff table (A8), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
+- **Staff table + assignment (A8 done)**: new `staff` table (`docs/sql/004_staff_table.sql`) — name, phone, role (admin/coordinator/viewer), is_active. New Staff screen (people icon on Leads top bar) to add/edit staff and toggle active/inactive. Lead Detail gained an "Assigned to (follow-up person)" dropdown, populated from active staff only, matching the supervisor's Excel "follow-up person" column. The migration also repointed the pre-existing but never-wired `leads.assigned_staff_id` FK from `auth.users` to the new `staff` table — assignment is to a roster entry, not necessarily an app login. Verified end-to-end on device: add/edit staff, deactivate one, assign a lead to an active staff member, confirm it persists after navigating away and back.
+- **Not built yet**: push notifications (A4 part 2), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
 
 If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and add an enquiry immediately.
 
@@ -137,7 +138,7 @@ This cost an entire debugging session. Don't repeat it.
 5. ~~**A5 — Segmented list views.**~~ **Done 2026-08-25.** 7 tabs with live counts, matching the supervisor's requested lists exactly.
 6. ~~**A6 — Excel export.**~~ **Done 2026-08-25.** CSV export + share from any segmented tab, human-readable labels, no new dependencies.
 7. ~~**A7 — `wa.me` one-tap messaging.**~~ **Done 2026-08-25** — built ahead of A6 (assessed as lower-risk, more immediately valuable). Three templated messages, opens WhatsApp pre-filled.
-8. **A8 — Staff table** + basic roles/assignment. **Next up.**
-9. **A9 — Reports/analytics screen** — Master Plan Part 7 has the full list the supervisor asked for; the "why we lose families" (unmet-demand / not-converted-reason) report is flagged as the one to lead with when demoing.
+8. ~~**A8 — Staff table** + basic roles/assignment.~~ **Done 2026-08-25.** Staff CRUD screen, active/inactive toggle, lead assignment dropdown.
+9. **A9 — Reports/analytics screen.** **Next up.** Master Plan Part 7 has the full list the supervisor asked for; the "why we lose families" (unmet-demand / not-converted-reason) report is flagged as the one to lead with when demoing.
 
 Meanwhile, **Track B (Meta/WhatsApp onboarding) and Track C (NGO content — the ~20 FAQ answers, price list, posters)** need to start now too, in parallel, driven by the supervisor/NGO — not by Anhad — since they're the long pole per the Master Plan's risk register. Track D (the actual automation) is gated on both being done.
