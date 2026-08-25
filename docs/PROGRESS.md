@@ -13,7 +13,8 @@ Last updated: 2026-08-25.
 - **Auth**: staff can sign up / log in / log out. Verified working end-to-end on a real device.
 - **Leads (A1 done)**: `leads` table migrated to the v2 schema (`docs/MASTER_PLAN_V2.md` Part 5 — split contact_channel/how_heard, expanded service/condition/amenity lists, budget range, visit/follow-up dates, etc. — see `docs/sql/002_leads_v2_migration.sql`). Add Enquiry form covers essentially all of it, including 11 of the 13 supervisor UI requests (country code + 10-digit validation, split contact-channel/how-heard, expanded services, structured patient conditions, room type, relation dropdown, medical history, visit/follow-up date pickers, multi-select chips that wrap instead of scrolling). Verified end-to-end on a real device.
 - **Lead detail + edit (A2 done)**: tapping a lead card opens a full detail/edit screen — every add-form field plus Status (with conditional not-converted reason/detail), actual visit date, and final remarks. Verified end-to-end: edit, save, status reflects on the list card.
-- **Not built yet**: contact activity log (A3 — the "proof" mechanic), follow-up-due home screen (A4), segmented list views (A5), Excel export (A6), `wa.me` one-tap messaging (A7), staff table (A8), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
+- **Contact activity log (A3 done)**: new `contact_activities` table (`docs/sql/003_contact_activities.sql`), tied to leads via `lead_id`. A "Contact Log" section on the Lead Detail screen (right after Status/Pipeline) lets staff log a call/WhatsApp/visit/email/SMS with direction, outcome, an optional callback date, and notes, and shows the timeline of everything logged so far. Verified end-to-end on device.
+- **Not built yet**: follow-up-due home screen (A4), segmented list views (A5), Excel export (A6), `wa.me` one-tap messaging (A7), staff table (A8), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
 
 If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and add an enquiry immediately.
 
@@ -127,8 +128,8 @@ This cost an entire debugging session. Don't repeat it.
 
 1. ~~**A1 — schema migration + form overhaul.**~~ **Done 2026-08-25.** Migrated per Master Plan Part 5, form rebuilt with 11/13 supervisor UI requests.
 2. ~~**A2 — Lead detail + edit screen.**~~ **Done 2026-08-25.** Tap a card, edit any field, change status, save.
-3. **A3 — Contact activity log** (`contact_activities` table — schema in Master Plan Part 5.4) — the "proof" mechanic the supervisor explicitly asked for. **Next up.**
-4. **A4 — Follow-up-due home screen** + push notifications.
+3. ~~**A3 — Contact activity log.**~~ **Done 2026-08-25.** Log calls/WhatsApp/visits with outcome + notes, timeline shown on Lead Detail.
+4. **A4 — Follow-up-due home screen** + push notifications. **Next up.**
 5. **A5 — Segmented list views** (converting / not converting / dormant / backup) + not-converted-reason capture.
 6. **A6 — Excel export.**
 7. **A7 — `wa.me` one-tap messaging** (works today, no Meta dependency).
