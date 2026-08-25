@@ -11,8 +11,9 @@ Last updated: 2026-08-25.
 ## 1. Current status — what works right now
 
 - **Auth**: staff can sign up / log in / log out. Verified working end-to-end on a real device.
-- **Leads**: a real `leads` table exists in Supabase (**still on the old v1 18-column schema — needs the migration described in `docs/MASTER_PLAN_V2.md` Part 5**). The app can list existing leads and add a new one through a form. Verified working end-to-end on a real device.
-- **Not built yet**: the v2 schema migration + 13-item form overhaul, lead detail/edit screen, contact activity log, follow-up-due home screen, segmented lists, Excel export, `wa.me` one-tap messaging, staff table, reports/analytics, and everything WhatsApp-automation-related (all of Track B/C/D in the Master Plan — none of it has started).
+- **Leads (A1 done)**: `leads` table migrated to the v2 schema (`docs/MASTER_PLAN_V2.md` Part 5 — split contact_channel/how_heard, expanded service/condition/amenity lists, budget range, visit/follow-up dates, etc. — see `docs/sql/002_leads_v2_migration.sql`). Add Enquiry form covers essentially all of it, including 11 of the 13 supervisor UI requests (country code + 10-digit validation, split contact-channel/how-heard, expanded services, structured patient conditions, room type, relation dropdown, medical history, visit/follow-up date pickers, multi-select chips that wrap instead of scrolling). Verified end-to-end on a real device.
+- **Lead detail + edit (A2 done)**: tapping a lead card opens a full detail/edit screen — every add-form field plus Status (with conditional not-converted reason/detail), actual visit date, and final remarks. Verified end-to-end: edit, save, status reflects on the list card.
+- **Not built yet**: contact activity log (A3 — the "proof" mechanic), follow-up-due home screen (A4), segmented list views (A5), Excel export (A6), `wa.me` one-tap messaging (A7), staff table (A8), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
 
 If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and add an enquiry immediately.
 
@@ -124,9 +125,9 @@ This cost an entire debugging session. Don't repeat it.
 
 **Superseded 2026-08-25** by `docs/MASTER_PLAN_V2.md` Part 8 (full roadmap) — read that for the authoritative plan. Short version, Track A (the only track with no NGO/Meta dependency, so the only one that can proceed unblocked right now):
 
-1. **A1 — schema migration + form overhaul.** The `leads` table needs restructuring per Master Plan Part 5 (split `how_heard`/`contact_channel`, expanded enums for services/conditions/relations, new budget_min/max, etc.), plus all 13 UI change requests the supervisor gave after seeing the demo (country code + 10-digit phone validation, expanded service types, structured patient conditions, relation dropdown, visit date, scroll fix, and more — full list in Master Plan Part 1.9). **Do this before building anything else** — every screen after this touches the same fields.
-2. **A2 — Lead detail + edit screen.**
-3. **A3 — Contact activity log** (`contact_activities` table — schema in Master Plan Part 5.4) — the "proof" mechanic the supervisor explicitly asked for.
+1. ~~**A1 — schema migration + form overhaul.**~~ **Done 2026-08-25.** Migrated per Master Plan Part 5, form rebuilt with 11/13 supervisor UI requests.
+2. ~~**A2 — Lead detail + edit screen.**~~ **Done 2026-08-25.** Tap a card, edit any field, change status, save.
+3. **A3 — Contact activity log** (`contact_activities` table — schema in Master Plan Part 5.4) — the "proof" mechanic the supervisor explicitly asked for. **Next up.**
 4. **A4 — Follow-up-due home screen** + push notifications.
 5. **A5 — Segmented list views** (converting / not converting / dormant / backup) + not-converted-reason capture.
 6. **A6 — Excel export.**
