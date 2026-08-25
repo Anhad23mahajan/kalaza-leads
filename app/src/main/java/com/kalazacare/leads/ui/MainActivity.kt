@@ -21,13 +21,14 @@ import com.kalazacare.leads.ui.leads.AddLeadScreen
 import com.kalazacare.leads.ui.leads.LeadDetailScreen
 import com.kalazacare.leads.ui.leads.LeadsScreen
 import com.kalazacare.leads.ui.leads.LeadsViewModel
+import com.kalazacare.leads.ui.leads.ReportsScreen
 import com.kalazacare.leads.ui.leads.StaffScreen
 import com.kalazacare.leads.ui.leads.StaffViewModel
 import com.kalazacare.leads.ui.login.LoginScreen
 import com.kalazacare.leads.ui.login.LoginViewModel
 import com.kalazacare.leads.ui.theme.KalazaLeadsTheme
 
-private enum class Screen { LOGIN, LEADS, ADD_LEAD, LEAD_DETAIL, STAFF }
+private enum class Screen { LOGIN, LEADS, ADD_LEAD, LEAD_DETAIL, STAFF, REPORTS }
 
 class MainActivity : ComponentActivity() {
     private var currentScreen by mutableStateOf(Screen.LOGIN)
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
                                 currentScreen = Screen.LEAD_DETAIL
                             },
                             onManageStaff = { currentScreen = Screen.STAFF },
+                            onViewReports = { currentScreen = Screen.REPORTS },
                             onLogout = {
                                 loginViewModel.logout()
                                 currentScreen = Screen.LOGIN
@@ -95,6 +97,11 @@ class MainActivity : ComponentActivity() {
                         }
                         Screen.STAFF -> StaffScreen(
                             viewModel = staffViewModel,
+                            onBack = { currentScreen = Screen.LEADS },
+                        )
+                        Screen.REPORTS -> ReportsScreen(
+                            leadsViewModel = leadsViewModel,
+                            staffViewModel = staffViewModel,
                             onBack = { currentScreen = Screen.LEADS },
                         )
                     }
