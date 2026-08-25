@@ -13,7 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.kalazacare.leads.data.remote.SupabaseClients
 import com.kalazacare.leads.data.repository.SupabaseAuthRepository
+import com.kalazacare.leads.data.repository.SupabaseContactActivitiesRepository
 import com.kalazacare.leads.data.repository.SupabaseLeadsRepository
+import com.kalazacare.leads.ui.leads.ActivitiesViewModel
 import com.kalazacare.leads.ui.leads.AddLeadScreen
 import com.kalazacare.leads.ui.leads.LeadDetailScreen
 import com.kalazacare.leads.ui.leads.LeadsScreen
@@ -33,8 +35,10 @@ class MainActivity : ComponentActivity() {
 
         val authRepository = SupabaseAuthRepository(SupabaseClients.main)
         val leadsRepository = SupabaseLeadsRepository(SupabaseClients.main)
+        val activitiesRepository = SupabaseContactActivitiesRepository(SupabaseClients.main)
         val loginViewModel = LoginViewModel(authRepository)
         val leadsViewModel = LeadsViewModel(leadsRepository)
+        val activitiesViewModel = ActivitiesViewModel(activitiesRepository)
 
         setContent {
             KalazaLeadsTheme {
@@ -71,6 +75,7 @@ class MainActivity : ComponentActivity() {
                                 LeadDetailScreen(
                                     lead = selected,
                                     viewModel = leadsViewModel,
+                                    activitiesViewModel = activitiesViewModel,
                                     onBack = {
                                         leadsViewModel.clearSelection()
                                         currentScreen = Screen.LEADS

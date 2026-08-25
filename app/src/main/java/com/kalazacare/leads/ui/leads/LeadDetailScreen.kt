@@ -35,6 +35,7 @@ import com.kalazacare.leads.data.model.UpdateLeadRequest
 fun LeadDetailScreen(
     lead: Lead,
     viewModel: LeadsViewModel,
+    activitiesViewModel: ActivitiesViewModel,
     onBack: () -> Unit,
     onSaved: () -> Unit,
 ) {
@@ -104,6 +105,11 @@ fun LeadDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                 )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            lead.id?.let { leadId ->
+                ContactLogSection(leadId = leadId, viewModel = activitiesViewModel)
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
