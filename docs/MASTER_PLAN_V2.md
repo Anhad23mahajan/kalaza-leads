@@ -634,7 +634,7 @@ Four parallel tracks. **A is code with no blockers. B and C are NGO-dependent an
 | A6 | ~~**Excel export + share**~~ (request #7) — **Done 2026-08-25**, as CSV (opens in Excel/Sheets) via the Android share sheet | 0.5 wk |
 | A7 | `wa.me` one-tap messaging (interim, works before any API) | 0.5 wk |
 | A8 | ~~Staff table + assignment + basic roles~~ — **Done 2026-08-25** | 0.5 wk |
-| A9 | Reports/analytics screen | 1.5 wk |
+| A9 | ~~Reports/analytics screen~~ — **Done 2026-08-25** | 1.5 wk |
 
 **≈ 9 weeks of solo evening/weekend work.** At the end of Track A the NGO has a fully working CRM — **with zero dependency on Meta.**
 
