@@ -2,10 +2,9 @@ package com.kalazacare.leads.ui.leads
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -77,6 +76,7 @@ fun EnumDropdown(
 }
 
 /** Multi-select chip row for array columns, e.g. patient_conditions, service_wanted. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun MultiSelectChips(
     label: String,
@@ -88,8 +88,11 @@ fun MultiSelectChips(
     Column {
         Text(label, style = MaterialTheme.typography.bodySmall)
         androidx.compose.foundation.layout.Spacer(Modifier.padding(top = 4.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(options) { option ->
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            options.forEach { option ->
                 FilterChip(
                     selected = option in selected,
                     onClick = { onToggle(option) },
