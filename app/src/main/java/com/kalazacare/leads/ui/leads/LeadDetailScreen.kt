@@ -27,50 +27,58 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.kalazacare.leads.data.model.NewLeadRequest
+import com.kalazacare.leads.data.model.Lead
+import com.kalazacare.leads.data.model.UpdateLeadRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddLeadScreen(
+fun LeadDetailScreen(
+    lead: Lead,
     viewModel: LeadsViewModel,
     onBack: () -> Unit,
     onSaved: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
 
-    var contactChannel by remember { mutableStateOf<String?>(null) }
-    var howHeard by remember { mutableStateOf<String?>(null) }
+    var contactChannel by remember { mutableStateOf(lead.contactChannel) }
+    var howHeard by remember { mutableStateOf(lead.howHeard) }
 
-    var enquirerName by remember { mutableStateOf("") }
-    var countryCode by remember { mutableStateOf("+91") }
-    var enquirerPhone by remember { mutableStateOf("") }
-    var enquirerRelation by remember { mutableStateOf<String?>(null) }
-    var enquirerLocation by remember { mutableStateOf("") }
+    var enquirerName by remember { mutableStateOf(lead.enquirerName) }
+    var countryCode by remember { mutableStateOf(lead.enquirerCountryCode) }
+    var enquirerPhone by remember { mutableStateOf(lead.enquirerPhone) }
+    var enquirerRelation by remember { mutableStateOf(lead.enquirerRelation) }
+    var enquirerLocation by remember { mutableStateOf(lead.enquirerLocation ?: "") }
 
-    var patientName by remember { mutableStateOf("") }
-    var patientAge by remember { mutableStateOf("") }
-    var patientGender by remember { mutableStateOf<String?>(null) }
-    var patientConditions by remember { mutableStateOf(listOf<String>()) }
-    var currentCondition by remember { mutableStateOf("") }
-    var medicalHistory by remember { mutableStateOf("") }
+    var patientName by remember { mutableStateOf(lead.patientName ?: "") }
+    var patientAge by remember { mutableStateOf(lead.patientAge?.toString() ?: "") }
+    var patientGender by remember { mutableStateOf(lead.patientGender) }
+    var patientConditions by remember { mutableStateOf(lead.patientConditions) }
+    var currentCondition by remember { mutableStateOf(lead.currentCondition ?: "") }
+    var medicalHistory by remember { mutableStateOf(lead.medicalHistory ?: "") }
 
-    var serviceWanted by remember { mutableStateOf(listOf<String>()) }
-    var accommodationType by remember { mutableStateOf<String?>(null) }
-    var budgetMin by remember { mutableStateOf("") }
-    var budgetMax by remember { mutableStateOf("") }
-    var amenitiesRequested by remember { mutableStateOf(listOf<String>()) }
-    var specialRequirements by remember { mutableStateOf("") }
-    var queries by remember { mutableStateOf("") }
-    var comments by remember { mutableStateOf("") }
+    var serviceWanted by remember { mutableStateOf(lead.serviceWanted) }
+    var accommodationType by remember { mutableStateOf(lead.accommodationType) }
+    var budgetMin by remember { mutableStateOf(lead.budgetMin?.toInt()?.toString() ?: "") }
+    var budgetMax by remember { mutableStateOf(lead.budgetMax?.toInt()?.toString() ?: "") }
+    var amenitiesRequested by remember { mutableStateOf(lead.amenitiesRequested) }
+    var specialRequirements by remember { mutableStateOf(lead.specialRequirements ?: "") }
+    var queries by remember { mutableStateOf(lead.queries ?: "") }
+    var comments by remember { mutableStateOf(lead.comments ?: "") }
 
-    var plannedVisitDate by remember { mutableStateOf<String?>(null) }
-    var nextFollowUpDate by remember { mutableStateOf<String?>(null) }
+    var status by remember { mutableStateOf(lead.status) }
+    var plannedVisitDate by remember { mutableStateOf(lead.plannedVisitDate) }
+    var actualVisitDate by remember { mutableStateOf(lead.actualVisitDate) }
+    var nextFollowUpDate by remember { mutableStateOf(lead.nextFollowUpDate) }
+
+    var notConvertedReason by remember { mutableStateOf(lead.notConvertedReason) }
+    var notConvertedDetail by remember { mutableStateOf(lead.notConvertedDetail ?: "") }
+    var finalRemarks by remember { mutableStateOf(lead.finalRemarks ?: "") }
 
     fun toggle(list: List<String>, value: String) =
         if (value in list) list - value else list + value
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text("New Enquiry") })
+        TopAppBar(title = { Text(lead.enquirerName) })
 
         Column(
             modifier = Modifier
@@ -78,6 +86,27 @@ fun AddLeadScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
         ) {
+            Text("Pipeline", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.padding(top = 8.dp))
+            EnumDropdown("Status", STATUSES, STATUS_LABELS, status, { if (it != null) status = it })
+
+            if (status == "NOT_CONVERTED") {
+                Spacer(Modifier.padding(top = 10.dp))
+                EnumDropdown(
+                    "Reason", NOT_CONVERTED_REASONS, NOT_CONVERTED_REASON_LABELS,
+                    notConvertedReason, { notConvertedReason = it },
+                )
+                Spacer(Modifier.padding(top = 10.dp))
+                OutlinedTextField(
+                    value = notConvertedDetail,
+                    onValueChange = { notConvertedDetail = it },
+                    label = { Text("Detail") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
             Text("How did they reach out?", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 8.dp))
             EnumDropdown("Contact channel", CONTACT_CHANNELS, CONTACT_CHANNEL_LABELS, contactChannel, { contactChannel = it })
@@ -230,6 +259,8 @@ fun AddLeadScreen(
 
             DateField("Planned visit date", plannedVisitDate, { plannedVisitDate = it })
             Spacer(Modifier.padding(top = 10.dp))
+            DateField("Actual visit date", actualVisitDate, { actualVisitDate = it })
+            Spacer(Modifier.padding(top = 10.dp))
             DateField("Next follow-up date", nextFollowUpDate, { nextFollowUpDate = it })
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
@@ -252,6 +283,15 @@ fun AddLeadScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
+            Spacer(Modifier.padding(top = 10.dp))
+
+            OutlinedTextField(
+                value = finalRemarks,
+                onValueChange = { finalRemarks = it },
+                label = { Text("Final remarks") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2,
+            )
 
             if (state.errorMessage != null) {
                 Spacer(Modifier.padding(top = 12.dp))
@@ -268,8 +308,10 @@ fun AddLeadScreen(
 
             Button(
                 onClick = {
-                    viewModel.addLead(
-                        NewLeadRequest(
+                    val leadId = lead.id ?: return@Button
+                    viewModel.updateLead(
+                        leadId,
+                        UpdateLeadRequest(
                             contactChannel = contactChannel,
                             howHeard = howHeard,
                             enquirerName = enquirerName.trim(),
@@ -291,8 +333,13 @@ fun AddLeadScreen(
                             specialRequirements = specialRequirements.trim().ifBlank { null },
                             queries = queries.trim().ifBlank { null },
                             comments = comments.trim().ifBlank { null },
+                            status = status,
                             plannedVisitDate = plannedVisitDate,
+                            actualVisitDate = actualVisitDate,
                             nextFollowUpDate = nextFollowUpDate,
+                            notConvertedReason = if (status == "NOT_CONVERTED") notConvertedReason else null,
+                            notConvertedDetail = if (status == "NOT_CONVERTED") notConvertedDetail.trim().ifBlank { null } else null,
+                            finalRemarks = finalRemarks.trim().ifBlank { null },
                         ),
                         onSaved,
                     )
@@ -303,7 +350,7 @@ fun AddLeadScreen(
                 if (state.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
                 }
-                Text(if (state.isLoading) "Saving..." else "Save Enquiry")
+                Text(if (state.isLoading) "Saving..." else "Save Changes")
             }
 
             Spacer(Modifier.padding(top = 8.dp))

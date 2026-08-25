@@ -153,5 +153,3 @@ fun DateField(
         }
     }
 }
-
-val COUNTRY_CODES = listOf("+91", "+1", "+44", "+971", "+61")
