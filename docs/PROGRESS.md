@@ -16,7 +16,8 @@ Last updated: 2026-08-25.
 - **Contact activity log (A3 done)**: new `contact_activities` table (`docs/sql/003_contact_activities.sql`), tied to leads via `lead_id`. A "Contact Log" section on the Lead Detail screen (right after Status/Pipeline) lets staff log a call/WhatsApp/visit/email/SMS with direction, outcome, an optional callback date, and notes, and shows the timeline of everything logged so far. Verified end-to-end on device.
 - **Follow-ups Due list (A4 part 1 done)**: see below, now folded into the segmented tabs. **Push notifications (A4 part 2) not built yet** — needs Firebase Cloud Messaging setup, a separate undertaking.
 - **Segmented list views (A5 done)**: Leads screen has 7 scrollable tabs, each with a live count — Follow-ups Due, All, Active (in-pipeline), Converted, Not Converted, Dormant, Backup — matching the separate lists the supervisor explicitly asked for. Not Converted cards show the reason inline. Purely client-side filtering on data already fetched. Verified end-to-end on device.
-- **Not built yet**: push notifications (A4 part 2), Excel export (A6), `wa.me` one-tap messaging (A7), staff table (A8), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
+- **`wa.me` one-tap WhatsApp messaging (A7 done)**: "Send WhatsApp" section on Lead Detail with three templated draft messages (Thank You, Follow-up, Visit Feedback), personalized with the lead's first name and service. Opens WhatsApp via a `wa.me` deep link with the message pre-filled; staff review/edit there before sending. Zero cost, no Meta dependency. Verified end-to-end on device (built ahead of A6 since it was assessed as more valuable/lower-risk).
+- **Not built yet**: push notifications (A4 part 2), Excel export (A6), staff table (A8), reports/analytics (A9), and everything WhatsApp-automation-related (Track B/C/D in the Master Plan — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
 
 If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and add an enquiry immediately.
 
@@ -133,8 +134,8 @@ This cost an entire debugging session. Don't repeat it.
 3. ~~**A3 — Contact activity log.**~~ **Done 2026-08-25.** Log calls/WhatsApp/visits with outcome + notes, timeline shown on Lead Detail.
 4. **A4 — Follow-up-due home screen** ~~+ push notifications~~. **List done 2026-08-25**, folded into A5's segmented tabs. **Push notifications still open** — needs Firebase Cloud Messaging setup.
 5. ~~**A5 — Segmented list views.**~~ **Done 2026-08-25.** 7 tabs with live counts, matching the supervisor's requested lists exactly.
-6. **A6 — Excel export.**
-7. **A7 — `wa.me` one-tap messaging** (works today, no Meta dependency). **Next up.**
+6. **A6 — Excel export.** **Next up.**
+7. ~~**A7 — `wa.me` one-tap messaging.**~~ **Done 2026-08-25** — built ahead of A6 (assessed as lower-risk, more immediately valuable). Three templated messages, opens WhatsApp pre-filled.
 8. **A8 — Staff table** + basic roles/assignment.
 9. **A9 — Reports/analytics screen** — Master Plan Part 7 has the full list the supervisor asked for; the "why we lose families" (unmet-demand / not-converted-reason) report is flagged as the one to lead with when demoing.
 
