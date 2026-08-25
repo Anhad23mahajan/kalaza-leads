@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kalazacare.leads.data.model.Lead
@@ -40,6 +41,7 @@ fun LeadDetailScreen(
     onSaved: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     var contactChannel by remember { mutableStateOf(lead.contactChannel) }
     var howHeard by remember { mutableStateOf(lead.howHeard) }
@@ -105,6 +107,25 @@ fun LeadDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 2,
                 )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            Text("Send WhatsApp", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.padding(top = 8.dp))
+            Text(
+                "Opens WhatsApp with a message pre-filled — review or edit it there before sending.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.padding(top = 10.dp))
+            WhatsAppTemplate.entries.forEach { template ->
+                Button(
+                    onClick = { launchWhatsApp(context, lead, buildWhatsAppMessage(template, lead)) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(template.label)
+                }
+                Spacer(Modifier.padding(top = 8.dp))
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
