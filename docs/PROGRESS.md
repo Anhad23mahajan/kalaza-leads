@@ -1,16 +1,18 @@
 # Kalaza Leads — Development Progress
 
-Living log of what's actually been built, how it works, and everything a new session needs to know before touching this project. **Read this before doing anything else.** `docs/PROJECT_SPEC.md` is the product spec (what the app should eventually do); this file is the engineering log (what's actually done, how, and why).
+Living log of what's actually been built, how it works, and everything a new session needs to know before touching this project. **Read this before doing anything else.**
 
-Last updated: 2026-08-23.
+**Scope note (2026-08-25):** `docs/MASTER_PLAN_V2.md` is now the authoritative source of truth for what this project *is* — it supersedes `docs/PROJECT_SPEC.md` wherever the two disagree (v1 spec is still fine for background). Read the Master Plan before planning any new work; the short version is that the supervisor redefined the project after a review — it's now three systems (Android CRM, a WhatsApp automation backend, and Meta's WhatsApp Cloud API integration), the leads schema needs a real migration, and most remaining blockers are NGO-side paperwork/content, not code. This file (`PROGRESS.md`) remains the engineering log of what's actually been built, how, and why — that hasn't changed.
+
+Last updated: 2026-08-25.
 
 ---
 
 ## 1. Current status — what works right now
 
 - **Auth**: staff can sign up / log in / log out. Verified working end-to-end on a real device.
-- **Leads**: a real `leads` table exists in Supabase. The app can list existing leads and add a new one through a form. Verified working end-to-end on a real device.
-- **Not built yet**: viewing/editing a lead's full details, logging contact activity (calls/WhatsApp/visits), the follow-up-due list, `wa.me` messaging, any AI/Edge Function features.
+- **Leads**: a real `leads` table exists in Supabase (**still on the old v1 18-column schema — needs the migration described in `docs/MASTER_PLAN_V2.md` Part 5**). The app can list existing leads and add a new one through a form. Verified working end-to-end on a real device.
+- **Not built yet**: the v2 schema migration + 13-item form overhaul, lead detail/edit screen, contact activity log, follow-up-due home screen, segmented lists, Excel export, `wa.me` one-tap messaging, staff table, reports/analytics, and everything WhatsApp-automation-related (all of Track B/C/D in the Master Plan — none of it has started).
 
 If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and add an enquiry immediately.
 
@@ -120,9 +122,16 @@ This cost an entire debugging session. Don't repeat it.
 
 ## 7. What to build next
 
-In rough priority order, per the last planning discussion:
-1. **Lead detail screen** — tap a card in the list, see all fields, update status.
-2. **Contact activity log** (`contact_activities` table, not yet created — schema is in `docs/PROJECT_SPEC.md` §7) — record each call/WhatsApp/visit with outcome and notes. This is the "proof" mechanic the NGO supervisor explicitly asked for.
-3. **Follow-up-due list** as the actual home screen (currently just a flat list) — the feature the spec calls "the killer feature."
-4. **`wa.me` one-tap messaging.**
-5. Everything AI/Edge-Function related (drafting, parsing, summarizing) — Phase 1 spec explicitly treats this as important but not first.
+**Superseded 2026-08-25** by `docs/MASTER_PLAN_V2.md` Part 8 (full roadmap) — read that for the authoritative plan. Short version, Track A (the only track with no NGO/Meta dependency, so the only one that can proceed unblocked right now):
+
+1. **A1 — schema migration + form overhaul.** The `leads` table needs restructuring per Master Plan Part 5 (split `how_heard`/`contact_channel`, expanded enums for services/conditions/relations, new budget_min/max, etc.), plus all 13 UI change requests the supervisor gave after seeing the demo (country code + 10-digit phone validation, expanded service types, structured patient conditions, relation dropdown, visit date, scroll fix, and more — full list in Master Plan Part 1.9). **Do this before building anything else** — every screen after this touches the same fields.
+2. **A2 — Lead detail + edit screen.**
+3. **A3 — Contact activity log** (`contact_activities` table — schema in Master Plan Part 5.4) — the "proof" mechanic the supervisor explicitly asked for.
+4. **A4 — Follow-up-due home screen** + push notifications.
+5. **A5 — Segmented list views** (converting / not converting / dormant / backup) + not-converted-reason capture.
+6. **A6 — Excel export.**
+7. **A7 — `wa.me` one-tap messaging** (works today, no Meta dependency).
+8. **A8 — Staff table** + basic roles/assignment.
+9. **A9 — Reports/analytics screen** — Master Plan Part 7 has the full list the supervisor asked for; the "why we lose families" (unmet-demand / not-converted-reason) report is flagged as the one to lead with when demoing.
+
+Meanwhile, **Track B (Meta/WhatsApp onboarding) and Track C (NGO content — the ~20 FAQ answers, price list, posters)** need to start now too, in parallel, driven by the supervisor/NGO — not by Anhad — since they're the long pole per the Master Plan's risk register. Track D (the actual automation) is gated on both being done.
