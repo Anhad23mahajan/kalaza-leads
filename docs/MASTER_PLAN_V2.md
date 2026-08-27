@@ -10,13 +10,15 @@
 **Correction note (2026-08-27):** Part 2.4's cost estimate (~₹450/year) and
 the assumption that Coexistence could be self-set-up directly have both
 been superseded by deeper research — see `docs/TRACK_B_META_ONBOARDING_PLAN.md`
-for the corrected numbers and process, and `docs/SUPERVISOR_SCRIPT_TRACK_BC.md`
-for the plain-language version. Short version: Meta's own message costs are
+for the original research and `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` for the
+definitive, step-by-step version covering both the Coexistence and
+new-number paths side by side. Short version: Meta's own message costs are
 still tiny (~₹550-650/year), but Coexistence specifically requires going
 through a registered Tech Provider/BSP, which typically means either a
 ~₹1,500-2,500/month company fee, or a free-but-uncertain-timeline direct
-Meta application. The rest of this document (architecture, data model,
-roadmap phasing) is still accurate.
+Meta application — a brand-new dedicated number avoids that requirement
+entirely and is the cost-safe default. The rest of this document
+(architecture, data model, roadmap phasing) is still accurate.
 
 ---
 
