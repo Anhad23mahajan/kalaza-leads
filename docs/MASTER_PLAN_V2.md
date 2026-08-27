@@ -629,7 +629,7 @@ Four parallel tracks. **A is code with no blockers. B and C are NGO-dependent an
 | A1 | Schema migration + **form overhaul** (all 13 change requests: country code + 10-digit validation, split how_heard/contact_channel, expanded services, conditions multi-select, room type, location, medical history, visit date, relation dropdown, scroll fix) | 1.5 wk |
 | A2 | **Lead detail + edit screen** (request #6) | 1 wk |
 | A3 | **Contact activity log** — the "proof" feature | 1 wk |
-| A4 | **Follow-up-due home screen** + push notifications | 1.5 wk |
+| A4 | ~~**Follow-up-due home screen** + push notifications~~ — **Done** (list 2026-08-25, notifications 2026-08-27 as local `WorkManager` checks, not true server push) | 1.5 wk |
 | A5 | Segmented list views (his 4+ lists) + status transitions + not-converted reason capture | 1 wk |
 | A6 | ~~**Excel export + share**~~ (request #7) — **Done 2026-08-25**, as CSV (opens in Excel/Sheets) via the Android share sheet | 0.5 wk |
 | A7 | `wa.me` one-tap messaging (interim, works before any API) | 0.5 wk |
