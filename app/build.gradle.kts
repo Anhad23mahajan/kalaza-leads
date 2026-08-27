@@ -102,6 +102,9 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
+    // WorkManager -- local periodic follow-up reminder checks (A4 part 2)
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Supabase — Auth, Postgrest (data), Realtime (live sync)
     implementation(platform(libs.supabase.bom))
     implementation(libs.supabase.postgrest)
