@@ -10,9 +10,7 @@ plugins {
 }
 
 // Read local.properties (gitignored) for Supabase config — see local.properties.example
-// at the repo root for the expected keys. Never hardcode real values here or in source;
-// this is exactly the mistake the project spec (docs/PROJECT_SPEC.md, section 9) warns
-// against for the Claude API key, and the same principle applies to any credential.
+// at the repo root for the expected keys. Never hardcode real values here or in source.
 val localProperties = Properties().apply {
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {

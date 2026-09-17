@@ -2,9 +2,7 @@
 
 For Anhad, to prepare for (and then execute) the Track B conversation and
 process with the NGO supervisor. This is the definitive version — it
-replaces every earlier Track B/C script. Companion document:
-`docs/TRACK_B_META_ONBOARDING_PLAN.md` has the original deep research with
-full source links if you want to double-check anything here.
+replaces every earlier Track B/C script.
 
 **What this document is for**: walking the supervisor through the decision
 between two real options, then — once he decides — executing every step in
@@ -458,4 +456,3 @@ NGO produces the verification documents in Step 2.
 - [WhatsApp Business API Pricing 2026 — EngageLab](https://www.engagelab.com/blog/whatsapp-business-api-pricing)
 - [WhatsApp API Pricing India 2026 — RichAutomate](https://richautomate.in/blog/whatsapp-business-api-without-monthly-fee-india-2026)
 - [AiSensy vs Interakt vs Wati 2026 comparison](https://aisensy.com/aisensy-vs-interakt-vs-wati)
-- Full original source list: `docs/TRACK_B_META_ONBOARDING_PLAN.md`

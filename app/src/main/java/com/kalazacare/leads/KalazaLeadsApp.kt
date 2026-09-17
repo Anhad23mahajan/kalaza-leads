@@ -5,9 +5,8 @@ import com.kalazacare.leads.data.remote.SupabaseClients
 import com.kalazacare.leads.notifications.NotificationScheduler
 
 /**
- * Application class. Repositories (LeadRepository, ContactActivityRepository, etc. —
- * see docs/PROJECT_SPEC.md section 7 for the data model) get wired up here as they're
- * built, following the same pattern Kalaza Care uses in its own Application class.
+ * Application class. Repositories (see data/repository/) are constructed in
+ * MainActivity.onCreate, not here — this class only does app-wide startup work.
  */
 class KalazaLeadsApp : Application() {
 

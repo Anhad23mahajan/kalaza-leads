@@ -9,9 +9,8 @@
 
 **Correction note (2026-08-27):** Part 2.4's cost estimate (~₹450/year) and
 the assumption that Coexistence could be self-set-up directly have both
-been superseded by deeper research — see `docs/TRACK_B_META_ONBOARDING_PLAN.md`
-for the original research and `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` for the
-definitive, step-by-step version covering both the Coexistence and
+been superseded by deeper research — see `docs/TRACK_B_PAPERWORK_PLAYBOOK.md`
+for the definitive, step-by-step version covering both the Coexistence and
 new-number paths side by side. Short version: Meta's own message costs are
 still tiny (~₹550-650/year), but Coexistence specifically requires going
 through a registered Tech Provider/BSP, which typically means either a
@@ -19,6 +18,16 @@ through a registered Tech Provider/BSP, which typically means either a
 Meta application — a brand-new dedicated number avoids that requirement
 entirely and is the cost-safe default. The rest of this document
 (architecture, data model, roadmap phasing) is still accurate.
+
+**Correction note (2026-09-17):** Track A (Part 8 below) is now **fully
+complete** — see `docs/PROGRESS.md` for the authoritative build log. Also,
+the in-app "Add Enquiry" form (A1, and everywhere else this document
+describes staff typing an enquiry into the app) has been **replaced**:
+enquirers now fill in their own details via a Google Form that feeds the
+same `leads` table through an Apps Script bridge — see
+`docs/GOOGLE_FORM_INTAKE_SPEC.md`. The in-app add-enquiry screen
+(`AddLeadScreen.kt`) has been deleted. Everything else in this document
+(data model, bot design, risk register, Track B/C/D plans) is unaffected.
 
 ---
 
@@ -639,17 +648,17 @@ Four parallel tracks. **A is code with no blockers. B and C are NGO-dependent an
 
 | ID | Item | Est. |
 |---|---|---|
-| A1 | Schema migration + **form overhaul** (all 13 change requests: country code + 10-digit validation, split how_heard/contact_channel, expanded services, conditions multi-select, room type, location, medical history, visit date, relation dropdown, scroll fix) | 1.5 wk |
-| A2 | **Lead detail + edit screen** (request #6) | 1 wk |
-| A3 | **Contact activity log** — the "proof" feature | 1 wk |
+| A1 | ~~Schema migration + **form overhaul** (all 13 change requests)~~ — **Done 2026-08-25**; form itself later replaced by the Google Form intake bridge, **2026-09-17** (see correction note above) | 1.5 wk |
+| A2 | ~~**Lead detail + edit screen** (request #6)~~ — **Done 2026-08-25** | 1 wk |
+| A3 | ~~**Contact activity log** — the "proof" feature~~ — **Done 2026-08-25** | 1 wk |
 | A4 | ~~**Follow-up-due home screen** + push notifications~~ — **Done** (list 2026-08-25, notifications 2026-08-27 as local `WorkManager` checks, not true server push) | 1.5 wk |
-| A5 | Segmented list views (his 4+ lists) + status transitions + not-converted reason capture | 1 wk |
+| A5 | ~~Segmented list views (his 4+ lists) + status transitions + not-converted reason capture~~ — **Done 2026-08-25** | 1 wk |
 | A6 | ~~**Excel export + share**~~ (request #7) — **Done 2026-08-25**, as CSV (opens in Excel/Sheets) via the Android share sheet | 0.5 wk |
-| A7 | `wa.me` one-tap messaging (interim, works before any API) | 0.5 wk |
+| A7 | ~~`wa.me` one-tap messaging (interim, works before any API)~~ — **Done 2026-08-25** | 0.5 wk |
 | A8 | ~~Staff table + assignment + basic roles~~ — **Done 2026-08-25** | 0.5 wk |
 | A9 | ~~Reports/analytics screen~~ — **Done 2026-08-25** | 1.5 wk |
 
-**≈ 9 weeks of solo evening/weekend work.** At the end of Track A the NGO has a fully working CRM — **with zero dependency on Meta.**
+**Track A is fully complete** (confirmed 2026-09-17, see `docs/PROGRESS.md`) — the NGO has a fully working CRM, **with zero dependency on Meta.** A security fix (self-signup gated by the active staff roster) and the Google Form intake bridge (replacing the in-app enquiry form) shipped after this table was originally written; see the correction note above and `docs/PROGRESS.md` for both.
 
 ## TRACK B — Meta onboarding (NGO must drive, start tomorrow)
 
@@ -771,7 +780,7 @@ Suggested framing, in his language:
 7. Start gathering NGO registration documents
 8. Assign someone to write the 20 answers, with a deadline
 
-**Update `PROGRESS.md` and `docs/PROJECT_SPEC.md`** to point at this document as the current source of truth for scope.
+*(Historical note: this action item is done — `docs/PROGRESS.md` points here, and `docs/PROJECT_SPEC.md` was deleted 2026-09-17 as fully superseded.)*
 
 ---
 
