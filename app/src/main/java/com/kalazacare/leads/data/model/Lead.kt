@@ -61,40 +61,6 @@ data class Lead(
     @SerialName("preferred_language") val preferredLanguage: String = "en",
 )
 
-/** Insert payload for the Add Enquiry form — omits server-assigned/pipeline-only fields. */
-@Serializable
-data class NewLeadRequest(
-    @SerialName("enquiry_date") val enquiryDate: String? = null,
-    @SerialName("contact_channel") val contactChannel: String? = null,
-    @SerialName("how_heard") val howHeard: String? = null,
-    @SerialName("how_heard_detail") val howHeardDetail: String? = null,
-
-    @SerialName("enquirer_name") val enquirerName: String,
-    @SerialName("enquirer_country_code") val enquirerCountryCode: String = "+91",
-    @SerialName("enquirer_phone") val enquirerPhone: String,
-    @SerialName("enquirer_relation") val enquirerRelation: String? = null,
-    @SerialName("enquirer_location") val enquirerLocation: String? = null,
-
-    @SerialName("patient_name") val patientName: String? = null,
-    @SerialName("patient_age") val patientAge: Int? = null,
-    @SerialName("patient_gender") val patientGender: String? = null,
-    @SerialName("patient_conditions") val patientConditions: List<String> = emptyList(),
-    @SerialName("current_condition") val currentCondition: String? = null,
-    @SerialName("medical_history") val medicalHistory: String? = null,
-
-    @SerialName("service_wanted") val serviceWanted: List<String> = emptyList(),
-    @SerialName("accommodation_type") val accommodationType: String? = null,
-    @SerialName("budget_min") val budgetMin: Double? = null,
-    @SerialName("budget_max") val budgetMax: Double? = null,
-    @SerialName("amenities_requested") val amenitiesRequested: List<String> = emptyList(),
-    @SerialName("special_requirements") val specialRequirements: String? = null,
-    val queries: String? = null,
-    val comments: String? = null,
-
-    @SerialName("planned_visit_date") val plannedVisitDate: String? = null,
-    @SerialName("next_follow_up_date") val nextFollowUpDate: String? = null,
-)
-
 /** Update payload for the Lead Detail edit screen — everything a staffer can change post-save. */
 @Serializable
 data class UpdateLeadRequest(

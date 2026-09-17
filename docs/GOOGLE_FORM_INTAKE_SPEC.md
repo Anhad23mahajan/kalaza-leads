@@ -7,10 +7,10 @@ the same `leads` table the app already reads from — so nothing changes on
 the app side except that new leads now arrive already filled in, instead
 of staff typing them.
 
-**Do not remove the in-app "New Enquiry" screen yet.** This form is built
-and published, but the bridge (§3) isn't wired up yet and hasn't been
-tested end-to-end (§4). Only remove that screen after §4 passes cleanly —
-otherwise there'd be a gap where nobody can add a new lead at all.
+**Status: done.** The form is built, published, the bridge (§3) is wired
+up, §4 passed cleanly with a real test submission, and the in-app
+"New Enquiry" screen (`AddLeadScreen.kt`) has been removed (2026-09-17) —
+the Google Form is now the only way new leads enter the system.
 
 ---
 
@@ -125,21 +125,17 @@ repo — see that file directly for the code. Setup:
 
 ---
 
-## 4. Testing — do this before touching the in-app form
+## 4. Testing — done, 2026-09-17
 
-1. Submit a real test response to the Google Form (use a fake name/number
-   you'll recognize, e.g. "TEST Anhad").
-2. Open the Kalaza Leads app, go to the Leads screen, pull to refresh (or
-   just reopen the app) — the test entry should appear in the "All" tab
-   within a few seconds of submitting.
-3. Open it and confirm every field landed correctly — especially the
-   checkbox fields (conditions/services/amenities) actually saved as a
-   proper list, not garbled text.
-4. Check the Apps Script's **Executions** log (in the script editor, left
-   sidebar) for that run — should show a successful (200) response, not
-   an error.
-5. Only once this works cleanly, come back and remove the in-app "New
-   Enquiry" screen — that's a separate, later step, not part of this one.
+1. Submitted a real test response to the Google Form ("TEST Anhad").
+2. Opened the Kalaza Leads app, Leads screen, pulled to refresh — the test
+   entry appeared in the "All" tab within seconds.
+3. Opened it and confirmed every field landed correctly, including the
+   checkbox fields (conditions/services/amenities) saving as a proper
+   list, not garbled text.
+4. Checked the Apps Script's **Executions** log — showed a Completed run
+   for `handleFormSubmit`, no errors.
+5. In-app "New Enquiry" screen removed the same day — see §0.
 
 ---
 
@@ -147,6 +143,25 @@ repo — see that file directly for the code. Setup:
 
 - **How the form link actually reaches the enquirer** — still an open
   question, parked for later (see chat history).
-- **Removing the in-app form** — deliberately a separate, later step.
 - **Anything about the WhatsApp chatbot / Q&A engine** — that's Track D,
   unrelated to this intake bridge.
+- **Staff-only pipeline fields** — `next_follow_up_date`, `actual_visit_date`,
+  `converted_at`, `status`, `assigned_staff_id`, `follow_up_count`,
+  `not_converted_reason`/`detail`, `feedback_*_themes`, `final_remarks`.
+  These are set by staff as a lead progresses, not something an enquirer
+  filling this form in has any way to answer — deliberately excluded, not
+  an oversight (2026-09-17: confirmed with Anhad after end-to-end testing).
+
+## 6. Possible future additions (not done, not urgent)
+
+Raised 2026-09-17, explicitly deferred — revisit only if it comes up again:
+
+- A **consent checkbox** (→ `consent_given`) — worth having on a form that
+  collects medical/financial family data.
+- **Preferred language** (→ `preferred_language`) — a quick dropdown could
+  help staff route the enquiry appropriately.
+
+If either gets added: update the question table in §1, `LeadFormOptions.kt`
+stays untouched (these aren't multi-select/lookup fields), and
+`KalazaFormBridge.gs`'s `payload` object in `handleFormSubmit` needs the
+new `getAnswer(nv, '<exact question title>')` line.
