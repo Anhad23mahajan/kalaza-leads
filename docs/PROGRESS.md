@@ -2,7 +2,7 @@
 
 Living log of what's actually been built, how it works, and everything a new session needs to know before touching this project. **Read this before doing anything else.**
 
-**Scope note (2026-08-25):** `docs/MASTER_PLAN_V2.md` is now the authoritative source of truth for what this project *is* — it supersedes `docs/PROJECT_SPEC.md` wherever the two disagree (v1 spec is still fine for background). Read the Master Plan before planning any new work; the short version is that the supervisor redefined the project after a review — it's now three systems (Android CRM, a WhatsApp automation backend, and Meta's WhatsApp Cloud API integration), the leads schema needs a real migration, and most remaining blockers are NGO-side paperwork/content, not code. This file (`PROGRESS.md`) remains the engineering log of what's actually been built, how, and why — that hasn't changed.
+**Scope note (2026-08-25):** `docs/MASTER_PLAN_V2.md` is the authoritative source of truth for what this project *is* (the older `docs/PROJECT_SPEC.md` it superseded was deleted 2026-09-17). Read the Master Plan before planning any new work; the short version is that the supervisor redefined the project after a review — it's now three systems (Android CRM, a WhatsApp automation backend, and Meta's WhatsApp Cloud API integration), the leads schema needed a real migration, and most remaining blockers are NGO-side paperwork/content, not code. This file (`PROGRESS.md`) remains the engineering log of what's actually been built, how, and why — that hasn't changed.
 
 Last updated: 2026-09-17 (Google Form intake bridge — built, published, and tested end-to-end).
 
@@ -60,7 +60,7 @@ app/src/main/java/com/kalazacare/leads/
 
 - **Project**: `niqhlkdyaklnngcanxld.supabase.co`, org "Anhad23mahajan's Org", region South Asia (Mumbai). Created 2026-08-23 as a **standalone project**, not shared with Kalaza Care (that was considered — see §6 decisions log).
 - **Credentials** live only in `local.properties` (gitignored) → injected into `BuildConfig.SUPABASE_URL` / `BuildConfig.SUPABASE_ANON_KEY` at build time. See `local.properties.example` for the exact keys needed. Never hardcode these.
-- **`leads` table**: 18 columns per `docs/PROJECT_SPEC.md` §7 (source_channel, how_heard, enquirer_name/phone/relation, patient_name/age, location, service_wanted, room_preference, budget, medical_history, specific_requirements, status, next_follow_up_date). Schema SQL lives in `docs/sql/001_leads_table.sql` — that file is the source of truth, already applied to the live project.
+- **`leads` table**: originally 18 columns (`docs/sql/001_leads_table.sql`), migrated 2026-08-25 to the wider v2 schema per `docs/sql/002_leads_v2_migration.sql` — see `Lead.kt` for the current, authoritative column list.
 - **RLS**: enabled, plus explicit `grant select/insert/update/delete ... to authenticated` (this project was created with "Automatically expose new tables" turned OFF for tighter default security, which means RLS policies alone are *not* enough — Postgres also needs the base grant, or PostgREST returns `permission denied for table leads` even with a passing policy). Every policy just checks `auth.uid() is not null` — there's no staff/roles table yet, so *any* signed-in account is trusted staff. Tighten this once a real roles table exists.
 - **Auth settings** (Authentication → Sign In / Providers → User Signups in the Supabase dashboard): **"Confirm email" is OFF**. Staff log in by name; the app synthesizes an email `{name}@kalazaleads.app` (see `SupabaseAuthRepository.kt`) since Supabase Auth is email/password under the hood. Two hard-won constraints here:
   - The domain must be a real TLD — `.internal`/`.local`/`.test` etc. get rejected outright by Supabase's signup validator with `email_address_invalid`. `.app` works.
@@ -124,10 +124,10 @@ This cost an entire debugging session. Don't repeat it.
 ## 6. Key decisions and why
 
 - **Standalone Supabase project, not shared with Kalaza Care.** The spec's original preference was sharing one project (clean lead→resident handoff). Went standalone instead because Harsh (who has Kalaza Care's credentials) wasn't available, and waiting would have blocked all progress. This is a **reversible** decision — migrating to Kalaza Care's project later is possible, just needs re-pointing `local.properties` and re-running the leads table SQL there.
-- **Not migrating to Aditya Sharma's Claude Code cloud account.** Originally planned (see `docs/PROJECT_SPEC.md` framing), but the user chose to keep building step-by-step in this local session instead — "slow and steady wins the game." If a handoff to that account happens later, this file is exactly what should be read first there.
+- **Not migrating to Aditya Sharma's Claude Code cloud account.** Originally considered, but the user chose to keep building step-by-step in this local session instead — "slow and steady wins the game." If a handoff to that account happens later, this file is exactly what should be read first there.
 - **Teal theme, not Kalaza Care's red.** Deliberate — the two apps install side by side on the same phone; staff need to tell them apart at a glance.
 - **No staff/roles table yet.** Every Supabase Auth account is currently treated as trusted staff (RLS just checks `auth.uid() is not null`). Fine for now since nothing else can create accounts through this app; revisit before any real deployment.
-- **wa.me deep links for MVP messaging, not WhatsApp Business API.** Zero cost, zero ban risk, ~90% of the value. Full rationale in `docs/PROJECT_SPEC.md` §4. Not built yet as of this writing.
+- **wa.me deep links for MVP messaging, not WhatsApp Business API.** Zero cost, zero ban risk, ~90% of the value. Built and shipped 2026-08-25 (A7, see §1 above).
 
 ---
 

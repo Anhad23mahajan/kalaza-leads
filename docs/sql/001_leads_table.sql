@@ -1,4 +1,4 @@
--- Kalaza Leads — leads table (docs/PROJECT_SPEC.md section 7)
+-- Kalaza Leads — leads table (v1; superseded by 002_leads_v2_migration.sql)
 -- One row per enquiry.
 --
 -- Also required in this Supabase project's Auth settings (Authentication > Sign In /

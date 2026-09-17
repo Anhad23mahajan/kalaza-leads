@@ -3,9 +3,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- For the follow-up-due push reminders (docs/PROJECT_SPEC.md section 5) —
-         requested at runtime once that feature is built; declared here now so the
-         manifest doesn't need touching again for it. -->
+    <!-- For the follow-up-due local notifications (see docs/PROGRESS.md,
+         "Follow-up reminder notifications"); requested at runtime in MainActivity. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application

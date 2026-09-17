@@ -6,8 +6,9 @@ Go through it feature by feature, demo each one live on the phone if
 possible, and pause for his reaction/opinion at each ⭐ point.
 
 After this, there's a separate conversation about the WhatsApp auto-reply
-piece (Track B/C) — see `docs/SUPERVISOR_SCRIPT_TRACK_BC.md`. Don't mix the
-two; this one is about proving the staff app is finished and working.
+piece (Track B/C) — see `docs/TRACK_B_MEETING_CHEATSHEET.md` and
+`docs/TRACK_B_SUPERVISOR_MEETING_SCRIPT.md`. Don't mix the two; this one is
+about proving the staff app is finished and working.
 
 ---
 
@@ -29,8 +30,11 @@ people you've added can get in.
 
 ## 2. Adding a new enquiry
 
-Show the Add Enquiry form. Walk through it field by field and tie it back
-to what he asked for after the review:
+**Updated 2026-09-17: this is no longer an in-app form.** Enquirers now
+fill in their own details via a Google Form (the same 23 fields below),
+which lands straight into the same system — no staff typing required. Show
+him the Google Form on your phone instead of an in-app screen, and tie it
+back to what he asked for after the review:
 
 - Phone number now only accepts exactly 10 digits, with a country code
   picker next to it (his request #1).
@@ -169,4 +173,4 @@ further from you or the NGO to keep working. Everything from here is about
 the next piece — the actual automatic WhatsApp replies — and that part
 does need some things from your side. Can we talk through that now?"*
 
-**Then, if he's ready, move to `docs/SUPERVISOR_SCRIPT_TRACK_BC.md`.**
+**Then, if he's ready, move to `docs/TRACK_B_MEETING_CHEATSHEET.md`.**

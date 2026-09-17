@@ -12,7 +12,7 @@ import io.github.jan.supabase.realtime.Realtime
  * table (same pattern as Kalaza Care) — every request it makes is still subject to those
  * policies. It is intentionally NOT hardcoded here: it's injected at build time from
  * local.properties (gitignored) via BuildConfig fields set in app/build.gradle.kts.
- * See local.properties.example at the repo root and docs/PROJECT_SPEC.md section 9.
+ * See local.properties.example at the repo root for the expected keys.
  *
  * Until local.properties is filled in, these are empty strings — createSupabaseClient
  * will fail loudly at first use rather than silently, which is preferable to a client

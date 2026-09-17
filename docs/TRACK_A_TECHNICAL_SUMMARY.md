@@ -18,7 +18,7 @@ all verified end-to-end on a real Android device.
 - **Stack**: Kotlin + Jetpack Compose (Material 3), MVVM, package
   `com.kalazacare.leads`.
 - **No DI framework, no NavHost.** `MainActivity` holds a private
-  `enum class Screen { LOGIN, LEADS, ADD_LEAD, LEAD_DETAIL, STAFF, REPORTS }`
+  `enum class Screen { LOGIN, LEADS, LEAD_DETAIL, STAFF, REPORTS }`
   as `mutableStateOf`, and a `when` picks which Composable to render.
   Deliberately simple for a solo project at this screen count.
 - **Pattern per feature**: `Repository` (talks to Supabase) → `ViewModel`
@@ -30,8 +30,13 @@ all verified end-to-end on a real Android device.
   live-sync feature has needed it yet).
 - **RLS posture (deliberate MVP simplification)**: every table has
   `auth.uid() is not null` as its only policy — any signed-in account is
-  trusted staff. No roles/permissions enforcement yet beyond the basic
-  `staff.role` field added in A8 (not yet wired into access control, just
+  trusted staff. **Signup itself is gated** (fixed 2026-09-17, see
+  `docs/sql/005_staff_name_check_rpc.sql`): a SECURITY DEFINER function
+  checks the typed name against the active `staff` roster before an account
+  can be created, closing the earlier hole where anyone with the APK could
+  sign up and see every family's data. No further roles/permissions
+  enforcement beyond the basic `staff.role` field added in A8 (not yet
+  wired into access control, just
   informational/UI-level).
 - **Theme**: teal, deliberately distinct from the older "Kalaza Care" app's
   red, since both install on the same staff phones.
@@ -49,6 +54,12 @@ is equally trusted.
 ---
 
 ## 2. A1 — Schema migration + Add Enquiry form
+
+**Update, 2026-09-17: the in-app Add Enquiry form described below (`AddLeadScreen.kt`)
+has been removed.** Enquirers now fill in the same fields themselves via a
+Google Form that feeds the `leads` table through an Apps Script bridge —
+see `docs/GOOGLE_FORM_INTAKE_SPEC.md`. The schema migration and field list
+below are still accurate; only the *form itself* changed.
 
 - `leads` table migrated to a v2 schema (`docs/sql/002_leads_v2_migration.sql`)
   per the supervisor's post-review requirements: split `contact_channel` /
@@ -253,5 +264,5 @@ same ground in narrative form.
 
 Track A has no more unblocked work. Track B (Meta/WhatsApp onboarding) and
 Track C (NGO-authored content) are supervisor/NGO-driven, not code — see
-`docs/SUPERVISOR_SCRIPT_TRACK_BC.md`. Track D (the actual automation) is
+`docs/TRACK_B_PAPERWORK_PLAYBOOK.md`. Track D (the actual automation) is
 gated on both.
