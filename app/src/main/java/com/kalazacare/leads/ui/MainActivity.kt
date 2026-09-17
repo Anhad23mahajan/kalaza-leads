@@ -20,7 +20,6 @@ import com.kalazacare.leads.data.repository.SupabaseContactActivitiesRepository
 import com.kalazacare.leads.data.repository.SupabaseLeadsRepository
 import com.kalazacare.leads.data.repository.SupabaseStaffRepository
 import com.kalazacare.leads.ui.leads.ActivitiesViewModel
-import com.kalazacare.leads.ui.leads.AddLeadScreen
 import com.kalazacare.leads.ui.leads.LeadDetailScreen
 import com.kalazacare.leads.ui.leads.LeadsScreen
 import com.kalazacare.leads.ui.leads.LeadsViewModel
@@ -31,7 +30,7 @@ import com.kalazacare.leads.ui.login.LoginScreen
 import com.kalazacare.leads.ui.login.LoginViewModel
 import com.kalazacare.leads.ui.theme.KalazaLeadsTheme
 
-private enum class Screen { LOGIN, LEADS, ADD_LEAD, LEAD_DETAIL, STAFF, REPORTS }
+private enum class Screen { LOGIN, LEADS, LEAD_DETAIL, STAFF, REPORTS }
 
 class MainActivity : ComponentActivity() {
     private var currentScreen by mutableStateOf(Screen.LOGIN)
@@ -70,7 +69,6 @@ class MainActivity : ComponentActivity() {
                         )
                         Screen.LEADS -> LeadsScreen(
                             viewModel = leadsViewModel,
-                            onAddLead = { currentScreen = Screen.ADD_LEAD },
                             onLeadClick = { lead ->
                                 leadsViewModel.selectLead(lead)
                                 currentScreen = Screen.LEAD_DETAIL
@@ -81,11 +79,6 @@ class MainActivity : ComponentActivity() {
                                 loginViewModel.logout()
                                 currentScreen = Screen.LOGIN
                             }
-                        )
-                        Screen.ADD_LEAD -> AddLeadScreen(
-                            viewModel = leadsViewModel,
-                            onBack = { currentScreen = Screen.LEADS },
-                            onSaved = { currentScreen = Screen.LEADS },
                         )
                         Screen.LEAD_DETAIL -> {
                             val leadsState by leadsViewModel.state.collectAsState()

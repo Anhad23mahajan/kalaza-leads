@@ -1,6 +1,6 @@
 package com.kalazacare.leads.ui.leads
 
-// Shared enum option lists + display labels for both AddLeadScreen and LeadDetailScreen.
+// Shared enum option lists + display labels for LeadDetailScreen (and CSV export labels).
 // Keep in sync with docs/sql/002_leads_v2_migration.sql's check constraints.
 
 val CONTACT_CHANNELS = listOf("phone_call", "whatsapp", "walk_in", "website", "email", "instagram_dm")
