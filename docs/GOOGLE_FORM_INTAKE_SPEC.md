@@ -7,9 +7,31 @@ the same `leads` table the app already reads from — so nothing changes on
 the app side except that new leads now arrive already filled in, instead
 of staff typing them.
 
-**Do not remove the in-app "New Enquiry" screen yet.** Build this, test it
-end-to-end (§4 below), and only then come back to remove that screen —
+**Do not remove the in-app "New Enquiry" screen yet.** This form is built
+and published, but the bridge (§3) isn't wired up yet and hasn't been
+tested end-to-end (§4). Only remove that screen after §4 passes cleanly —
 otherwise there'd be a gap where nobody can add a new lead at all.
+
+---
+
+## 0. Status — the form is already built
+
+The form itself (all 23 questions below, §1) has already been built and
+published under Anhad's Google account, and linked to a response
+spreadsheet.
+
+- **Responder link** (send this to enquirers, eventually via WhatsApp):
+  `https://docs.google.com/forms/d/e/1FAIpQLSfH3qQxdCvq4Iw0-kS6tuef2hx4Y-q8bT7Jef_y99A9yhSp0A/viewform`
+- **Edit link** (for making changes to the form itself):
+  `https://docs.google.com/forms/d/1C6eQ1uoamNoquSEXbMa-SMoif6ThfYmHjzQuvJ2b0So/edit`
+- Every question was verified against the table in §1 field-by-field after
+  building — titles, types, and every option spelled exactly as specified.
+
+**What's left, and it has to happen in your own Google account/browser —
+an agent can't do this part, since Google blocks automated clicks from
+opening the Sheets/Apps Script popup**: §3 (paste the bridge script in) and
+§4 (test it). Skip straight to those sections; §1 and §2 are already done
+and are kept below only as the reference spec.
 
 ---
 
@@ -57,7 +79,9 @@ This was deliberately built to not be a silent failure point.
 
 ---
 
-## 2. Building the form
+## 2. Building the form — already done (§0)
+
+*(Kept for reference / rebuilding if this form is ever lost.)*
 
 1. Go to [forms.google.com](https://forms.google.com), create a new blank form.
 2. Title it something like "Kalaza Care — Enquiry Details."
@@ -67,9 +91,12 @@ This was deliberately built to not be a silent failure point.
    written (order doesn't matter, spelling does).
 5. For question 6 (phone), question 10 (age), 17/18 (budget): open the
    "..." menu on that question → Response validation → set as noted in
-   the table.
-6. Once built, click the **Responses** tab → the green Sheets icon →
-   "Create a new spreadsheet" — this is what the bridge script attaches to.
+   the table. *(Age/budget number validation was skipped for time —
+   optional nice-to-have, not required for correctness.)*
+6. Click the **Responses** tab → the green Sheets icon → "Create a new
+   spreadsheet" — this is what the bridge script attaches to. Then
+   **Publish** the form (top-right) — without this, it won't accept
+   responses from anyone outside your own account.
 
 ---
 
