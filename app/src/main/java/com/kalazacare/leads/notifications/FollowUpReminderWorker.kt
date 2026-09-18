@@ -15,8 +15,8 @@ private const val TAG = "FollowUpReminderWorker"
 private val TERMINAL_STATUSES = setOf("CONVERTED", "NOT_CONVERTED", "DORMANT")
 
 /**
- * Periodic, client-only check for leads with a follow-up due (Master Plan
- * Part 6.5 / roadmap A4 part 2). Deliberately NOT a real push notification --
+ * Periodic, client-only check for leads with a follow-up due (roadmap A4
+ * part 2). Deliberately NOT a real push notification --
  * that needs a server, which doesn't exist until Track D. This covers what's
  * possible today: the app noticing its own data crossed a date.
  */

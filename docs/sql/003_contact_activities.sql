@@ -1,4 +1,4 @@
--- Kalaza Leads — contact_activities table (docs/MASTER_PLAN_V2.md Part 5.4)
+-- Kalaza Leads — contact_activities table (A3)
 -- The "proof" log: every call, WhatsApp message, and visit for a lead,
 -- with outcome and notes -- the feature the NGO supervisor explicitly asked for.
 

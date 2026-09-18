@@ -1,4 +1,4 @@
--- Kalaza Leads — leads table v2 migration (docs/MASTER_PLAN_V2.md Part 5)
+-- Kalaza Leads — leads table v2 migration (v2 schema; see Lead.kt for the current columns)
 -- Drops and recreates `leads` on the revised post-supervisor-review schema.
 -- Safe to run: as of 2026-08-25 the live table only holds 2 throwaway test
 -- rows from development testing, nothing real to preserve.

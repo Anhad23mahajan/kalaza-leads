@@ -13,7 +13,7 @@ enum class WhatsAppTemplate(val label: String) {
 }
 
 /**
- * Templated draft messages (Master Plan Part 6.4, S1/S2/S5). These are static
+ * Templated draft messages (message sequences S1/S2/S5 in docs/AUTOMATION_DESIGN.md). These are static
  * templates, not AI-generated -- real drafting/personalization is an Edge
  * Function + Claude API job for later (Track D), out of scope for the
  * client-only wa.me MVP bridge.
