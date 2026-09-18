@@ -337,12 +337,12 @@ reviewed against its declared category before use.
 1. Inside WhatsApp Manager (part of the Business Portfolio) or the chosen
    BSP's template editor, draft the wording for each planned message —
    start with: enquiry follow-up #1, follow-up #2, post-visit feedback ask
-   (see `docs/MASTER_PLAN_V2.md` Part 6.4 for suggested wording to adapt).
+   (see `docs/AUTOMATION_DESIGN.md` §7 for suggested wording to adapt).
 2. Assign each one the correct category.
 3. Submit. Most utility templates get automated approval within minutes;
    if flagged for human review, up to 24 hours.
 4. **If multiple languages are planned** (English/Hindi/Marathi, per
-   Master Plan §2.8), each language variant is a **separate submission**
+   `AUTOMATION_DESIGN.md` §4), each language variant is a **separate submission**
    needing its own approval — this needs a decision from the supervisor
    on which languages to support before this step can be considered done.
 

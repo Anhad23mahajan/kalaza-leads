@@ -64,7 +64,7 @@ private fun buildLeadsCsv(leads: List<Lead>): String = buildString {
 
 /**
  * Writes [leads] to a CSV in the app's cache dir and opens the Android share
- * sheet so staff can send it to WhatsApp, email, Drive, etc. (Master Plan A6 /
+ * sheet so staff can send it to WhatsApp, email, Drive, etc. (roadmap A6 /
  * supervisor request #7 — "Excel data file saved and shared").
  */
 fun exportAndShareLeads(context: Context, leads: List<Lead>, segmentLabel: String) {

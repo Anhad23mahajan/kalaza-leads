@@ -1,4 +1,4 @@
--- Kalaza Leads — staff table (docs/MASTER_PLAN_V2.md Part 5.4, roadmap item A8)
+-- Kalaza Leads — staff table (roadmap item A8)
 -- A roster of staff for assignment ("follow-up person" in the supervisor's
 -- Excel) and basic roles. Deliberately not tied 1:1 to auth.users -- not
 -- every staff member necessarily has an app login yet.

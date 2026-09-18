@@ -84,7 +84,7 @@ fun computeNotConvertedReasons(leads: List<Lead>): List<Pair<String, Int>> {
         .sortedByDescending { it.second }
 }
 
-/** The "why we lose families" report -- Master Plan Part 7's flagged demo material. */
+/** The "why we lose families" report -- the supervisor's most-wanted report. */
 data class UnmetDemandEntry(val reasonLabel: String, val detail: String)
 
 fun computeUnmetDemand(leads: List<Lead>): List<UnmetDemandEntry> =

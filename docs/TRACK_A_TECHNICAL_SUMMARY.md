@@ -212,7 +212,7 @@ calls):
   by service requested (multi-membership — a lead counts toward every
   service it listed), by assigned staff (uses A8's staff roster).
 - **Not-converted reasons, ranked.**
-- **"Unmet demand"** — the Master Plan's flagged "why we lose families"
+- **"Unmet demand"** — the supervisor's flagged "why we lose families"
   report: lists the free-text `not_converted_detail` for every lead whose
   reason was `amenity_missing` or `service_not_offered`.
 - **Budget distribution** — bucketed histogram from `budget_min`/`budget_max`.
