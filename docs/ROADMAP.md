@@ -32,7 +32,7 @@ instead of idling.
    - Put the form link in the **greeting message** (auto-sent to first-time messagers) and in a **quick reply** (e.g. `/form`) for staff to fire on calls/walk-ins.
    - Print a **QR code** of the responder link for the front desk.
    - It costs nothing, and it gives the supervisor a visible auto-reply within days.
-3. **Move form ownership off the personal Gmail.** The Form, its response Sheet (full of family medical/contact data), and the Apps Script all live in `anhadagammahajan@gmail.com`. Before real use: create/borrow an NGO-owned Google account and transfer ownership (or at least add it as co-owner). Also decide who can see the response Sheet.
+3. **Move form ownership off the personal Gmail.** The Form, its response Sheet (full of family medical/contact data), and the Apps Script all live in Anhad's personal Google account. Before real use: create/borrow an NGO-owned Google account and transfer ownership (or at least add it as co-owner). Also decide who can see the response Sheet.
 4. **Supabase free-tier check.** Free projects pause after a period of inactivity and have no automated backups (verify current terms in the dashboard). Decide: is this OK for real data? If not — periodic CSV export to a safe place, or an upgrade — and record the decision.
 5. **Optional form additions** (deferred, low priority): consent checkbox → `consent_given`, preferred language → `preferred_language`. Steps are in `GOOGLE_FORM_INTAKE_SPEC.md` §6.
 
