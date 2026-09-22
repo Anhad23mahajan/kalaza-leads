@@ -4,7 +4,7 @@ Living log of what's actually been built, how it works, and everything a new ses
 
 **Scope note (2026-08-25):** `docs/ROADMAP.md` is the source of truth for what's done and what's next, and `docs/AUTOMATION_DESIGN.md` for how the WhatsApp system should work (the older `PROJECT_SPEC.md` and `MASTER_PLAN_V2.md` were deleted as superseded; they remain in git history). Read the roadmap before planning any new work; the short version is that the supervisor redefined the project after a review — it's now three systems (Android CRM, a WhatsApp automation backend, and Meta's WhatsApp Cloud API integration), the leads schema needed a real migration, and most remaining blockers are NGO-side paperwork/content, not code. This file (`PROGRESS.md`) remains the engineering log of what's actually been built, how, and why — that hasn't changed.
 
-Last updated: 2026-09-17 (Google Form intake bridge — built, published, and tested end-to-end).
+Last updated: 2026-09-21 (complete handoff guide added: `docs/HANDOFF.md`; before that: Google Form intake bridge — built, published, and tested end-to-end).
 
 ---
 
@@ -23,9 +23,9 @@ Last updated: 2026-09-17 (Google Form intake bridge — built, published, and te
 - **Follow-up reminder notifications (A4 part 2 done)**: `WorkManager` periodic check (`notifications/FollowUpReminderWorker.kt`), scheduled daily targeting ~9am (`notifications/NotificationScheduler.kt`), counts leads with a due/overdue follow-up and fires a local device notification (`notifications/NotificationHelper.kt`) if any exist; tapping it opens the app. Deliberately client-only, not real server push — there's no backend yet (that's Track D). Requests the Android 13+ `POST_NOTIFICATIONS` permission on launch. **Known limitation, accepted as-is**: WorkManager doesn't guarantee exact timing — Android's Doze mode can defer the first daily run by hours (confirmed on device: fired same-day evening instead of ~9am). Staff still get notified same-day, which satisfies the actual ask; precision was deemed not worth the added complexity of exact-alarm scheduling (`AlarmManager` + a separate Android 12+ permission grant flow). Revisit only if this proves to matter in practice. Verified end-to-end on device — notification fired and opened the app correctly.
 - **Track A (the Android CRM) is now fully feature-complete.** Remaining: everything WhatsApp-automation-related (Track B/C/D, see `docs/ROADMAP.md` — none of it has started, and B/C need the supervisor/NGO to act, not Anhad).
 - **Security fix (2026-09-17): self-signup gated by the active staff roster.** Login previously fell back to creating a brand-new account for *any* name/password that failed sign-in — meaning anyone with the APK could get in and see every family's medical/financial data, since every RLS policy just checks "is someone logged in," not "are they staff." Fixed via a new `is_active_staff_name` SQL function (`docs/sql/005_staff_name_check_rpc.sql`, SECURITY DEFINER, returns only a boolean, callable pre-auth) — signup is now blocked unless the typed name matches an active row in `staff`. Also added a logout confirmation dialog. Built and verified on device in a prior session; already deployed to Supabase.
-- **Google Form intake bridge (done 2026-09-17), running alongside the in-app "New Enquiry" screen.** The enquirer now fills in their own details via a Google Form (delivery mechanism — how the link reaches them over WhatsApp — still undecided, parked) rather than staff re-typing everything into the app; applies to phone/walk-in enquiries too via the same form. `docs/GOOGLE_FORM_INTAKE_SPEC.md` has the exact 23-question spec; `tools/google-form-bridge/KalazaFormBridge.gs` is the Apps Script bridge that inserts form responses into the same `leads` table; `docs/sql/006_google_form_anon_insert.sql` grants the narrow anon-insert-only RLS exception this needs (already run in Supabase). Form built and published, bridge script pasted in, Script Properties set, `setupTrigger()` run, and a real test submission ("TEST Anhad") verified end-to-end: landed in the app's Leads "All" tab with every field — including the checkbox multi-selects (conditions/service/amenities) — saved correctly as arrays, and the Apps Script Executions log showed a clean Completed run. **The in-app "New Enquiry" screen has now been removed (2026-09-17)** — `AddLeadScreen.kt` deleted, plus the now-dead `addLead`/`NewLeadRequest` plumbing across `LeadsViewModel`, `LeadsRepository`/`SupabaseLeadsRepository`, and `Lead.kt`, and the FAB + `Screen.ADD_LEAD` wiring in `LeadsScreen.kt`/`MainActivity.kt`. The Google Form is now the only way new leads enter the system. `LeadFormOptions.kt`'s shared enum/label lists are untouched — still used by `LeadDetailScreen` (edit) and CSV export labels.
+- **Google Form intake bridge (done 2026-09-17), which replaced the in-app "New Enquiry" screen.** The enquirer now fills in their own details via a Google Form (delivery mechanism — how the link reaches them over WhatsApp — still undecided, parked) rather than staff re-typing everything into the app; applies to phone/walk-in enquiries too via the same form. `docs/GOOGLE_FORM_INTAKE_SPEC.md` has the exact 23-question spec; `tools/google-form-bridge/KalazaFormBridge.gs` is the Apps Script bridge that inserts form responses into the same `leads` table; `docs/sql/006_google_form_anon_insert.sql` grants the narrow anon-insert-only RLS exception this needs (already run in Supabase). Form built and published, bridge script pasted in, Script Properties set, `setupTrigger()` run, and a real test submission ("TEST Anhad") verified end-to-end: landed in the app's Leads "All" tab with every field — including the checkbox multi-selects (conditions/service/amenities) — saved correctly as arrays, and the Apps Script Executions log showed a clean Completed run. **The in-app "New Enquiry" screen has now been removed (2026-09-17)** — `AddLeadScreen.kt` deleted, plus the now-dead `addLead`/`NewLeadRequest` plumbing across `LeadsViewModel`, `LeadsRepository`/`SupabaseLeadsRepository`, and `Lead.kt`, and the FAB + `Screen.ADD_LEAD` wiring in `LeadsScreen.kt`/`MainActivity.kt`. The Google Form is now the only way new leads enter the system. `LeadFormOptions.kt`'s shared enum/label lists are untouched — still used by `LeadDetailScreen` (edit) and CSV export labels.
 
-If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and add an enquiry immediately.
+If you're picking this up fresh: pull latest, open the project at `C:\Dev\kalaza-leads` (see §4 — **not** the OneDrive folder), build, install on the connected device, and you should be able to log in and see leads (your name must be on the active staff roster - on a fresh database bootstrap the first staff row, see `docs/HANDOFF.md` section 7.4). New leads arrive via the Google Form, not in the app.
 
 ---
 
@@ -37,14 +37,14 @@ Kotlin + Jetpack Compose (Material 3), MVVM. Package `com.kalazacare.leads`.
 app/src/main/java/com/kalazacare/leads/
   KalazaLeadsApp.kt                    Application class
   data/
-    model/Lead.kt                      Lead (read) + NewLeadRequest (insert payload)
-    model/StaffMember.kt               unused placeholder, not wired up yet
+    model/Lead.kt                      Lead (read) + UpdateLeadRequest (edit payload)
+    model/StaffMember.kt               staff roster model (Staff screen, assignment)
     remote/SupabaseClients.kt          SupabaseClient singleton, reads URL/key from BuildConfig
     repository/
       AuthRepository.kt / SupabaseAuthRepository.kt
       LeadsRepository.kt / SupabaseLeadsRepository.kt
   ui/
-    MainActivity.kt                    Screen state machine: LOGIN -> LEADS -> ADD_LEAD
+    MainActivity.kt                    Screen state machine: LOGIN / LEADS / LEAD_DETAIL / STAFF / REPORTS
     login/LoginScreen.kt, LoginViewModel.kt
     leads/LeadsScreen.kt, LeadsViewModel.kt
     theme/                             Teal Material3 theme (deliberately distinct from Kalaza Care's red)
@@ -52,7 +52,7 @@ app/src/main/java/com/kalazacare/leads/
 
 **Pattern**: each feature is Repository (talks to Supabase) → ViewModel (StateFlow of a `*State` data class) → Composable Screen (collects state, renders, calls ViewModel methods). `MainActivity` creates all repositories/ViewModels once in `onCreate` and passes them down — no DI framework, deliberately simple for a solo student project.
 
-**Navigation**: no NavHost. `MainActivity` holds a `private enum class Screen { LOGIN, LEADS, ADD_LEAD }` as a `mutableStateOf`, and a `when` picks which Composable to show. Fine for 3 screens; will need real navigation (Compose Navigation) once the screen count grows past ~5.
+**Navigation**: no NavHost. `MainActivity` holds a `private enum class Screen { LOGIN, LEADS, LEAD_DETAIL, STAFF, REPORTS }` as a `mutableStateOf`, and a `when` picks which Composable to show. Fine at this size; consider Compose Navigation if the screen count grows. (This tree is abridged - the complete, current file map is in `docs/HANDOFF.md` section 6.)
 
 ---
 
@@ -114,7 +114,7 @@ This cost an entire debugging session. Don't repeat it.
 
 ## 5. Git / GitHub workflow
 
-- Repo: `github.com/Anhad23mahajan/kalaza-leads`, owner's own account (not the friend/Aditya account originally considered — see §6).
+- Repo: `github.com/Anhad23mahajan/kalaza-leads`, owner's own account (not a friend's account, which was originally considered — see §6).
 - No standing credentials are stored anywhere. Every push uses a short-lived fine-grained GitHub PAT: user generates one scoped to just this repo (Contents: Read and write, shortest expiration) at `github.com/settings/personal-access-tokens/new`, pastes it into chat, it's used once in the remote URL (`https://x-access-token:TOKEN@github.com/...`), then immediately stripped from git config (`git remote set-url origin` back to the plain HTTPS URL) and the user revokes it on GitHub.
 - Git identity: `Anhad Mahajan` / `anhadagammahajan@gmail.com` (set via `git config --global`).
 - Because two local copies of the repo exist (§4), remember to sync both: commit+push from whichever copy was edited, then `git pull origin main` in the other one before building/testing there.
@@ -124,7 +124,7 @@ This cost an entire debugging session. Don't repeat it.
 ## 6. Key decisions and why
 
 - **Standalone Supabase project, not shared with Kalaza Care.** The spec's original preference was sharing one project (clean lead→resident handoff). Went standalone instead because Harsh (who has Kalaza Care's credentials) wasn't available, and waiting would have blocked all progress. This is a **reversible** decision — migrating to Kalaza Care's project later is possible, just needs re-pointing `local.properties` and re-running the leads table SQL there.
-- **Not migrating to Aditya Sharma's Claude Code cloud account.** Originally considered, but the user chose to keep building step-by-step in this local session instead — "slow and steady wins the game." If a handoff to that account happens later, this file is exactly what should be read first there.
+- **Not migrating to a friend's Claude Code cloud account.** Originally considered, but the user chose to keep building step-by-step in this local session instead — "slow and steady wins the game." If a handoff to that account happens later, this file is exactly what should be read first there.
 - **Teal theme, not Kalaza Care's red.** Deliberate — the two apps install side by side on the same phone; staff need to tell them apart at a glance.
 - **No staff/roles table yet.** Every Supabase Auth account is currently treated as trusted staff (RLS just checks `auth.uid() is not null`). Fine for now since nothing else can create accounts through this app; revisit before any real deployment.
 - **wa.me deep links for MVP messaging, not WhatsApp Business API.** Zero cost, zero ban risk, ~90% of the value. Built and shipped 2026-08-25 (A7, see §1 above).

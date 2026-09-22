@@ -1,7 +1,7 @@
 # Google Form Intake — Field Spec & Setup
 
 This replaces the in-app "New Enquiry" screen. The enquirer fills this form
-(sent via WhatsApp), it lands in a Google Sheet, and a small script
+(how the link reaches them is still open - see `docs/ROADMAP.md`), it lands in a Google Sheet, and a small script
 (`tools/google-form-bridge/KalazaFormBridge.gs`) pushes each response into
 the same `leads` table the app already reads from — so nothing changes on
 the app side except that new leads now arrive already filled in, instead
@@ -27,11 +27,10 @@ spreadsheet.
 - Every question was verified against the table in §1 field-by-field after
   building — titles, types, and every option spelled exactly as specified.
 
-**What's left, and it has to happen in your own Google account/browser —
-an agent can't do this part, since Google blocks automated clicks from
-opening the Sheets/Apps Script popup**: §3 (paste the bridge script in) and
-§4 (test it). Skip straight to those sections; §1 and §2 are already done
-and are kept below only as the reference spec.
+**Nothing is left for the form itself.** Historically the bridge setup (section 3) and the test (section 4)
+had to be done by the owner in their own Google account and browser, because an automated browser cannot open
+the Sheets / Apps Script popup. Both are done; section 3 and section 4 record the steps and the results.
+Section 1 and section 2 are kept below as the reference spec / rebuild recipe.
 
 ---
 
@@ -52,15 +51,15 @@ a typo here breaks that field silently.
 | 7 | `Your relation to the patient` | Dropdown | Son / Daughter / Spouse / Sibling / Grandchild / Nephew or Niece / Friend / Self / Hospital Staff / Other | No | `enquirer_relation` |
 | 8 | `Where are you from (location)` | Short answer | — | No | `enquirer_location` |
 | 9 | `Patient's name` | Short answer | — | No | `patient_name` |
-| 10 | `Patient's age` | Short answer, response validation: number, between 0 and 120 | — | No | `patient_age` |
+| 10 | `Patient's age` | Short answer *(planned validation: number 0-120 - NOT applied on the built form)* | — | No | `patient_age` |
 | 11 | `Patient's gender` | Dropdown | Male / Female / Other | No | `patient_gender` |
 | 12 | `What does the patient have? (select all that apply)` | Checkboxes | Alzheimer's / Dementia / Parkinson's / Cancer / Post-Stroke / Post-Operative / Post-Transplant / Bedridden / Diabetes / Cardiac / Mobility Impaired / Other | No | `patient_conditions` |
 | 13 | `Current condition / mobility` | Paragraph | — | No | `current_condition` |
 | 14 | `Medical history` | Paragraph | — | No | `medical_history` |
 | 15 | `Service(s) wanted (select all that apply)` | Checkboxes | Assisted Living / Palliative Care / Post-Transplant Care / Cancer Care / Medical Recovery / Dementia Care / Respite Care / Day Care | No | `service_wanted` |
 | 16 | `Room type preferred` | Dropdown | Single Room / Double Sharing / Triple Sharing / Full Flat / Dormitory / Not Sure | No | `accommodation_type` |
-| 17 | `Budget - minimum (Rs.)` | Short answer, response validation: number | — | No | `budget_min` |
-| 18 | `Budget - maximum (Rs.)` | Short answer, response validation: number | — | No | `budget_max` |
+| 17 | `Budget - minimum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_min` |
+| 18 | `Budget - maximum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_max` |
 | 19 | `Amenities requested (select all that apply)` | Checkboxes | AC / Lift / Attached Bathroom / Ground Floor / Female Attendant / Private Nurse / Veg Food / Other | No | `amenities_requested` |
 | 20 | `Any special requirements` | Paragraph | — | No | `special_requirements` |
 | 21 | `What would you like to ask us?` | Paragraph | — | No | `queries` |
@@ -142,7 +141,7 @@ repo — see that file directly for the code. Setup:
 ## 5. What's NOT covered here (on purpose)
 
 - **How the form link actually reaches the enquirer** — still an open
-  question, parked for later (see chat history).
+  question, parked for later (see `docs/ROADMAP.md` section 2 and `docs/HANDOFF.md` section 9).
 - **Anything about the WhatsApp chatbot / Q&A engine** — that's Track D,
   unrelated to this intake bridge.
 - **Staff-only pipeline fields** — `next_follow_up_date`, `actual_visit_date`,

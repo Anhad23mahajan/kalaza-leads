@@ -26,6 +26,7 @@ The supervisor's own words, decoded: *"the primary task is to take the follow-up
 
 ## Where to start reading
 
+- [`docs/HANDOFF.md`](docs/HANDOFF.md) — **start here if you're new**: the complete guide (history, architecture, database, build, decisions, gotchas, open items).
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — where the project stands and what's next, phase by phase.
 - [`docs/AUTOMATION_DESIGN.md`](docs/AUTOMATION_DESIGN.md) — how the WhatsApp auto-reply system should work and its safety rules (not built yet).
 - [`docs/PROGRESS.md`](docs/PROGRESS.md) — the engineering build log: what's been built, how, and why, kept up to date as work lands.
