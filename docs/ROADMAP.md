@@ -33,7 +33,7 @@ instead of idling.
    - Print a **QR code** of the responder link for the front desk.
    - It costs nothing, and it gives the supervisor a visible auto-reply within days.
 3. **Move form ownership off the personal Gmail.** The Form, its response Sheet (full of family medical/contact data), and the Apps Script all live in Anhad's personal Google account. Before real use: create/borrow an NGO-owned Google account and transfer ownership (or at least add it as co-owner). Also decide who can see the response Sheet.
-4. **Supabase free-tier check.** Free projects pause after a period of inactivity and have no automated backups (verify current terms in the dashboard). Decide: is this OK for real data? If not — periodic CSV export to a safe place, or an upgrade — and record the decision.
+4. **Supabase free-tier check.** Verified 2026-09-22: a Free project pauses after **7 days with no database queries** (dashboard visits don't count), stays restorable from the dashboard for **1 year** after pausing, then gets deleted; there are **zero days of backup retention** on Free (no automated backups at all, unlike Pro/Team). Paid plans can't be paused. Decide: is this OK for real data? If not — a scheduled export/backup, a periodic keep-alive query, or an upgrade — and record the decision.
 5. **Optional form additions** (deferred, low priority): consent checkbox → `consent_given`, preferred language → `preferred_language`. Steps are in `GOOGLE_FORM_INTAKE_SPEC.md` §6.
 
 ## 3. Phase 2 — Unblock Track B and C (needs the supervisor)

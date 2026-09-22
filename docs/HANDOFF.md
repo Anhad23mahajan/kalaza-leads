@@ -50,7 +50,10 @@ Written 2026-09-21. It is meant to be enough, on its own, to continue the projec
 | The database schema | `docs/sql/001…006` (run in order) and `Lead.kt` |
 | Google Form questions and bridge setup | `docs/GOOGLE_FORM_INTAKE_SPEC.md`, `tools/google-form-bridge/KalazaFormBridge.gs` |
 | WhatsApp bot rules, sequences, tables | `docs/AUTOMATION_DESIGN.md` |
-| Meta / WhatsApp onboarding decision + steps | `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` (+ cheat sheet and meeting script) |
+| Meta / WhatsApp onboarding decision + steps | `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` |
+| Track B meeting prep (glance sheet / rehearsal script) | `docs/TRACK_B_MEETING_CHEATSHEET.md`, `docs/TRACK_B_SUPERVISOR_MEETING_SCRIPT.md` |
+| Track A feature-by-feature build notes | `docs/TRACK_A_TECHNICAL_SUMMARY.md` |
+| Plain-language script for demoing Track A to the supervisor | `docs/SUPERVISOR_DEMO_SCRIPT_TRACK_A.md` |
 
 **Recovering deleted documents.** Some older docs were deliberately deleted as superseded. They still exist in git history. Commit `ffe8913` still contains all three:
 `git show ffe8913:docs/MASTER_PLAN_V2.md` (787 lines — the original three-track plan, supervisor quotes, cost analysis),
@@ -66,7 +69,7 @@ Written 2026-09-21. It is meant to be enough, on its own, to continue the projec
 
 **Keep this document alive.** When something material changes, update the relevant section and the "Last verified" line below, and keep `docs/PROGRESS.md` and `docs/ROADMAP.md` in step. A stale handoff is worse than none.
 
-Last verified against the repo: **2026-09-21** (main in sync with GitHub).
+Last verified against the repo: **2026-09-21** (main in sync with GitHub). External facts (Meta WhatsApp pricing/limits, Supabase free-tier terms, BSP pricing) last checked by live web search: **2026-09-22** — see the inline notes in §7 and §15 for what changed and the sources.
 
 ---
 
@@ -297,7 +300,7 @@ tools/google-form-bridge/KalazaFormBridge.gs   Apps Script source (pasted into G
 - Keys live on the dashboard at **Project Settings → API Keys**. The **anon / publishable key** is what the app and the Apps Script use. **The service-role / secret key must never be used in the app, the script, the repo, or any chat.**
 - **Auth settings that matter:** "Confirm email" must be **OFF** (staff log in with synthesized emails that have no inbox); password minimum is Supabase's default of 6 characters.
 - **"Automatically expose new tables" is OFF** for this project. Consequence: **RLS policies alone are not enough** — every table also needs an explicit `GRANT` to the role, or PostgREST answers `permission denied for table …` even when a policy would pass. Every migration includes its grants.
-- ⚠️ **Free-tier caveat (verify current terms on the dashboard):** free Supabase projects can be paused after a period of inactivity and don't get automated backups. Decide before real data goes in (see §16).
+- ⚠️ **Free-tier caveat, verified by live web search 2026-09-22 (re-check the dashboard, as these terms can change):** a Free-plan project pauses after **7 days with no database activity** (dashboard visits and cached API reads don't count — it has to be an actual query reaching Postgres). A paused project's data is intact and can be restored from the dashboard for up to **1 year** before deletion. The Free plan has **zero days of backup retention** — there is no snapshot system running at all, unlike Pro/Team. **Paid plans cannot be paused.** Decide before real data goes in (see §16): either accept the pause risk with a periodic manual export, or upgrade.
 
 ### 7.2 Tables
 **`leads`** — one row per enquiry (v2 schema, `002_leads_v2_migration.sql`). Column groups:
@@ -604,7 +607,7 @@ Read this before "improving" something that looks odd — it may have been a del
 
 **The core technical truth.** An app can never read WhatsApp. The only legitimate way is for the NGO's number to be enrolled in Meta's WhatsApp Business Platform (Cloud API): Meta forwards each incoming message to a webhook we host and we reply through the API. Non-official automation (whatsapp-web.js / Baileys) violates WhatsApp's terms and gets numbers banned — never use it on the NGO's number.
 
-**The one decision needed from the supervisor** (`docs/TRACK_B_PAPERWORK_PLAYBOOK.md`, verified against the file 2026-09-21):
+**The one decision needed from the supervisor** (`docs/TRACK_B_PAPERWORK_PLAYBOOK.md`; numbers re-verified by live web search 2026-09-22 — one material change found, see the callout after the table):
 
 | | Option A — keep the existing number ("Coexistence") | Option B — a new dedicated number |
 |---|---|---|
@@ -614,9 +617,11 @@ Read this before "improving" something that looks odd — it may have been a del
 | Ongoing cost | ~₹550–650/yr Meta fees if the self-Tech-Provider attempt succeeds; else ~₹18,000–30,000/yr for a paid BSP (AiSensy from ~₹1,500/mo, Interakt ~₹2,142/mo, Wati from ~₹2,499/mo) | ~₹550–650/yr Meta fees + a basic SIM plan |
 | Trade-offs | Loses some features (group sync, disappearing messages, view-once, live location; broadcast lists read-only; WhatsApp for Windows unsupported; linked devices unlinked); needs Business app v2.24.17+ | Two numbers to run; the new number must be republished wherever the NGO shares its WhatsApp contact |
 
-The docs recommend **Option B as the cost-safe default**; the decision is the supervisor's. **A new number does NOT remove:** the Meta Business Portfolio, business verification (trust deed / society registration + GST or Udyam + address proof, name and address must match exactly; ~2–5 business days), the payment method, message-template approval, the Track C content, or the Track D coding.
+> ⚠️ **Material update (verified 2026-09-22): the "replies are free" framing expires 1 October 2026.** From that date Meta charges ₹0.115/message for service replies and for utility templates sent inside the 24-hour window (both previously free) — but every phone number still gets **1,000 free service messages/month**, resetting monthly. At this NGO's real volume (~200–400 enquiries/year) that allowance almost certainly still covers everything, so the ~₹550–650/yr estimate probably still holds — but say "the first ~1,000 replies a month are free, and our volume is nowhere near that" to the supervisor, not "replies are unlimited free." Also: Meta describes Tech Provider enrollment for Option A as *mandatory* now (not just recommended), and **Embedded Signup v2 (used to onboard existing numbers under Coexistence) is deprecated 8 October 2026** — Option A must be built against **v4** from then on. Details and sources: `TRACK_B_PAPERWORK_PLAYBOOK.md`'s top-of-file note and §8/§10.
 
-**Universal steps** (either option): Business Portfolio (owned by the **NGO**, not an individual) → business verification → payment method (an NGO-controlled card) → number path (A or B) → templates (Utility category for follow-ups; each language is a separate submission). Unverified accounts start with a 250-contacts/day allowance and show a raw number instead of the business name — the plan is still to verify. Meta pricing: replies within the 24-hour window are free; template messages cost paise each; figures changed in July 2026 — **re-check Meta's current rate card** before quoting numbers.
+The docs recommend **Option B as the cost-safe default**; the decision is the supervisor's. **A new number does NOT remove:** the Meta Business Portfolio, business verification (trust deed / society registration + GST or Udyam + address proof, name and address must match exactly; Meta's SLA is up to 14 business days, many clean submissions clear in 1–5), the payment method, message-template approval, the Track C content, or the Track D coding.
+
+**Universal steps** (either option): Business Portfolio (owned by the **NGO**, not an individual) → business verification → payment method (an NGO-controlled card) → number path (A or B) → templates (Utility category for follow-ups; each language is a separate submission). Unverified accounts start with a 250-contacts/day allowance and show a raw number instead of the business name — the plan is still to verify. Meta pricing (India, verified 2026-09-22): utility/authentication/service ₹0.115/message, marketing ₹0.8631/message, first 1,000 service messages/month/number free — **re-check Meta's current rate card before quoting numbers**, as rates and allowances do change.
 
 **Meeting outcome: UNKNOWN as of 2026-09-21.** A supervisor meeting was expected Sep 17. Anhad said beforehand he was ~90% sure the supervisor would choose the new-number plan — an expectation, not a recorded result. **Ask Anhad what happened and record it in `ROADMAP.md` and `PROGRESS.md`** — everything downstream branches on it. Meeting aids: `TRACK_B_MEETING_CHEATSHEET.md` (glance sheet; four asks — does a Business Portfolio exist and who's admin; trust/society and where are the documents; who gets a new SIM; who writes the 20 answers and by when) and `TRACK_B_SUPERVISOR_MEETING_SCRIPT.md` (rehearsal script).
 
@@ -639,7 +644,7 @@ The prioritised plan is `docs/ROADMAP.md`. This is the complete list of loose en
 2. **Hand over the Track C worksheet**: ~20 FAQ answers (list in `AUTOMATION_DESIGN.md` §5), price-list PDF, five service info packs, posters/links. Ask for ~5 answers a week with a date attached.
 3. **Decide the languages** enquiries actually come in (English/Hindi/Marathi) — shapes the knowledge base and every template.
 4. **Ownership of the Google Form / response Sheet / Apps Script.** They live in Anhad's *personal* Google account and will hold real families' medical/contact data. Move to (or co-own with) an NGO account and decide who may see the Sheet.
-5. **Supabase free-tier decision** for real data (inactivity pausing, no automated backups — verify current terms). Options: periodic CSV export, or upgrade.
+5. **Supabase free-tier decision** for real data — verified 2026-09-22: pauses after 7 days with zero DB queries (restorable up to 1 year, then deleted), and there is no backup system at all on the Free plan (0-day retention). Options: a scheduled export/backup script, keep the project 'warm' with a periodic real query, or upgrade to Pro (paid plans can't be paused).
 6. **Deliver the form link to enquirers**: put it in the WhatsApp Business app's greeting message and a `/form` quick reply; print a QR code for the front desk.
 
 **Housekeeping**
