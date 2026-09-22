@@ -101,14 +101,14 @@ Design rule: **one question per message.** Nobody fills a 10-field form over Wha
 
 | # | When | What | Cost |
 |---|---|---|---|
-| S1 | Instant | Thank-you → service menu → info pack for the chosen service (text, price list PDF, photos, video, Google reviews link) | Free (inside 24h window) |
+| S1 | Instant | Thank-you → service menu → info pack for the chosen service (text, price list PDF, photos, video, Google reviews link) | Free up to 1,000 service messages/month per number (see note below) |
 | S2 | +2 days | Follow-up #1 (template): "have you had a chance to decide? happy to arrange a visit" | Template, paise |
 | S3 | +5, +10 days | Softer follow-ups; after #3 → `DORMANT` | Template |
 | S4 | Custom | If they say "I'll tell you in 3 days", the follow-up fires then | Template |
 | S5 | Day before visit; +2 days after | Visit reminder; feedback ask with buttons (Good / Okay / Not good) → stored in `feedback_responses` and the positive/negative theme lists | Template |
 | S6 | +60/+90 days | Re-engagement for `BACKUP` leads (marketing category — use sparingly) | Marketing template |
 
-A reply reopens the free 24-hour window, so the conversation continues free. Current rates and limits: see the Track B playbook.
+A reply reopens the 24-hour window. **Note (verified 2026-09-22): from 1 October 2026, replies inside that window are no longer unconditionally free** — Meta now gives 1,000 free service messages/month per phone number, then charges per message. At this NGO's volume that allowance should cover normal use; don't assume it's unlimited. Current rates and limits: see the Track B playbook.
 
 ## 8. Tables still to build
 

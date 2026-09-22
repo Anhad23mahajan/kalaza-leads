@@ -16,6 +16,23 @@ over time — the *sequence and requirements* below are solid; if a specific
 click-path looks different when you're actually in it, the underlying step
 is still correct.
 
+**Re-verified via live web search 2026-09-22 — one material change since
+this was first written.** Meta is ending free service replies: from
+**1 October 2026**, replies inside the 24-hour window (previously free
+since Nov 2024) and utility templates inside that window (previously free
+since Jul 2025) both start costing money, at **₹0.115/message**, after a
+**free allowance of 1,000 service messages per business phone number per
+month** (resets monthly, doesn't roll over). At this NGO's volume
+(roughly 200–400 enquiries/year) that free allowance likely still covers
+everything, so the ~₹550–650/year estimate below probably still holds —
+but the framing "replies are unlimited free" is no longer accurate and
+should not be said to the supervisor as-is. See §8 for the updated cost
+table and §10 for sources. Also new since this doc was written: Tech
+Provider enrollment for Embedded Signup is now described by Meta as
+*mandatory* for anyone onboarding WhatsApp Business App numbers (Option
+A), and **Embedded Signup v2 is deprecated 8 October 2026** — anyone
+pursuing Option A must build against **v4**.
+
 ---
 
 ## 0. The one-paragraph version
@@ -138,9 +155,10 @@ Double-check this before submitting.
 2. Upload the documents from the list above.
 3. Wait for review.
 
-**How long**: Typically **2–5 business days** for complete, matching
-documents. If rejected, Meta will usually say why (most often a name/
-address mismatch) — fix and resubmit.
+**How long**: Meta's official SLA is **up to 14 business days**; many
+straightforward, complete-and-matching submissions clear in **1-5 business
+days**, and some in hours (verified 2026-09-22). If rejected, Meta will
+usually say why (most often a name/address mismatch) — fix and resubmit.
 
 **Who does this**: The documents themselves can only come from the NGO —
 Anhad cannot supply or fabricate them. Anhad can help with the actual
@@ -403,9 +421,11 @@ this document gave Track B).
 
 | Path | Setup cost | Ongoing cost |
 |---|---|---|
-| Option B (new number) | ₹0 | ~₹550-650/year (Meta message fees) + cost of a basic SIM plan for the new line |
+| Option B (new number) | ₹0 | ~₹550-650/year (Meta message fees, at this NGO's volume) + cost of a basic SIM plan for the new line |
 | Option A, self-Tech-Provider (if approved) | ₹0 | ~₹550-650/year |
-| Option A, paid BSP | ₹0 (most BSPs) | ~₹18,000-30,000/year + Meta's message fees |
+| Option A, paid BSP | ₹0 (most BSPs) | ~₹18,000-30,000/year (BSP subscription) + Meta's message fees, + most BSPs add a 10-30% per-message markup on top of Meta's rate |
+
+**Meta's per-message rate (India, verified 2026-09-22, effective 1 Oct 2026):** utility/authentication/service ₹0.115 each; marketing ₹0.8631. **First 1,000 service messages/month per phone number are still free** — only messages past that, and every template outside the 24-hour window, are charged. The ~₹550-650/year figure assumes this NGO's real volume (roughly 200-400 enquiries/year, well under the free allowance) stays mostly inside the free tier; it is not "everything is free," which was true only through 30 Sept 2026.
 
 ---
 
@@ -414,7 +434,7 @@ this document gave Track B).
 | Step | Typical duration |
 |---|---|
 | Business Portfolio creation | Minutes |
-| Business verification | 2-5 business days (fastest if documents are ready) |
+| Business verification | Meta's official SLA is up to 14 business days; many straightforward cases clear in 1-5 business days when documents match exactly, some in hours (verified 2026-09-22) |
 | Payment method | Minutes |
 | Option A: self-Tech-Provider approval | Unconfirmed, time-boxed to 2-3 weeks |
 | Option A: BSP signup | Hours to a few days |
@@ -436,8 +456,18 @@ NGO produces the verification documents in Step 2.
    outcomes for a case like this one.
 3. Which specific BSPs currently support Coexistence on their cheaper
    plans versus only their higher tiers — confirm directly with whichever
-   BSP is shortlisted before committing.
-4. Exact current UI button names/locations in Business Manager/WhatsApp
+   BSP is shortlisted before committing. AiSensy also lists a "Free
+   Forever" limited plan (verified 2026-09-22) — worth checking whether it
+   covers Coexistence before assuming only the ₹1,500/month tier applies.
+   Interakt's advertised entry price varies by source (~₹999-2,142/month
+   across sources checked 2026-09-22) — get a live quote, don't trust
+   either number blindly.
+4. Whether Embedded Signup v4 (mandatory from 8 Oct 2026, see the note at
+   the top of this document) changes anything else about the Option A
+   setup steps below — the steps here describe v2-era mechanics; re-check
+   Meta's current docs before executing Step 6A if this is read after that
+   date.
+5. Exact current UI button names/locations in Business Manager/WhatsApp
    Manager — Meta changes these periodically; the steps above are
    conceptually accurate even if a label has shifted by the time you're
    in there.
@@ -456,3 +486,8 @@ NGO produces the verification documents in Step 2.
 - [WhatsApp Business API Pricing 2026 — EngageLab](https://www.engagelab.com/blog/whatsapp-business-api-pricing)
 - [WhatsApp API Pricing India 2026 — RichAutomate](https://richautomate.in/blog/whatsapp-business-api-without-monthly-fee-india-2026)
 - [AiSensy vs Interakt vs Wati 2026 comparison](https://aisensy.com/aisensy-vs-interakt-vs-wati)
+- [WhatsApp Business API Pricing in India (2026) — AiSensy](https://aisensy.com/pricing) — verified 2026-09-22
+- [Upcoming pricing updates for service and utility messages — Meta for Developers](https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing/non-template-messages) — the 1 Oct 2026 change, verified 2026-09-22
+- [WhatsApp Service Message Pricing Changes in October 2026 — SendPulse](https://sendpulse.com/blog/whatsapp-service-message-pricing) — verified 2026-09-22
+- [Onboard WhatsApp Business app users (Coexistence), Tech Provider requirement — Meta for Developers](https://developers.facebook.com/documentation/business-messaging/whatsapp/embedded-signup/onboarding-business-app-users) — verified 2026-09-22
+- [WhatsApp Messaging Limits — Meta for Developers](https://developers.facebook.com/documentation/business-messaging/whatsapp/messaging-limits) — verified 2026-09-22
