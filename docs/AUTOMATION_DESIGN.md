@@ -110,6 +110,8 @@ Design rule: **one question per message.** Nobody fills a 10-field form over Wha
 
 A reply reopens the 24-hour window. **Note (verified 2026-09-22): from 1 October 2026, replies inside that window are no longer unconditionally free** — Meta now gives 1,000 free service messages/month per phone number, then charges per message. At this NGO's volume that allowance should cover normal use; don't assume it's unlimited. Current rates and limits: see the Track B playbook.
 
+**Evidence and policy (researched 2026-09-24, see `docs/WHATSAPP_CHATBOT_RESEARCH.md`):** Meta bans *general-purpose* AI chatbots on the WhatsApp Business Platform (from 15 Jan 2026) but allows structured FAQ/booking/lead-qualification bots with a human escalation path — this design is compliant as long as it stays KB-only and task-bound. Adopt: explicit human-trigger words (incl. Hindi/Marathi), repeat-failure handoff, context summary to staff, a "lead not contacted in N minutes" alert, and DPDP consent + a retention policy. Future option: replace the Google Form with a native **WhatsApp Flow** once the Cloud API is live.
+
 ## 8. Tables still to build
 
 Already built: `leads`, `contact_activities`, `staff` (see `docs/sql/` and `Lead.kt`).

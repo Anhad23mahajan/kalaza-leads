@@ -50,6 +50,7 @@ Written 2026-09-21. It is meant to be enough, on its own, to continue the projec
 | The database schema | `docs/sql/001…006` (run in order) and `Lead.kt` |
 | Google Form questions and bridge setup | `docs/GOOGLE_FORM_INTAKE_SPEC.md`, `tools/google-form-bridge/KalazaFormBridge.gs` |
 | WhatsApp bot rules, sequences, tables | `docs/AUTOMATION_DESIGN.md` |
+| What real healthcare enterprises do on WhatsApp, Meta's AI policy, WhatsApp Flows | `docs/WHATSAPP_CHATBOT_RESEARCH.md` (researched 2026-09-24) |
 | Meta / WhatsApp onboarding decision + steps | `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` |
 | Track B meeting prep (glance sheet / rehearsal script) | `docs/TRACK_B_MEETING_CHEATSHEET.md`, `docs/TRACK_B_SUPERVISOR_MEETING_SCRIPT.md` |
 | Track A feature-by-feature build notes | `docs/TRACK_A_TECHNICAL_SUMMARY.md` |

@@ -28,6 +28,7 @@ The supervisor's own words, decoded: *"the primary task is to take the follow-up
 
 - [`docs/HANDOFF.md`](docs/HANDOFF.md) — **start here if you're new**: the complete guide (history, architecture, database, build, decisions, gotchas, open items).
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — where the project stands and what's next, phase by phase.
+- [`docs/WHATSAPP_CHATBOT_RESEARCH.md`](docs/WHATSAPP_CHATBOT_RESEARCH.md) — research on how healthcare brands use WhatsApp bots, Meta's AI rules, and WhatsApp Flows.
 - [`docs/AUTOMATION_DESIGN.md`](docs/AUTOMATION_DESIGN.md) — how the WhatsApp auto-reply system should work and its safety rules (not built yet).
 - [`docs/PROGRESS.md`](docs/PROGRESS.md) — the engineering build log: what's been built, how, and why, kept up to date as work lands.
 - [`docs/GOOGLE_FORM_INTAKE_SPEC.md`](docs/GOOGLE_FORM_INTAKE_SPEC.md) — the intake form's field spec and the Apps Script bridge setup.
