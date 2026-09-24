@@ -70,6 +70,7 @@ Order of work (re-sequenced into thin slices so something works early; design in
 | **D-4** | Two-way sync: log every message into a `wa_messages` table + link to `leads` | — |
 | **D-5** | Scheduled outbound: honour "I'll tell you in 2–3 days", post-visit feedback ask | Approved templates (Track B) |
 | **D-6** | AI layer (translation / extraction), only after D-1…D-5 are solid | — |
+| **D-7** | *Option:* replace the Google Form with a native **WhatsApp Flow** (same fields, filled inside the chat, inserted into the same `leads` table) — see `WHATSAPP_CHATBOT_RESEARCH.md` §5 | Cloud API live (Track B) |
 
 Design rules carried over (they're the reason the risk register looks the way it does): never let the bot invent a facility capability; always hand off on no-match; staff can take over any thread at any time; honour opt-outs.
 
