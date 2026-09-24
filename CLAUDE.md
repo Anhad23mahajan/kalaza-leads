@@ -7,7 +7,7 @@
 3. Before doing anything, ask the human what the outcome of the **Track B supervisor meeting** was and what they want to work on (details: HANDOFF §15–§16).
 
 ## What this is
-An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO in Pune. Staff track enquiries, follow-ups and contacts. **Track A (the app) is finished and tested on a real phone.** New leads arrive through a **Google Form → Apps Script → Supabase** bridge; there is deliberately **no in-app "add enquiry" screen**. The WhatsApp auto-reply bot (Tracks B/C/D) has not started.
+An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO in Pune. The single admin tracks enquiries, follow-ups and contacts. **Track A (the app) is finished and tested on a real phone.** New leads arrive through a **Google Form → Apps Script → Supabase** bridge; there is deliberately **no in-app "add enquiry" screen**. The WhatsApp auto-reply bot (Tracks B/C/D) has not started.
 
 ## Rules that prevent mistakes
 1. **The repo is PUBLIC.** Never commit or write into any doc: tokens, keys, passwords, the Supabase service-role key, real families' data, or personal contact details. `local.properties` is gitignored — keep it that way. Use fake data ("TEST …") for tests.
@@ -22,7 +22,7 @@ An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO i
 10. **Keep docs true.** After a feature or decision, update `docs/PROGRESS.md`, `docs/ROADMAP.md` and, if material, `docs/HANDOFF.md`. After removing anything, search the repo for dead references.
 
 ## Facts that bite
-- Signup is **gated by the active staff roster** (`is_active_staff_name`). On a **fresh database** nobody can sign up until you insert the first staff row — see HANDOFF §7.4.
+- **Single-admin app** (2026-09-24): no signup, roster, roles or assignment. The one admin account is created in the Supabase dashboard and "Allow new users to sign up" is OFF (`docs/sql/007_single_admin.sql`). On a fresh database: run 001…007, then Authentication → Users → Add user, then disable signups (HANDOFF section 7.4).
 - Supabase project has "Automatically expose new tables" **off**: every table needs an explicit `GRANT` *and* a policy.
 - Login is by **name**; the app synthesizes `name@kalazaleads.app` (Confirm-email is OFF; passwords ≥ 6 chars).
 - The Google Form's **question titles are the contract** with `tools/google-form-bridge/KalazaFormBridge.gs`. Changing a title silently breaks that field. Enum lists must stay in sync across `LeadFormOptions.kt`, the SQL check constraints and the bridge maps.
@@ -30,4 +30,4 @@ An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO i
 - The bot must **never invent facts**, must hand distress and no-match to a human, and must honour opt-outs (`docs/AUTOMATION_DESIGN.md`).
 
 ## Layout
-`app/` Android code (`com.kalazacare.leads`) · `docs/` all documentation · `docs/sql/001…006` migrations (run in order) · `tools/google-form-bridge/` Apps Script source · `gradle/libs.versions.toml` all versions.
+`app/` Android code (`com.kalazacare.leads`) · `docs/` all documentation · `docs/sql/001…007` migrations (run in order) · `tools/google-form-bridge/` Apps Script source · `gradle/libs.versions.toml` all versions.

@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 // ── Kalaza Leads Brand Colors ────────────────────────────────────────────────
 // Deliberately distinct from Kalaza Care's red/maroon — this is a companion app
-// installed alongside it on the same phone, so staff need to tell them apart at
+// installed alongside it on the same phone, so they need to be easy to tell apart at
 // a glance on the home screen.
 val LeadsTeal        = Color(0xFF00695C)   // Primary brand teal — buttons, FABs, accents
 val LeadsLightTeal   = Color(0xFF00897B)   // Hover / pressed teal

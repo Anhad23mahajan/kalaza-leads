@@ -23,8 +23,8 @@ doesn't need Meta, doesn't need any paperwork from you, it's just ready."*
 
 ## 1. Logging in
 
-Staff log in with just their name and a password — no email needed. Only
-people you've added can get in.
+The admin logs in with just a name and a password — no email needed. There
+is no signup, so nobody else can create an account.
 
 ---
 
@@ -117,12 +117,11 @@ data file saved and shared" request.
 
 ---
 
-## 8. Staff and who's following up with whom
+## 8. (Removed) Staff and who's following up with whom
 
-There's now a staff list, and every enquiry can be assigned to a specific
-person — your "follow-up person" column from your own Excel. You can add
-staff, and mark someone inactive if they leave without deleting their
-history.
+*(Updated 2026-09-24: skip this section.)* The app is now used by a single
+admin, so there is one login and nothing to assign — the staff list and the
+"follow-up person" assignment were removed.
 
 ---
 
@@ -137,7 +136,6 @@ This is the most important screen to walk him through slowly:
   not just volume, but *quality* of each source.
 - **Which services people ask for most**, and how many of those turn into
   admissions.
-- **Who on the team is converting the most enquiries.**
 - **Why people said no** — budget, chose another facility, wanted an
   amenity you don't have, and so on — ranked.
 - **⭐ The "why we're losing families" report.** This is the one to slow

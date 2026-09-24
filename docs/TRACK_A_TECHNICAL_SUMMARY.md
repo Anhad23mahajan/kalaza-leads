@@ -30,14 +30,12 @@ all verified end-to-end on a real Android device.
   live-sync feature has needed it yet).
 - **RLS posture (deliberate MVP simplification)**: every table has
   `auth.uid() is not null` as its only policy — any signed-in account is
-  trusted staff. **Signup itself is gated** (fixed 2026-09-17, see
-  `docs/sql/005_staff_name_check_rpc.sql`): a SECURITY DEFINER function
-  checks the typed name against the active `staff` roster before an account
-  can be created, closing the earlier hole where anyone with the APK could
-  sign up and see every family's data. No further roles/permissions
-  enforcement beyond the basic `staff.role` field added in A8 (not yet
-  wired into access control, just
-  informational/UI-level).
+  trusted. **Update 2026-09-24: single-admin app** — there is exactly one
+  account, the app has no signup path, and "Allow new users to sign up" is
+  off in Supabase (`docs/sql/007_single_admin.sql`). This replaced the
+  2026-09-17 staff-roster signup gate, which had closed the earlier hole
+  where anyone with the APK could sign up and see every family's data.
+  There are no roles or assignment any more.
 - **Theme**: teal, deliberately distinct from the older "Kalaza Care" app's
   red, since both install on the same staff phones.
 
@@ -45,11 +43,10 @@ all verified end-to-end on a real Android device.
 
 ## 1. Auth
 
-Staff sign up / log in / log out. Supabase Auth is email/password under the
-hood, but staff log in by **name only** — the app synthesizes an email
+The admin logs in / out (there is no signup). Supabase Auth is email/password under the
+hood, but the admin logs in by **name only** — the app synthesizes an email
 (`{name}@kalazaleads.app`) since a real inbox isn't needed (email
-confirmation is off on this Supabase project). No roles yet; every account
-is equally trusted.
+confirmation is off on this Supabase project). One admin account only.
 
 ---
 
@@ -180,7 +177,7 @@ the Android share sheet via a `FileProvider`.
 
 ---
 
-## 9. A8 — Staff table + basic roles/assignment
+## 9. A8 — Staff table + basic roles/assignment  *(REMOVED 2026-09-24 — single admin; the text below is historical)*
 
 - New `staff` table (`docs/sql/004_staff_table.sql`): name, phone, role
   (admin/coordinator/viewer), is_active.
@@ -210,7 +207,7 @@ calls):
 - **Pipeline funnel**: count per status, in pipeline order.
 - **Breakdowns** (count + conversion rate each): by source (`how_heard`),
   by service requested (multi-membership — a lead counts toward every
-  service it listed), by assigned staff (uses A8's staff roster).
+  service it listed). *(A "by assigned staff" breakdown existed until 2026-09-24.)*
 - **Not-converted reasons, ranked.**
 - **"Unmet demand"** — the supervisor's flagged "why we lose families"
   report: lists the free-text `not_converted_detail` for every lead whose
@@ -248,7 +245,7 @@ UI: proportional bar rows (`Box` width fraction, no charting library) inside
 
 **SQL migrations** (`docs/sql/`): `001_leads_table.sql` (v1, superseded),
 `002_leads_v2_migration.sql`, `003_contact_activities.sql`,
-`004_staff_table.sql`.
+`004_staff_table.sql`, `005_staff_name_check_rpc.sql`, `006_google_form_anon_insert.sql`, and `007_single_admin.sql` (removes the staff machinery).
 
 **New Gradle dependency added in Track A**: `androidx.work:work-runtime-ktx`
 (A4 part 2). Everything else (CSV export, staff CRUD, reports) shipped with

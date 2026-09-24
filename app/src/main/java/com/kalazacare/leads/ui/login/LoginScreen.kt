@@ -28,7 +28,7 @@ fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit = {},
 ) {
-    var staffName by remember { mutableStateOf("") }
+    var adminName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val state by viewModel.state.collectAsState()
 
@@ -63,8 +63,8 @@ fun LoginScreen(
         androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 32.dp))
 
         OutlinedTextField(
-            value = staffName,
-            onValueChange = { staffName = it },
+            value = adminName,
+            onValueChange = { adminName = it },
             label = { Text("Name") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -95,7 +95,7 @@ fun LoginScreen(
         androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 20.dp))
 
         Button(
-            onClick = { viewModel.login(staffName, password) },
+            onClick = { viewModel.login(adminName, password) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !state.isLoading,
         ) {

@@ -39,7 +39,6 @@ data class Lead(
     val comments: String? = null,
 
     val status: String = "NEW",
-    @SerialName("assigned_staff_id") val assignedStaffId: String? = null,
     @SerialName("next_follow_up_date") val nextFollowUpDate: String? = null,
     @SerialName("follow_up_count") val followUpCount: Int = 0,
     @SerialName("price_list_shared") val priceListShared: Boolean = false,
@@ -61,7 +60,7 @@ data class Lead(
     @SerialName("preferred_language") val preferredLanguage: String = "en",
 )
 
-/** Update payload for the Lead Detail edit screen — everything a staffer can change post-save. */
+/** Update payload for the Lead Detail edit screen — everything that can be changed after saving. */
 @Serializable
 data class UpdateLeadRequest(
     @SerialName("contact_channel") val contactChannel: String? = null,
@@ -90,7 +89,6 @@ data class UpdateLeadRequest(
     val comments: String? = null,
 
     val status: String,
-    @SerialName("assigned_staff_id") val assignedStaffId: String? = null,
     @SerialName("planned_visit_date") val plannedVisitDate: String? = null,
     @SerialName("actual_visit_date") val actualVisitDate: String? = null,
     @SerialName("next_follow_up_date") val nextFollowUpDate: String? = null,

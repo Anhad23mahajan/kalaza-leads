@@ -121,6 +121,3 @@ val ACTIVITY_OUTCOME_LABELS = mapOf(
     "callback_requested" to "Callback Requested", "not_reachable" to "Not Reachable",
 )
 
-// Staff roster (docs/sql/004_staff_table.sql)
-val STAFF_ROLES = listOf("admin", "coordinator", "viewer")
-val STAFF_ROLE_LABELS = mapOf("admin" to "Admin", "coordinator" to "Coordinator", "viewer" to "Viewer")

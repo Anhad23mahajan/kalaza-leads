@@ -14,13 +14,13 @@ The supervisor's own words, decoded: *"the primary task is to take the follow-up
 - **Follow-up-due list** as a home-screen tab — a phone notification tells staff *"you have follow-ups due today"* so no lead is forgotten.
 - **Contact log per lead** — every call, message, and visit recorded with outcome (positive / negative / no answer / call back later) and notes. Doubles as an audit trail and a reminder engine.
 - **One-tap WhatsApp** — the app drafts the right message for the right lead at the right time; staff tap a `wa.me` deep link that opens WhatsApp with everything pre-filled, and hit send. Zero API cost, zero ban risk, fully within WhatsApp's rules.
-- **Staff roster + assignment** — leads can be assigned to an active staff member; self-signup is gated so only people on the active staff list can create an account.
+- **Single admin** — the app is used by one person. There is no signup: the one admin account lives in Supabase and new signups are switched off.
 - **CSV export + reports/analytics** — export any filtered list of leads to CSV, and a reports screen breaks down conversion rate, pipeline funnel, source/service/staff performance, and unmet demand (e.g. "families lost because we don't have a lift").
 
 ## Tech stack
 
 **Client:** Kotlin, Jetpack Compose (Material 3), MVVM + `StateFlow`
-**Backend:** Supabase — Postgres, Auth (RLS-gated, self-signup checked against an active-staff roster)
+**Backend:** Supabase — Postgres, Auth (RLS-gated; single admin account, signups disabled)
 **Intake bridge:** Google Forms → Google Apps Script → Supabase REST API (anon, insert-only)
 **Messaging:** `wa.me` deep links for MVP; WhatsApp Business Cloud API is the planned Phase 2 (Track B/C/D — not started, gated on NGO-side onboarding).
 

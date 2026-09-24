@@ -35,12 +35,12 @@ FAMILY on WhatsApp ⇄ Meta WhatsApp Cloud API
                         │
                         ▼
               SUPABASE POSTGRES  ◄──────────── Google Form → Sheet → Apps Script (built)
-              leads · contact_activities · staff (built)
+              leads · contact_activities (built)
               wa_messages · faq_entries · content_assets ·
               message_templates · feedback_responses (to build)
                         ▲
                         │
-              ANDROID APP (built) — staff read/edit the same tables
+              ANDROID APP (built) — the admin reads/edits the same tables
 ```
 
 **Key rule: the Android app and the bot never talk to each other. Both talk to the same database.** That's what makes them feel like one application while being built independently.

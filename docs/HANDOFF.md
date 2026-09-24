@@ -47,7 +47,7 @@ Written 2026-09-21. It is meant to be enough, on its own, to continue the projec
 | Current status / what's next | `docs/ROADMAP.md` |
 | Engineering log, environment gotchas | `docs/PROGRESS.md` |
 | Everything, from the start, incl. history and *why* | **this file** |
-| The database schema | `docs/sql/001…006` (run in order) and `Lead.kt` |
+| The database schema | `docs/sql/001…007` (run in order) and `Lead.kt` |
 | Google Form questions and bridge setup | `docs/GOOGLE_FORM_INTAKE_SPEC.md`, `tools/google-form-bridge/KalazaFormBridge.gs` |
 | WhatsApp bot rules, sequences, tables | `docs/AUTOMATION_DESIGN.md` |
 | What real healthcare enterprises do on WhatsApp, Meta's AI policy, WhatsApp Flows | `docs/WHATSAPP_CHATBOT_RESEARCH.md` (researched 2026-09-24) |
@@ -79,8 +79,8 @@ Last verified against the repo: **2026-09-21** (main in sync with GitHub). Exter
 - **What it is:** *Kalaza Leads* — an Android app (Kotlin, Jetpack Compose, Supabase) that helps an elder-care NGO in Pune (**Kalaza Care**) never lose an enquiry from a family asking about care for a parent. It tracks every enquiry, schedules follow-ups, keeps a contact log, and reports on conversion.
 - **Who built it:** Anhad Mahajan, solo, as a portfolio/coursework project for a real client (the NGO supervisor is the requester).
 - **State (2026-09-21):**
-  - **Track A — the Android CRM: 100% built and tested on a real phone.** Login, leads list (7 tabs), lead detail/edit, contact log, follow-up notifications, staff roster + assignment, CSV export, reports, one-tap WhatsApp (`wa.me`).
-  - **Security fix shipped:** self-signup is gated by an active-staff roster.
+  - **Track A — the Android CRM: 100% built and tested on a real phone.** Login, leads list (7 tabs), lead detail/edit, contact log, follow-up notifications, CSV export, reports, one-tap WhatsApp (`wa.me`). **It is a single-admin app (2026-09-24): exactly one person uses it, so there is no staff roster, no roles and no lead assignment.**
+  - **Security:** there is **no signup in the app**. The one admin account is created in the Supabase dashboard and "Allow new users to sign up" is switched OFF (`docs/sql/007_single_admin.sql`). (On Sep 17 signup had been gated by a staff roster; that machinery was removed with the move to a single admin.)
   - **Intake moved to a Google Form** feeding the same database through a Google Apps Script bridge. The in-app "New Enquiry" screen was **deleted on purpose**. Verified end-to-end.
   - **Track B (Meta/WhatsApp Business onboarding), Track C (NGO-written content), Track D (the auto-reply bot): not started.** They depend on decisions and paperwork only the NGO can supply.
 - **The supervisor's real priority is the WhatsApp auto-reply bot** (Track D). The CRM was the unblocked part, so it was built first.
@@ -159,6 +159,8 @@ Dates are 2026. Commit hashes are anchors you can `git show`. (Sessions were lon
 
 **Sep 21 — this handoff.** Anhad may need to continue on a friend's machine and Claude account with no context; the repo was audited for completeness and this guide and a root `CLAUDE.md` were written.
 
+**Sep 24 — single admin.** Anhad clarified that exactly one person (the admin) will ever use the app, so "remove anything other than admin": the Staff screen, roster, roles, lead assignment and the staff-roster signup gate were all removed from the app, and `007_single_admin.sql` drops the `staff` table, `leads.assigned_staff_id` and `is_active_staff_name`. Login is now sign-in only; the admin account lives in Supabase with signups disabled. This also removed the "unclaimed staff name" weakness. Same day: WhatsApp-chatbot research (`WHATSAPP_CHATBOT_RESEARCH.md`).
+
 ---
 
 ---
@@ -228,14 +230,14 @@ Columns as he listed them: enquiry date · enquirer · required for? · location
               ▼                                    ▼
         ┌──────────────────────────────────────────────┐
         │  SUPABASE  (Postgres + Auth + RLS)           │
-        │  tables: leads, contact_activities, staff    │
-        │  fn: is_active_staff_name(text)              │
+        │  tables: leads, contact_activities       │
+        │  Auth: single admin, signups off             │
         └──────────────────────────────────────────────┘
                               ▲
                               │  supabase-kt (Auth + Postgrest), signed-in staff only
                     ┌────────────────────┐
                     │  ANDROID APP       │  Kotlin + Compose, MVVM
-                    │  (Kalaza Leads)    │  staff read/edit the same tables
+                    │  (Kalaza Leads)    │  the admin reads/edits the same tables
                     └────────────────────┘
 ```
 
@@ -262,7 +264,7 @@ app/build.gradle.kts              reads local.properties → BuildConfig.SUPABAS
 app/src/main/AndroidManifest.xml  INTERNET, POST_NOTIFICATIONS, FileProvider
 app/src/main/res/                 launcher icons, strings, colors, themes, xml/file_paths.xml
 docs/                             all documentation (see §0)
-docs/sql/001…006                  database migrations, run in order
+docs/sql/001…007                  database migrations, run in order
 tools/google-form-bridge/KalazaFormBridge.gs   Apps Script source (pasted into Google, not built)
 ```
 
@@ -273,20 +275,19 @@ tools/google-form-bridge/KalazaFormBridge.gs   Apps Script source (pasted into G
 | `KalazaLeadsApp.kt` | Application class: touches the Supabase client at startup (so bad config fails loudly) and schedules the daily reminder worker |
 | `data/remote/SupabaseClients.kt` | Singleton `SupabaseClient` (installs Auth, Postgrest, Realtime — Realtime is unused) built from `BuildConfig` |
 | `data/model/Lead.kt` | `Lead` (read model) and `UpdateLeadRequest` (edit payload) — **the current column list is authoritative here** |
-| `data/model/ContactActivity.kt`, `StaffMember.kt` | Models for `contact_activities` and `staff` |
-| `data/repository/*Repository.kt` + `Supabase*Repository.kt` | Interface + Supabase implementation for Auth, Leads, ContactActivities, Staff |
+| `data/model/ContactActivity.kt` | Models for `contact_activities` and `staff` |
+| `data/repository/*Repository.kt` + `Supabase*Repository.kt` | Interface + Supabase implementation for Auth, Leads, ContactActivities |
 | `notifications/` | `FollowUpReminderWorker` (WorkManager job), `NotificationHelper` (builds/shows the notification, checks permission), `NotificationScheduler` (24 h periodic, targets ~9 am) |
 | `ui/MainActivity.kt` | Composition root + screen enum + notification-permission request |
 | `ui/login/` | `LoginScreen`, `LoginViewModel` |
 | `ui/leads/LeadsScreen.kt` | The home screen: 7 segmented tabs with live counts, lead cards, top-bar actions (share/export, staff, reports, logout with confirmation) |
 | `ui/leads/LeadsViewModel.kt` | Loads leads, holds selection, `updateLead` |
-| `ui/leads/LeadDetailScreen.kt` | Full detail/edit form + status pipeline + assignment dropdown + contact log + WhatsApp drafts |
+| `ui/leads/LeadDetailScreen.kt` | Full detail/edit form + status pipeline + contact log + WhatsApp drafts |
 | `ui/leads/ContactLogSection.kt`, `ActivitiesViewModel.kt` | The contact-activity timeline and logging dialog |
 | `ui/leads/FormComponents.kt` | Reusable inputs: `EnumDropdown`, `MultiSelectChips` (wrapping), `DateField` (Material3 date picker, ISO `yyyy-MM-dd`) |
 | `ui/leads/LeadFormOptions.kt` | **Shared enum lists + display labels** (must stay in sync with the SQL check constraints and with the Apps Script maps) |
 | `ui/leads/LeadExport.kt` | CSV export of the currently open tab + share sheet via `FileProvider` |
 | `ui/leads/ReportsAnalytics.kt`, `ReportsScreen.kt` | Pure analytics functions and the Reports UI |
-| `ui/leads/StaffScreen.kt`, `StaffViewModel.kt` | Staff roster CRUD, active/inactive toggle |
 | `ui/leads/WhatsAppHelper.kt` | The three static message templates and the `wa.me` deep link builder |
 | `ui/theme/` | Teal Material 3 theme (`Color/Shape/Theme/Type`) |
 
@@ -309,30 +310,26 @@ tools/google-form-bridge/KalazaFormBridge.gs   Apps Script source (pasted into G
 - *Enquirer:* `enquirer_name`, `enquirer_country_code` (default +91), `enquirer_phone` (10 digits), `enquirer_relation` (son … other), `enquirer_location`.
 - *Patient:* `patient_name`, `patient_age`, `patient_gender`, `patient_conditions text[]` (alzheimers, dementia, parkinsons, cancer, post_stroke, post_operative, post_transplant, bedridden, diabetes, cardiac, mobility_impaired, other), `patient_condition_notes`, `current_condition`, `medical_history`.
 - *Requirement:* `service_wanted text[]` (assisted_living, palliative_care, post_transplant_care, cancer_care, medical_recovery, dementia_care, respite_care, day_care), `accommodation_type` (single_room, double_sharing, triple_sharing, full_flat, dormitory, not_sure), `budget_min`, `budget_max`, `budget_notes`, `amenities_requested text[]` (ac, lift, attached_bathroom, ground_floor, female_attendant, private_nurse, veg_food, other), `special_requirements`, `queries`, `comments`.
-- *Pipeline:* `status` (**NEW, CONTACTED, INFO_SENT, VISIT_SCHEDULED, VISITED, CONSIDERING, CONVERTED, NOT_CONVERTED, DORMANT, BACKUP**), `assigned_staff_id` (FK → `staff.id`), `next_follow_up_date`, `follow_up_count`, `price_list_shared(+_at)`, `info_packs_sent text[]`, `planned_visit_date`, `actual_visit_date`, `converted_at`, `days_to_convert` (**generated column** = `converted_at − enquiry_date`).
+- *Pipeline:* `status` (**NEW, CONTACTED, INFO_SENT, VISIT_SCHEDULED, VISITED, CONSIDERING, CONVERTED, NOT_CONVERTED, DORMANT, BACKUP**), `next_follow_up_date`, `follow_up_count`, `price_list_shared(+_at)`, `info_packs_sent text[]`, `planned_visit_date`, `actual_visit_date`, `converted_at`, `days_to_convert` (**generated column** = `converted_at − enquiry_date`).
 - *Outcome:* `not_converted_reason` (budget_too_high, chose_another_facility, location_too_far, amenity_missing, service_not_offered, family_decided_home_care, patient_passed_away, decision_postponed, unreachable_no_response, unhappy_after_visit, other), `not_converted_detail`, `feedback_positive_themes text[]`, `feedback_negative_themes text[]`, `final_remarks`.
 - *Compliance:* `consent_given`, `opted_out`, `preferred_language` (en | hi | mr). (Present in the table; the app does not expose them yet.)
 
 **`contact_activities`** — the "proof" log: `lead_id` (FK, cascade delete), `occurred_at`, `type` (call | whatsapp | visit | email | sms), `direction` (inbound | outbound), `outcome` (positive | negative | no_answer | callback_requested | not_reachable), `callback_on`, `notes`, `staff_id`, `is_automated`.
 
-**`staff`** — roster: `name`, `phone`, `role` (admin | coordinator | viewer — **informational only, not enforced anywhere**), `is_active`. Deliberately *not* tied 1:1 to `auth.users`; a staff member may not have an app login.
+**Removed 2026-09-24 (single admin):** the `staff` table, the `leads.assigned_staff_id` column and the `is_active_staff_name` function were dropped by `007_single_admin.sql`. One person uses the app, so there is no roster, no roles and no assignment.
 
 ### 7.3 Security model (read carefully — it has a trap)
-1. **RLS on every table.** Policies for `authenticated` say only `auth.uid() is not null` — i.e. **any logged-in account is trusted staff** (accepted MVP simplification).
-2. **Signup is gated** (fixed 2026-09-17 after a real hole was found — previously *anyone with the APK* could create an account and read every family's medical/financial data). `SupabaseAuthRepository.login()`: tries sign-in first; if that fails it calls the `is_active_staff_name(check_name)` RPC (SECURITY DEFINER, returns only a boolean, callable without a session, case/whitespace-insensitive) and only if the name matches an **active** `staff` row does it attempt sign-up; a "user already exists" error is then reported as "Incorrect password". Otherwise: *"Name not recognized as active staff … Ask your admin to add you under Staff first."*
+1. **RLS on every table.** Policies for `authenticated` say only `auth.uid() is not null` — i.e. **any logged-in account is trusted** — and there is exactly one account (the admin) with signups disabled.
+2. **No signup path in the app** (single admin, 2026-09-24). History: on Sep 17 a hole was found — the old `login()` silently created an account for any unknown credentials, so anyone with the APK could read every family's data. It was first patched with a staff-roster gate (`005`), then replaced entirely by this simpler model. Now `SupabaseAuthRepository.login()` **only signs in**; the single admin account is created in the Supabase dashboard (Authentication → Users → Add user, email = `<name lowercased, spaces→_>@kalazaleads.app`, auto-confirm) and **"Allow new users to sign up" is OFF** (Authentication → Sign In / Providers). Wrong credentials give *"Incorrect name or password."*
 3. **Anonymous insert exception** (`006`): the `anon` role may **INSERT** into `leads` (`with check (true)`) so the Google Form bridge can write without a login. `anon` still cannot select/update/delete. Accepted risk: anyone holding the anon key (it's inside every APK) can insert junk rows — not read/edit/delete. Mitigations if abuse ever appears: shared-secret field checked in the bridge, or move the insert behind an Edge Function with the service key.
-4. **Login mechanics:** staff type a **name** + password; the app synthesizes the email `{name lowercased, spaces→underscores}@kalazaleads.app` (must be a real-looking TLD — `.internal`/`.local`/`.test` are rejected by Supabase's validator with `email_address_invalid`; `.app` works).
-5. **Known weakness - unclaimed staff names.** The signup gate is *knowing an active staff name*, with no secret. If a staff row exists whose person has not logged in yet, anyone holding the APK who types that name plus any password creates that account first. Mitigation today: each staff member logs in once right after being added. Possible hardening: an admin-issued invite code or an approval step (section 16).
+4. **Login mechanics:** the admin types a **name** + password; the app synthesizes the email `{name lowercased, spaces→underscores}@kalazaleads.app` (must be a real-looking TLD — `.internal`/`.local`/`.test` are rejected by Supabase's validator with `email_address_invalid`; `.app` works).
+5. **The old "unclaimed staff name" weakness no longer exists** (no signup, no roster). Residual risk: anyone who knows the admin's name + password, or who gets the Supabase login, has full access. A forgotten password is recovered from the dashboard by deleting the user and adding it again (Authentication → Users).
 
 ### 7.4 Rebuilding the database from nothing
 Do this if the Supabase project is ever lost or you want a fresh copy.
 1. Create a Supabase project. In **Authentication → Sign In / Providers**, turn **Confirm email OFF**. In project settings turn **"Automatically expose new tables" OFF** (or simply keep the grants in the SQL).
-2. In the SQL Editor run, **in this order**: `001_leads_table.sql` → `002_leads_v2_migration.sql` (drops and recreates `leads`, so it is safe only on an empty/throwaway table) → `003_contact_activities.sql` → `004_staff_table.sql` → `005_staff_name_check_rpc.sql` → `006_google_form_anon_insert.sql`.
-3. **Bootstrap the first staff member — mandatory.** On a fresh database `staff` is empty, so the signup gate rejects *everyone*, including you. Run once in the SQL editor:
-   ```sql
-   insert into public.staff (name, role, is_active) values ('YourName', 'admin', true);
-   ```
-   Then open the app, log in with that exact name and a new password (≥ 6 chars); the account is created on first login. Afterwards add further staff from the app's Staff screen.
+2. In the SQL Editor run, **in this order**: `001_leads_table.sql` → `002_leads_v2_migration.sql` (drops and recreates `leads`, so it is safe only on an empty/throwaway table) → `003_contact_activities.sql` → `004_staff_table.sql` → `005_staff_name_check_rpc.sql` → `006_google_form_anon_insert.sql` → `007_single_admin.sql` (004/005 create the old staff machinery that 007 immediately removes — harmless, kept as history).
+3. **Create the admin account — mandatory.** The app has no signup, so on a fresh project nobody can log in until you create the account: Supabase → **Authentication → Users → Add user**, email `<name lowercased, spaces→_>@kalazaleads.app` (e.g. `anhad@kalazaleads.app`), a password of ≥ 6 characters, tick **Auto Confirm User**. Then **Authentication → Sign In / Providers → turn OFF "Allow new users to sign up"**. Log in to the app with the *name* (not the email).
 4. Copy the Project URL and anon key into `local.properties` (§10) and, for the Form bridge, into the Apps Script's Script Properties (§9).
 
 ---
@@ -343,13 +340,13 @@ All verified end-to-end on a real Android phone. Deep build notes: `docs/TRACK_A
 
 - **Login.** Name + password (§7.3). Logout has a confirmation dialog. `LoginViewModel.logout()` resets its state synchronously — see the Compose gotcha in §14.
 - **Leads screen (A5).** Seven scrollable tabs, each with a live count, all client-side filters over the already-fetched list: **Follow-ups Due** (follow-up date ≤ today and status not terminal, sorted by date), **All**, **Active** (NEW…CONSIDERING), **Converted**, **Not Converted** (cards show the reason), **Dormant**, **Backup**. Terminal statuses = CONVERTED, NOT_CONVERTED, DORMANT.
-- **Lead detail / edit (A2).** Every field editable, status with conditional not-converted reason/detail, planned vs actual visit date, final remarks, an **Assigned to** dropdown (active staff only). Saves via `UpdateLeadRequest`.
+- **Lead detail / edit (A2).** Every field editable, status with conditional not-converted reason/detail, planned vs actual visit date, final remarks. Saves via `UpdateLeadRequest`.
 - **Contact log (A3).** Log a call/WhatsApp/visit/email/SMS with direction, outcome, optional callback date and notes; timeline shown newest first. This is the supervisor's "proof it happened" feature.
 - **Follow-up notifications (A4).** Local, not server push: WorkManager runs every 24 h (first run targets ~9 am), queries leads whose follow-up is due, filters terminal statuses, and shows one device notification if any exist; tapping opens the app. It awaits Supabase auth initialisation and no-ops if nobody is logged in. Needs the Android 13+ `POST_NOTIFICATIONS` permission (requested at launch). **Known, accepted limitation:** Doze can delay it by hours (observed: fired same-day evening). Exact alarms were rejected as not worth the complexity. True server push needs Firebase Cloud Messaging and a backend (Track D).
 - **`wa.me` messaging (A7).** Three static, personalised drafts (Thank You, Follow-up, Visit Feedback) opened in WhatsApp via a deep link; staff review and press send. Zero cost, zero Meta dependency, no ban risk. Not AI-generated.
 - **CSV export (A6).** Share icon exports whichever tab is open (respecting its filter), with human-readable labels, via the Android share sheet. **CSV, not .xlsx, on purpose** — Apache POI has known Android problems and would bloat the APK; CSV opens in Excel/Sheets/WhatsApp.
-- **Staff (A8).** Add/edit roster entries, toggle active/inactive; drives assignment and the signup gate.
-- **Reports (A9).** All computed client-side (`ReportsAnalytics.kt`, pure functions): overview (total, converted, conversion rate, median days-to-convert), pipeline funnel, breakdowns by source / service (a lead counts toward every service it listed) / assigned staff, not-converted reasons ranked, **Unmet demand** (free-text detail for `amenity_missing`/`service_not_offered` — the "why we lose families" report), budget distribution. Bars are plain `Box` fractions, no chart library.
+- **No staff / roles / assignment** (removed 2026-09-24): one admin uses the app, so the Staff screen, the roster and the "Assigned to" dropdown are gone.
+- **Reports (A9).** All computed client-side (`ReportsAnalytics.kt`, pure functions): overview (total, converted, conversion rate, median days-to-convert), pipeline funnel, breakdowns by source / service (a lead counts toward every service it listed), not-converted reasons ranked, **Unmet demand** (free-text detail for `amenity_missing`/`service_not_offered` — the "why we lose families" report), budget distribution. Bars are plain `Box` fractions, no chart library.
 - **Intentionally absent:** any in-app way to *create* a lead. New leads arrive only through the Google Form (§9). Deleted 2026-09-17 with `AddLeadScreen.kt` and the `addLead`/`NewLeadRequest` plumbing.
 
 ---
@@ -365,7 +362,7 @@ All verified end-to-end on a real Android phone. Deep build notes: `docs/TRACK_A
 - **The trigger** — an *installable* `onFormSubmit` trigger for `handleFormSubmit`, created by running `setupTrigger()` once from the editor (it removes old `handleFormSubmit` triggers first, so re-running is safe).
 
 **How the script works:** `handleFormSubmit(e)` reads `e.namedValues` keyed by the **literal question title**, so **the title text is the contract** — rename a question and that field silently stops mapping. Dropdown/checkbox answers are normalised (lowercase, punctuation stripped, so curly vs straight apostrophes don't matter) and looked up in maps mirroring `LeadFormOptions.kt`; multi-select answers arrive comma-joined and are split into arrays; age/budget parsed to numbers; visit date reformatted to `yyyy-MM-dd`; country code defaults to `+91`. If name or phone is blank the row is skipped (logged). It POSTs to `<SUPABASE_URL>/rest/v1/leads` with the anon key (`Prefer: return=minimal`). Failures are only logged to Apps Script **Executions** — the Sheet row still exists, so nothing is lost, but there is no alert (§16).
-**Deliberately not on the form:** staff-only pipeline fields (`next_follow_up_date`, `actual_visit_date`, `status`, `assigned_staff_id`, `final_remarks`, …) — an enquirer can't know them. Possible later additions: a consent checkbox and preferred-language dropdown (`GOOGLE_FORM_INTAKE_SPEC.md` §6).
+**Deliberately not on the form:** staff-only pipeline fields (`next_follow_up_date`, `actual_visit_date`, `status`, `final_remarks`, …) — an enquirer can't know them. Possible later additions: a consent checkbox and preferred-language dropdown (`GOOGLE_FORM_INTAKE_SPEC.md` §6).
 
 **Setup / re-setup checklist (what actually went wrong the first time):**
 1. Paste the **contents** of `KalazaFormBridge.gs` into the editor (once someone pasted the *file path* as text instead of the file).
@@ -524,14 +521,14 @@ Read this before "improving" something that looks odd — it may have been a del
 | Aug 25 | Built **A7 before A6** | Lower risk, higher value | Done |
 | Aug 25 | **Split `how_heard` from `contact_channel`** | Supervisor: "call happens after google search"; one field would destroy attribution analytics | Final |
 | Aug 25 | **CSV, not .xlsx**, for export | Apache POI is painful on Android (desugaring, missing AWT/XML classes, APK bloat); any dependency failure only shows after a full build round-trip; CSV opens in Excel/Sheets/WhatsApp | Final unless asked |
-| Aug 25 | `staff` table **not** tied to `auth.users`; `assigned_staff_id` FK repointed to `staff(id)` | Not every staff member has a login; safe as the column was null everywhere | Final |
+| Aug 25 | `staff` table **not** tied to `auth.users`; `assigned_staff_id` FK repointed to `staff(id)` | Not every staff member has a login; safe as the column was null everywhere | **Removed 2026-09-24** (single admin) |
 | Aug 25 | Reports computed **client-side** from already-loaded data | No new backend calls at this volume | Final |
 | Aug 25 | Drop the request for the supervisor's Excel | He declined (official records; data-protection concerns) | Closed — don't re-ask |
 | Aug 27 | **Local WorkManager notifications**, not FCM push | FCM needs a server (Track D); "follow-up due" is a fact about DB data, so a daily local check is legitimate at 1–3 enquiries/day | Final for now |
 | Aug 27 | Accept notification-timing imprecision; **no exact alarms** | Exact alarms need an Android 12+ permission flow and OEM battery managers can still throttle | Revisit only if it matters |
 | Aug 27 | Track B: recommend a **new dedicated number** as cost-safe default | Coexistence needs a Tech Provider/BSP (₹18–30k/yr if paid); supervisor won't accept that | Supervisor's call — outcome unknown (§15) |
 | Aug 27 | Repeatedly deleted/rebuilt Track B docs as understanding improved | Kept only the definitive playbook + cheat sheet + script | Done |
-| Sep 16 | **Gate signup by active-staff roster**; do *not* re-check the roster on every sign-in of an existing account | Closes the "anyone with the APK" hole; per-sign-in check risked locking Anhad out of his own test account | Further hardening possible |
+| Sep 16 | **Gate signup by active-staff roster**; do *not* re-check the roster on every sign-in of an existing account | Closes the "anyone with the APK" hole; per-sign-in check risked locking Anhad out of his own test account | **Superseded 2026-09-24** by the single-admin model (no signup at all) |
 | Sep 16 | No forgot-password flow | Emails are fake; recover by deleting the auth user in Supabase and logging in again | Final |
 | Sep 17 | **Google Form intake replaces the in-app enquiry screen** | Enquirer types their own details; uniform across WhatsApp/call/walk-in; avoids phone-typing pain | Done. Assistant's objections (cold form, no Q&A, untracked phone enquiries) were overruled by Anhad |
 | Sep 17 | Merge form link into the Thank-You template → **withdrawn** | Anhad: "i didn't think of it properly"; Thank-You stays a plain courtesy; also no lead exists yet at that moment | Delivery of the link parked (§9, §16) |
@@ -541,7 +538,8 @@ Read this before "improving" something that looks odd — it may have been a del
 | Sep 17 | Delete the in-app screen **immediately** (assistant had proposed waiting) | Anhad: decide the WhatsApp delivery later | Done |
 | Sep 17 | Doc cleanup: delete `PROJECT_SPEC.md`, first Meta research doc | Fully superseded | Done |
 | Sep 18 | Trim Master Plan → `AUTOMATION_DESIGN.md`; add `ROADMAP.md` | "it's all a little confusing" | Done |
-| — | **Not built on purpose:** FCM, exact alarms, xlsx, role enforcement, per-sign-in roster check, forgot-password, lead→resident handoff, Cloud API/webhook, AI features | See rows above / Track D | Open or rejected as stated |
+| Sep 24 | **Single admin: remove staff roster, roles, assignment and the signup gate** | Exactly one person uses the app; the multi-user machinery was dead weight and the roster gate had a residual weakness (unclaimed names). No signup + disabled signups is simpler and safer | Code + `007` written; run order in the SQL header |
+| — | **Not built on purpose:** FCM, exact alarms, xlsx, forgot-password, lead→resident handoff, Cloud API/webhook, AI features | See rows above / Track D | Open or rejected as stated |
 
 ---
 
@@ -561,8 +559,8 @@ Read this before "improving" something that looks odd — it may have been a del
 | Signup error `email_address_invalid` | Reserved TLD (`.internal/.local/.test`) | Use `@kalazaleads.app` |
 | Signup "succeeds" but the account never works | "Confirm email" is ON | Turn it OFF in Supabase Auth |
 | `permission denied for table …` although a policy exists | New tables aren't auto-exposed | Add `GRANT` to the role (all migrations already do) |
-| Login says name "not recognized as active staff" | Roster gate | Add/activate the name on the Staff screen (or bootstrap SQL on a fresh DB, §7.4) |
-| "Incorrect password for …" and it's forgotten | No reset flow | Supabase → Authentication → Users → delete that user; log in again with a new password |
+| Login says "Incorrect name or password." | Wrong name/password, or the admin account doesn't exist | The name is turned into `name_with_underscores@kalazaleads.app` — check it under Supabase → Authentication → Users; recreate the user if needed (section 7.4) |
+| Forgotten admin password | No in-app reset (the email is fake) | Supabase → Authentication → Users → delete the admin user, then **Add user** again with the same email and a new password (signups are OFF, so it can't be re-created from the app) |
 | Password rejected | Supabase minimum is 6 characters | Use ≥ 6 |
 | Logout bounces straight back to Leads | `LoginViewModel` still had `isLoggedIn = true` and navigation was a bare `if` | Trigger navigation in `LaunchedEffect(state.isLoggedIn)` **and** reset the ViewModel state **synchronously** in `logout()` (not inside `viewModelScope.launch`) — both are needed |
 | Compose: reading a `StateFlow.value` doesn't update UI | Bypasses recomposition tracking | `collectAsState()` |
@@ -651,14 +649,14 @@ The prioritised plan is `docs/ROADMAP.md`. This is the complete list of loose en
 **Housekeeping**
 7. **Delete test leads** from Supabase (Table Editor): "hfgnb" (an old test), the second "TEST Anhad" submission, and any third test row — **verify the actual rows before deleting** (counts in chat were inconsistent). The *first* "TEST Anhad" submission exists **only in the response Sheet** (it predated the trigger) — delete it there too.
 8. **Revoke every outstanding GitHub PAT** at `github.com/settings/personal-access-tokens`, and confirm none is left active. Many were pasted into chat over the project's life and revocation was never confirmed for all.
-9. **Review Supabase Auth users** (Authentication → Users). Accounts created by the pre-fix "any name works" signup (before Sep 16) may still exist; delete any that aren't real staff. Also confirm whether the supervisor was added to the Staff roster (unconfirmed).
-10. **Unclaimed-name weakness (security).** Signup is gated by *knowing an active staff name*, with no secret. If a staff row exists whose person hasn't logged in yet, anyone with the APK who types that name + any password **claims that account first**. Mitigation: have every staff member log in once right after being added; possible hardening — an admin-issued invite code, or an admin-approval step.
+9. **Review Supabase Auth users** (Authentication → Users): there should be exactly **one** user — the admin. Delete any others (accounts from the pre-Sep-16 "any name works" signup, earlier test accounts).
+10. **Apply the single-admin change** (written 2026-09-24): run `docs/sql/007_single_admin.sql` in Supabase FIRST, then build and install the new APK, then switch OFF "Allow new users to sign up" (reasoning and order are in the SQL file's header). Mark this done here once it has been run and verified on the phone.
 11. **Docs**: `docs/PROGRESS.md` and `docs/GOOGLE_FORM_INTAKE_SPEC.md` had a few stale statements (in-app form still described in places; the spec's §1 table lists number-range validations the built form lacks). These were corrected on 2026-09-21; if you find more, fix them.
 
 **Optional / later**
 12. Form additions: consent checkbox (`consent_given`), preferred-language dropdown (`preferred_language`), age/budget number validation. Steps: `GOOGLE_FORM_INTAKE_SPEC.md` §6 (+ add a `getAnswer` line in the bridge for each new question).
 13. Bridge hardening: today a failed insert is only logged in Apps Script Executions (the Sheet row still exists). Add an email-on-failure and/or a "backfill from Sheet" script; optionally an anon-spam guard (shared secret checked in the bridge, or an Edge Function).
-14. Enforce `staff.role` (currently informational); re-check the roster on every sign-in.
+14. *(removed — roles no longer exist; single admin)*
 15. Replace deprecated `Icons.Filled.ArrowBack` (§10.7).
 16. Unit tests for pure logic (`ReportsAnalytics.kt`, the tab filters, the bridge's `normalize`/`mapMulti`).
 17. Exact-time notifications (AlarmManager) or real push (FCM) — only if the timing proves to matter or Track D exists.
@@ -727,8 +725,8 @@ GitHub holds all source, all docs, the SQL migrations and the Apps Script. It do
 - **Enquirer / patient** — the person contacting the NGO (often a son/daughter) vs. the elderly person the care is for. Tracked separately on purpose.
 - **Lead** — one enquiry; a row in `leads`.
 - **Converted** — the family started living at the facility (supervisor's definition). **Days-to-convert** = converted date − enquiry date.
-- **Follow-up person** — the staff member assigned to a lead (`assigned_staff_id`).
-- **Staff roster** — the `staff` table; drives assignment and gates signup.
+- **Admin** — the single person who uses the app; the only Supabase Auth user.
+- **Single-admin model** — no signup, no roster, no roles, no assignment (from 2026-09-24).
 - **RLS** — Postgres Row-Level Security. **Grant** — the base permission a role needs *in addition to* RLS.
 - **Anon key / publishable key** — Supabase's public client key. **Service-role key** — the all-powerful one; never used here.
 - **PostgREST** — the REST layer Supabase puts on Postgres (`/rest/v1/<table>`).
