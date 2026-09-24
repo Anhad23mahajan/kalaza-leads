@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Assessment
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -66,7 +65,6 @@ private val SEGMENTS = listOf(
 fun LeadsScreen(
     viewModel: LeadsViewModel,
     onLeadClick: (Lead) -> Unit,
-    onManageStaff: () -> Unit = {},
     onViewReports: () -> Unit = {},
     onLogout: () -> Unit = {},
 ) {
@@ -93,9 +91,6 @@ fun LeadsScreen(
                             enabled = visibleLeads.isNotEmpty(),
                         ) {
                             Icon(Icons.Filled.Share, contentDescription = "Export ${SEGMENTS[selectedTab].label} to CSV")
-                        }
-                        IconButton(onClick = onManageStaff) {
-                            Icon(Icons.Filled.People, contentDescription = "Manage staff")
                         }
                         IconButton(onClick = onViewReports) {
                             Icon(Icons.Filled.Assessment, contentDescription = "Reports")

@@ -37,19 +37,11 @@ fun LeadDetailScreen(
     lead: Lead,
     viewModel: LeadsViewModel,
     activitiesViewModel: ActivitiesViewModel,
-    staffViewModel: StaffViewModel,
     onBack: () -> Unit,
     onSaved: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    val staffState by staffViewModel.state.collectAsState()
     val context = LocalContext.current
-
-    val activeStaff = staffState.staff.filter { it.isActive }
-    val staffOptions = listOf("") + activeStaff.mapNotNull { it.id }
-    val staffOptionLabels = mapOf("" to "Unassigned") +
-        activeStaff.associate { (it.id ?: "") to it.name }
-    var assignedStaffId by remember { mutableStateOf(lead.assignedStaffId) }
 
     var contactChannel by remember { mutableStateOf(lead.contactChannel) }
     var howHeard by remember { mutableStateOf(lead.howHeard) }
@@ -117,14 +109,6 @@ fun LeadDetailScreen(
                 )
             }
 
-            Spacer(Modifier.padding(top = 10.dp))
-            EnumDropdown(
-                "Assigned to (follow-up person)",
-                staffOptions,
-                staffOptionLabels,
-                assignedStaffId ?: "",
-                { assignedStaffId = it?.ifBlank { null } },
-            )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
             Text("Send WhatsApp", style = MaterialTheme.typography.titleMedium)
@@ -323,7 +307,7 @@ fun LeadDetailScreen(
             OutlinedTextField(
                 value = comments,
                 onValueChange = { comments = it },
-                label = { Text("Staff comments") },
+                label = { Text("Comments") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
@@ -378,7 +362,6 @@ fun LeadDetailScreen(
                             queries = queries.trim().ifBlank { null },
                             comments = comments.trim().ifBlank { null },
                             status = status,
-                            assignedStaffId = assignedStaffId,
                             plannedVisitDate = plannedVisitDate,
                             actualVisitDate = actualVisitDate,
                             nextFollowUpDate = nextFollowUpDate,

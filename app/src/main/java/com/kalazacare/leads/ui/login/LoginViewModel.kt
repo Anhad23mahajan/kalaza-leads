@@ -21,9 +21,9 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state
 
-    fun login(staffName: String, password: String) {
-        Log.d(TAG, "login() called with staffName=$staffName")
-        if (staffName.isBlank() || password.isBlank()) {
+    fun login(adminName: String, password: String) {
+        Log.d(TAG, "login() called with adminName=$adminName")
+        if (adminName.isBlank() || password.isBlank()) {
             Log.d(TAG, "login() blocked: blank field")
             _state.value = _state.value.copy(errorMessage = "Name and password required")
             return
@@ -33,7 +33,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
             Log.d(TAG, "login() coroutine started, calling authRepository.login")
             _state.value = _state.value.copy(isLoading = true, errorMessage = null)
 
-            val result = authRepository.login(staffName, password)
+            val result = authRepository.login(adminName, password)
             Log.d(TAG, "authRepository.login returned: success=${result.isSuccess}, error=${result.exceptionOrNull()}")
             result
                 .onSuccess { userId ->

@@ -145,7 +145,7 @@ repo — see that file directly for the code. Setup:
 - **Anything about the WhatsApp chatbot / Q&A engine** — that's Track D,
   unrelated to this intake bridge.
 - **Staff-only pipeline fields** — `next_follow_up_date`, `actual_visit_date`,
-  `converted_at`, `status`, `assigned_staff_id`, `follow_up_count`,
+  `converted_at`, `status`, `follow_up_count`,
   `not_converted_reason`/`detail`, `feedback_*_themes`, `final_remarks`.
   These are set by staff as a lead progresses, not something an enquirer
   filling this form in has any way to answer — deliberately excluded, not

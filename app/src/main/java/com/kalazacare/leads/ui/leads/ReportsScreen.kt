@@ -36,11 +36,9 @@ import kotlin.math.roundToInt
 @Composable
 fun ReportsScreen(
     leadsViewModel: LeadsViewModel,
-    staffViewModel: StaffViewModel,
     onBack: () -> Unit,
 ) {
     val leadsState by leadsViewModel.state.collectAsState()
-    val staffState by staffViewModel.state.collectAsState()
     val leads = leadsState.leads
 
     Scaffold(
@@ -85,9 +83,6 @@ fun ReportsScreen(
                 BreakdownRowsList(computeByService(leads))
             }
 
-            ReportSection("By assigned staff") {
-                BreakdownRowsList(computeByStaff(leads, staffState.staff))
-            }
 
             ReportSection("Why they didn't convert") {
                 BreakdownList(computeNotConvertedReasons(leads))

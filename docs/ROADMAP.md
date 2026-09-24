@@ -10,8 +10,8 @@ This is the **"what do we do next"** doc. For how the auto-reply system should w
 
 | Area | State |
 |---|---|
-| **Track A — Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, follow-up notifications, staff roster + assignment, CSV export, reports, `wa.me` one-tap messages. |
-| **Security** | Done. Signup gated by the active-staff roster (`is_active_staff_name`). RLS = "any logged-in user is staff". |
+| **Track A — Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, follow-up notifications, CSV export, reports, `wa.me` one-tap messages. |
+| **Security** | Single admin (2026-09-24): no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). RLS = "any logged-in user" = the one admin. |
 | **Intake** | Done. Google Form (23 fields) → Apps Script → Supabase `leads`. In-app "New Enquiry" screen removed. Verified end-to-end 2026-09-17. |
 | **Track B — Meta/WhatsApp onboarding** | **Not started.** Prep docs are ready (`TRACK_B_*`). Needs a decision + paperwork from the supervisor/NGO. |
 | **Track C — NGO content** (FAQ answers, price list, packs) | **Not started.** NGO-authored. |
@@ -26,6 +26,8 @@ instead of idling.
 ---
 
 ## 2. Phase 1 — Loose ends (this week, all in Anhad's hands)
+
+**First (written 2026-09-24, not yet run):** apply the single-admin change — run `docs/sql/007_single_admin.sql` in Supabase, then build and install the new APK, then switch OFF "Allow new users to sign up". Order and reasoning are in the SQL header.
 
 1. **Delete the test leads** ("hfgnb", the "TEST Anhad" rows) from Supabase Table Editor. They're junk in the real table.
 2. **Solve "how does the form link reach the enquirer" with zero API cost.** This was parked; there's a free answer inside the WhatsApp Business *app*:
@@ -86,7 +88,6 @@ Useful while B/C are waiting, and directly serves the portfolio goal:
 - **Hardening of what exists:**
   - Bridge failure visibility — today a failed Supabase insert is only logged in Apps Script (the row still lives in the Sheet). Add an email-on-failure or a "backfill from sheet" script.
   - Anon-insert spam guard (shared-secret field checked in the bridge, or move the insert behind an Edge Function) — noted as an accepted risk in `006_google_form_anon_insert.sql`, revisit if abuse appears.
-  - Roles: `staff.role` exists but isn't enforced anywhere. Only matters if viewers must be read-only.
   - A few unit tests for the pure logic (`ReportsAnalytics.kt`, segment filters, the bridge's `normalize`/`mapMulti`).
 - **Resume/portfolio write-up** of the project — the story is strong: real NGO client, real device testing, security fix found and closed, architecture pivot to Google Forms.
 
@@ -106,7 +107,7 @@ Useful while B/C are waiting, and directly serves the portfolio goal:
 ## 7. Known and accepted (not planned work)
 
 - Follow-up notifications fire same-day but not at an exact time (WorkManager/Doze). Exact alarms deemed not worth the complexity.
-- Every signed-in account is trusted staff (RLS is `auth.uid() is not null`); mitigated by roster-gated signup.
+- There is one admin account; RLS is `auth.uid() is not null` and signups are disabled.
 - Anyone holding the anon key can insert junk leads (not read/edit/delete).
 - `Realtime` is installed but unused.
 

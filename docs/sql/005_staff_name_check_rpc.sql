@@ -1,3 +1,4 @@
+-- SUPERSEDED 2026-09-24 by 007_single_admin.sql (no signup exists any more; this function is dropped).
 -- Kalaza Leads — gate self-service signup by the active staff roster.
 --
 -- Problem: SupabaseAuthRepository.login() previously fell back to creating

@@ -1,3 +1,4 @@
+-- SUPERSEDED 2026-09-24 by 007_single_admin.sql (the app is single-admin; this table is dropped).
 -- Kalaza Leads — staff table (roadmap item A8)
 -- A roster of staff for assignment ("follow-up person" in the supervisor's
 -- Excel) and basic roles. Deliberately not tied 1:1 to auth.users -- not

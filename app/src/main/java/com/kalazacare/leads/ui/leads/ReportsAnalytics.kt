@@ -1,7 +1,6 @@
 package com.kalazacare.leads.ui.leads
 
 import com.kalazacare.leads.data.model.Lead
-import com.kalazacare.leads.data.model.StaffMember
 
 /**
  * Pure, client-side analytics over leads already loaded into memory (Master
@@ -68,13 +67,6 @@ fun computeByService(leads: List<Lead>): List<BreakdownRow> {
         }
     }
     return rows.values.sortedByDescending { it.count }
-}
-
-fun computeByStaff(leads: List<Lead>, staff: List<StaffMember>): List<BreakdownRow> {
-    val staffNames = staff.associate { it.id to it.name }
-    return leads.groupBy { it.assignedStaffId?.let { id -> staffNames[id] } ?: "Unassigned" }
-        .map { (label, group) -> BreakdownRow(label, group.size, group.count { it.status == "CONVERTED" }) }
-        .sortedByDescending { it.count }
 }
 
 fun computeNotConvertedReasons(leads: List<Lead>): List<Pair<String, Int>> {
