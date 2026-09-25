@@ -27,9 +27,9 @@ instead of idling.
 
 ## 2. Phase 1 — Loose ends (this week, all in Anhad's hands)
 
-**First (written 2026-09-24, not yet run):** apply the single-admin change — run `docs/sql/007_single_admin.sql` in Supabase, then build and install the new APK, then switch OFF "Allow new users to sign up". Order and reasoning are in the SQL header.
+**Done 2026-09-25:** the single-admin change is applied (007 run, signups switched OFF, junk Auth users and test leads cleaned up). Still to do: build/install the reworked lead-detail screen and verify it on the phone.
 
-1. **Delete the test leads** ("hfgnb", the "TEST Anhad" rows) from Supabase Table Editor. They're junk in the real table.
+1. ~~Delete the test leads~~ **Done 2026-09-25** (one demo lead, "Anhad Test", was kept on purpose — delete it before real data arrives).
 2. **Solve "how does the form link reach the enquirer" with zero API cost.** This was parked; there's a free answer inside the WhatsApp Business *app*:
    - Put the form link in the **greeting message** (auto-sent to first-time messagers) and in a **quick reply** (e.g. `/form`) for staff to fire on calls/walk-ins.
    - Print a **QR code** of the responder link for the front desk.

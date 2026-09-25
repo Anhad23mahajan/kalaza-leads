@@ -163,6 +163,8 @@ Dates are 2026. Commit hashes are anchors you can `git show`. (Sessions were lon
 
 **Sep 25 — form changes.** At Anhad's request the Google Form was simplified: the Country code question was deleted (always +91), *Self* and *Hospital Staff* were removed from the relation options, *Respite Care* from the services, and *Triple Sharing / Dormitory / Not Sure* from the room types, and all 22 remaining questions were numbered; a second one-off script then reordered them logically (referral detail after "how did you hear", current condition before medical history, budget minimum before maximum) and renumbered. Because the bridge matches answers by title, `getAnswer` was first made tolerant of a leading number (and curly apostrophes), the change was applied to the live Apps Script, and the form was then edited by a one-off `FormApp` script (permission granted once, function deleted afterwards). Verified: live form reads back correctly and the trigger is still installed; an offline test of the bridge with numbered titles maps every field. **Live end-to-end test passed 2026-09-25 14:05 (after both form edits):** a real submission ran the trigger (Completed, 2.3 s) and every field, including the multi-select checkboxes, budgets, room type and relation, showed correctly on the phone in the new single-admin build.
 
+**Sep 25 — single-admin rollout finished.** Signups were switched off in Supabase, the 32 junk Auth users and 5 test leads (plus 1 contact-log entry) were deleted, leaving the one admin account and one demo lead. The lead-detail screen was reworked (form order, no country-code picker, options matching the form, outlined Cancel, patient name in the title) — written and committed, awaiting a build on the phone. **Handing over to the supervisor later:** add his account under Supabase → Authentication → Users → Add user (`somnath@kalazaleads.app`, a password, tick Auto Confirm User); he then logs in with the name "Somnath". Signups can stay off.
+
 ---
 
 ---
@@ -649,10 +651,10 @@ The prioritised plan is `docs/ROADMAP.md`. This is the complete list of loose en
 6. **Deliver the form link to enquirers**: put it in the WhatsApp Business app's greeting message and a `/form` quick reply; print a QR code for the front desk.
 
 **Housekeeping**
-7. **Delete test leads** from Supabase (Table Editor): "hfgnb" (an old test), the second "TEST Anhad" submission, and any third test row — **verify the actual rows before deleting** (counts in chat were inconsistent). The *first* "TEST Anhad" submission exists **only in the response Sheet** (it predated the trigger) — delete it there too.
+7. ~~Delete test leads~~ **Done 2026-09-25:** the 5 old test leads and the one contact-log entry were deleted from Supabase; one test lead ("Anhad Test", from the 2026-09-25 form test) was deliberately kept for demos. **Delete it before real families' data goes in.**
 8. **Revoke every outstanding GitHub PAT** at `github.com/settings/personal-access-tokens`, and confirm none is left active. Many were pasted into chat over the project's life and revocation was never confirmed for all.
-9. **Review Supabase Auth users** (Authentication → Users): there should be exactly **one** user — the admin. Delete any others (accounts from the pre-Sep-16 "any name works" signup, earlier test accounts).
-10. **Apply the single-admin change** (written 2026-09-24): run `docs/sql/007_single_admin.sql` in Supabase FIRST, then build and install the new APK, then switch OFF "Allow new users to sign up" (reasoning and order are in the SQL file's header). Mark this done here once it has been run and verified on the phone.
+9. ~~Review Supabase Auth users~~ **Done 2026-09-25:** there were 33 accounts (32 junk ones from when signup was open); the 32 were deleted, leaving exactly one Auth user, `anhad@kalazaleads.app`. Verified by count (1 user, 1 lead, 0 activities).
+10. ~~Apply the single-admin change~~ **Done 2026-09-25:** `007_single_admin.sql` was run (2026-09-24), and "Allow new users to sign up" was switched OFF in Supabase (Authentication → Sign In / Providers) on 2026-09-25. **Still to verify on the phone:** the build with the reworked lead-detail screen (committed, not yet built/installed).
 11. **Docs**: `docs/PROGRESS.md` and `docs/GOOGLE_FORM_INTAKE_SPEC.md` had a few stale statements (in-app form still described in places; the spec's §1 table lists number-range validations the built form lacks). These were corrected on 2026-09-21; if you find more, fix them.
 
 **Optional / later**
