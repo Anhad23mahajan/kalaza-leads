@@ -16,7 +16,7 @@ the Google Form is now the only way new leads enter the system.
 
 ## 0. Status — the form is already built
 
-The form itself (all 22 questions below, §1) has already been built and
+The form itself (all 24 questions below, §1) has already been built and
 published under Anhad's Google account, and linked to a response
 spreadsheet.
 
@@ -64,16 +64,17 @@ a typo here breaks that field silently.
 | 20 | `What would you like to ask us?` | Paragraph | — | No | `queries` |
 | 21 | `Anything else you'd like to add` | Paragraph | — | No | `comments` |
 | 22 | `Preferred visit date (if known)` | Date | — | No | `planned_visit_date` |
+| 23 | `When would you like us to follow up with you?` | Date (optional; help text: pick a date if you would like us to contact you again on a particular day) | — | No | `next_follow_up_date` |
+| 24 | `If you have already visited us, on which date?` | Date (optional; help text: leave blank if you have not visited yet) | — | No | `actual_visit_date` |
 
 **Changed 2026-09-25 (the table above is the live form, in its live order):**
 - The **Country code** question was deleted (always +91; the bridge already defaults to +91 when the answer is missing).
 - Options removed: relation → *Self*, *Hospital Staff*; services → *Respite Care*; room type → *Triple Sharing*, *Dormitory*, *Not Sure*. The database check constraints, the bridge maps and `LeadFormOptions.kt` still accept those values (old rows stay valid); the form just no longer offers them.
 - **Every question title now carries a number prefix** (`1. How did they first contact us?` … `22. Preferred visit date (if known)`). The numbers in the first column above are those live numbers. The bridge's `getAnswer` ignores a leading `N. ` and treats curly apostrophes as straight, so the *title text after the number* is still the contract. The numbering was applied by a one-off Apps Script (`FormApp`), because Google Forms has no built-in question numbering.
 - **Order fixed (2026-09-25, second pass):** a one-off script moved the questions into the order above and renumbered them. Earlier the order had drifted ("Your name" before "If referral or other", "Medical history" before "Current condition", and Budget - maximum before minimum). The bridge matches titles, not positions, so it was never affected.
+- **Dates hardened (2026-09-25, third pass):** the two date questions above were added (numbers 23 and 24). The bridge used to build dates by parsing the Sheet's *text* with `new Date(...)`, which breaks under India's day-first format (30/09/2026 fails; 05/10/2026 silently becomes 10 May). It now reads the **real Date value from the response row** (`getDateAnswer`, using `e.range`), which ignores regional format; text is parsed only as a last resort and read day-first, returning null rather than a wrong date. Offline tests cover Date cells, day-first text, impossible dates, blanks and missing columns.
 
-**Deliberately left off the form**: `next_follow_up_date` — that's an
-internal scheduling field staff set later, not something to ask the
-enquirer to decide for themselves.
+**Reworded for the enquirer (2026-09-25):** `next_follow_up_date` and `actual_visit_date` were originally kept off the form as staff-only fields. Anhad asked for them on the form, so they were added as questions an enquirer *can* answer ("when would you like us to follow up?" and "if you have already visited us, on which date?"). A follow-up date supplied this way makes the lead appear in the app's *Follow-ups Due* tab on that day — leads from the form otherwise have no follow-up date and never appear there. Staff can still change all dates in the app. `status`, `assigned`-style fields and final remarks remain staff-only.
 
 **On the apostrophes** (Alzheimer's, Parkinson's): type them however feels
 natural when building the form — the bridge script normalizes text before
