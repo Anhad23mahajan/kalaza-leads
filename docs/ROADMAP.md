@@ -46,7 +46,7 @@ instead of idling.
 - **Path 2 — New dedicated number** (cost-safe default; no BSP requirement).
 - **Path 3 — Stall** (supervisor won't/can't act yet) → do Phase 4 work only.
 
-> **Record the outcome here and in `PROGRESS.md` right after the meeting.** Everything in Phase 3+ branches on it.
+> **Outcome (reported 2026-09-25):** the supervisor chose to use the **NGO centre's existing phone/number** for the assistant (details and open issues in `HANDOFF.md` §15). Still to settle: whether that number is the main one staff use in WhatsApp daily (→ Coexistence, needs a Tech Provider/BSP) or can be dedicated to the bot (→ direct Cloud API, staff reply via the app), the payment-method question, and business verification.
 
 In parallel, hand over the **Track C worksheet**: the ~20 Q&A answers (list in `AUTOMATION_DESIGN.md` §5), price list PDF, five service info packs, posters/links. This is the single biggest schedule risk in the project. Ask for ~5 answers a week, not all at once, and put a date on it.
 
