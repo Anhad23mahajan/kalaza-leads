@@ -165,6 +165,8 @@ Dates are 2026. Commit hashes are anchors you can `git show`. (Sessions were lon
 
 **Sep 25 — single-admin rollout finished.** Signups were switched off in Supabase, the 32 junk Auth users and 5 test leads (plus 1 contact-log entry) were deleted, leaving the one admin account and one demo lead. The lead-detail screen was reworked (form order, no country-code picker, options matching the form, outlined Cancel, patient name in the title) — written and committed, awaiting a build on the phone. **Handing over to the supervisor later:** add his account under Supabase → Authentication → Users → Add user (`somnath@kalazaleads.app`, a password, tick Auto Confirm User); he then logs in with the name "Somnath". Signups can stay off.
 
+**Sep 25 (later) — dates on the form.** Anhad noticed the lead screen has three date fields the form didn't ask for. `Preferred visit date` already fed *Planned visit date*; two optional date questions were added — *"When would you like us to follow up with you?"* → `next_follow_up_date` (so form leads finally show up in *Follow-ups Due*) and *"If you have already visited us, on which date?"* → `actual_visit_date`. While doing this a latent bug was found and fixed: the bridge parsed dates from the Sheet's regional *text* (breaks on day-first formats), so it now reads the real Date value from the response row. The live Apps Script was updated and verified byte-identical to the repo file (fingerprint check); a live test submission with the dates filled is still to be done.
+
 ---
 
 ---
@@ -223,7 +225,7 @@ Columns as he listed them: enquiry date · enquirer · required for? · location
      phone / walk-in / WhatsApp        (future) WhatsApp bot
               │                                    │
               ▼                                    ▼
-   Google Form (22 questions)        Meta WhatsApp Cloud API   ← NOT BUILT (Track B/D)
+   Google Form (24 questions)        Meta WhatsApp Cloud API   ← NOT BUILT (Track B/D)
               │                                    │ webhook
               ▼                                    ▼
    Google Sheet (responses)          Supabase Edge Functions   ← NOT BUILT (Track D)
@@ -360,7 +362,7 @@ All verified end-to-end on a real Android phone. Deep build notes: `docs/TRACK_A
 **Why:** the enquirer fills in their own details (regardless of channel — WhatsApp, phone call or walk-in), so staff don't re-type everything on a phone. Everything lands in the same `leads` table; the rest of the app is unchanged.
 
 **Pieces (all under Anhad's personal Google account):**
-- **The Form** — 22 numbered questions, exact titles/types/options in `docs/GOOGLE_FORM_INTAKE_SPEC.md` §1. Responder link: `https://docs.google.com/forms/d/e/1FAIpQLSfH3qQxdCvq4Iw0-kS6tuef2hx4Y-q8bT7Jef_y99A9yhSp0A/viewform`. Edit link: `https://docs.google.com/forms/d/1C6eQ1uoamNoquSEXbMa-SMoif6ThfYmHjzQuvJ2b0So/edit` (only openable by the owner). Published.
+- **The Form** — 24 numbered questions, exact titles/types/options in `docs/GOOGLE_FORM_INTAKE_SPEC.md` §1. Responder link: `https://docs.google.com/forms/d/e/1FAIpQLSfH3qQxdCvq4Iw0-kS6tuef2hx4Y-q8bT7Jef_y99A9yhSp0A/viewform`. Edit link: `https://docs.google.com/forms/d/1C6eQ1uoamNoquSEXbMa-SMoif6ThfYmHjzQuvJ2b0So/edit` (only openable by the owner). Published.
 - **The response Sheet** — created from the Form's Responses tab. Contains **real family data once in use** → ownership/sharing matter (§16).
 - **The Apps Script** — *container-bound* to that Sheet (Sheet → Extensions → Apps Script), source in `tools/google-form-bridge/KalazaFormBridge.gs`. Reads two **Script Properties**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
 - **The trigger** — an *installable* `onFormSubmit` trigger for `handleFormSubmit`, created by running `setupTrigger()` once from the editor (it removes old `handleFormSubmit` triggers first, so re-running is safe).

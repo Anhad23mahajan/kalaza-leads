@@ -135,7 +135,7 @@ function mapMulti(lookup, rawCombined) {
 
 /** Makes titles comparable: drops a leading question number ("12. ") and treats curly apostrophes as straight. */
 function stripQuestionNumber(title) {
-  return String(title || '').replace(/[‘’]/g, "'").replace(/^\s*\d+\s*[.)]\s*/, '').trim();
+  return String(title || '').replace(/[\u2018\u2019]/g, "'").replace(/^\s*\d+\s*[.)]\s*/, '').trim();
 }
 
 function getAnswer(namedValues, title) {
@@ -150,13 +150,48 @@ function getAnswer(namedValues, title) {
   return '';
 }
 
-function formatDate(rawDate) {
-  var parsed = new Date(rawDate);
-  if (isNaN(parsed.getTime())) return null;
-  var yyyy = parsed.getFullYear();
-  var mm = String(parsed.getMonth() + 1).padStart(2, '0');
-  var dd = String(parsed.getDate()).padStart(2, '0');
-  return yyyy + '-' + mm + '-' + dd;
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+/** Parses date TEXT defensively (last resort). d/m/yyyy is read day-first (India). Returns 'yyyy-mm-dd' or null. */
+function parseDateString(raw) {
+  var s = String(raw || '').trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  var m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/);
+  if (!m) return null;
+  var day = parseInt(m[1], 10), month = parseInt(m[2], 10), year = parseInt(m[3], 10);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return year + '-' + pad2(month) + '-' + pad2(day);
+}
+
+/**
+ * Reads a Date-question answer. Prefers the real Date value from the response row, which is immune
+ * to the spreadsheet's regional date format (30/09/2026 vs 9/30/2026); falls back to parsing text.
+ */
+function getDateAnswer(e, title) {
+  var wanted = stripQuestionNumber(title);
+  try {
+    if (e.range) {
+      var sheet = e.range.getSheet();
+      var cols = sheet.getLastColumn();
+      var headers = sheet.getRange(1, 1, 1, cols).getValues()[0];
+      var row = sheet.getRange(e.range.getRow(), 1, 1, cols).getValues()[0];
+      for (var i = 0; i < headers.length; i++) {
+        if (stripQuestionNumber(headers[i]) === wanted) {
+          var v = row[i];
+          if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v.getTime())) {
+            return Utilities.formatDate(v, sheet.getParent().getSpreadsheetTimeZone(), 'yyyy-MM-dd');
+          }
+          return parseDateString(v);
+        }
+      }
+    }
+  } catch (err) {
+    logError('getDateAnswer failed for ' + title + ': ' + err, null);
+  }
+  return parseDateString(getAnswer(e.namedValues, title));
 }
 
 function logError(message, context) {
@@ -183,8 +218,9 @@ function handleFormSubmit(e) {
     var budgetMax = budgetMaxRaw ? parseFloat(budgetMaxRaw) : null;
     if (budgetMax !== null && isNaN(budgetMax)) budgetMax = null;
 
-    var visitDateRaw = getAnswer(nv, 'Preferred visit date (if known)');
-    var plannedVisitDate = visitDateRaw ? formatDate(visitDateRaw) : null;
+    var plannedVisitDate = getDateAnswer(e, 'Preferred visit date (if known)');
+    var nextFollowUpDate = getDateAnswer(e, 'When would you like us to follow up with you?');
+    var actualVisitDate = getDateAnswer(e, 'If you have already visited us, on which date?');
 
     var payload = {
       contact_channel: mapSingle(CONTACT_CHANNEL_MAP, getAnswer(nv, 'How did they first contact us?')),
@@ -214,6 +250,8 @@ function handleFormSubmit(e) {
       comments: getAnswer(nv, "Anything else you'd like to add") || null,
 
       planned_visit_date: plannedVisitDate,
+      next_follow_up_date: nextFollowUpDate,
+      actual_visit_date: actualVisitDate,
     };
 
     if (!payload.enquirer_name || !payload.enquirer_phone) {

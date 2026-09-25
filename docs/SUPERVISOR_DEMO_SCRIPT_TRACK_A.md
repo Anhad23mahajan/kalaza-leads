@@ -31,7 +31,7 @@ is no signup, so nobody else can create an account.
 ## 2. Adding a new enquiry
 
 **Updated 2026-09-17: this is no longer an in-app form.** Enquirers now
-fill in their own details via a Google Form (22 questions),
+fill in their own details via a Google Form (24 questions),
 which lands straight into the same system — no staff typing required. Show
 him the Google Form on your phone instead of an in-app screen, and tie it
 back to what he asked for after the review:
