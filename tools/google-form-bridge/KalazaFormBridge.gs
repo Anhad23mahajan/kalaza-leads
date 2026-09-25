@@ -133,10 +133,21 @@ function mapMulti(lookup, rawCombined) {
     .filter(function (value) { return value !== null; });
 }
 
+/** Makes titles comparable: drops a leading question number ("12. ") and treats curly apostrophes as straight. */
+function stripQuestionNumber(title) {
+  return String(title || '').replace(/[‘’]/g, "'").replace(/^\s*\d+\s*[.)]\s*/, '').trim();
+}
+
 function getAnswer(namedValues, title) {
-  var values = namedValues[title];
-  if (!values || values.length === 0) return '';
-  return values[0];
+  var wanted = stripQuestionNumber(title);
+  for (var key in namedValues) {
+    if (stripQuestionNumber(key) === wanted) {
+      var values = namedValues[key];
+      if (!values || values.length === 0) return '';
+      return values[0];
+    }
+  }
+  return '';
 }
 
 function formatDate(rawDate) {

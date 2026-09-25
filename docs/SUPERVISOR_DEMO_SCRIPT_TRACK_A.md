@@ -31,13 +31,13 @@ is no signup, so nobody else can create an account.
 ## 2. Adding a new enquiry
 
 **Updated 2026-09-17: this is no longer an in-app form.** Enquirers now
-fill in their own details via a Google Form (the same 23 fields below),
+fill in their own details via a Google Form (22 questions),
 which lands straight into the same system — no staff typing required. Show
 him the Google Form on your phone instead of an in-app screen, and tie it
 back to what he asked for after the review:
 
-- Phone number now only accepts exactly 10 digits, with a country code
-  picker next to it (his request #1).
+- Phone number now only accepts exactly 10 digits (his request #1); the
+  country-code picker was removed on 2026-09-25 — +91 is assumed.
 - "How did they reach out" is now two separate questions — how they *heard*
   about Kalaza Care (Google, Instagram, referral, etc.) and how they
   *contacted* us (call, WhatsApp, walk-in) — including Google Search,
