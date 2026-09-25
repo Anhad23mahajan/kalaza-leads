@@ -223,7 +223,8 @@ function handleFormSubmit(e) {
     var actualVisitDate = getDateAnswer(e, 'If you have already visited us, on which date?');
 
     var payload = {
-      contact_channel: mapSingle(CONTACT_CHANNEL_MAP, getAnswer(nv, 'How did they first contact us?')),
+      // Renamed 2026-09-25 from 'How did they first contact us?'; the old title is kept as a fallback.
+      contact_channel: mapSingle(CONTACT_CHANNEL_MAP, getAnswer(nv, 'How did you first contact us?') || getAnswer(nv, 'How did they first contact us?')),
       how_heard: mapSingle(HOW_HEARD_MAP, getAnswer(nv, 'How did you hear about Kalaza Care?')),
       how_heard_detail: getAnswer(nv, 'If referral or other, please give details') || null,
 
