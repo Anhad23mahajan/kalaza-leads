@@ -44,8 +44,8 @@ a typo here breaks that field silently.
 |---|---|---|---|---|---|
 | 1 | `How did they first contact us?` | Dropdown | Phone Call / WhatsApp / Walk-in / Website / Email / Instagram DM | No | `contact_channel` |
 | 2 | `How did you hear about Kalaza Care?` | Dropdown | Google Search / Google Maps / Instagram / Facebook / Referral - Friend or Family / Referral - Hospital / Referral - Doctor / Passing By / Newspaper / Other | No | `how_heard` |
-| 3 | `Your name` | Short answer | — | **Yes** | `enquirer_name` |
-| 4 | `If referral or other, please give details` | Short answer | — | No | `how_heard_detail` |
+| 3 | `If referral or other, please give details` | Short answer | — | No | `how_heard_detail` |
+| 4 | `Your name` | Short answer | — | **Yes** | `enquirer_name` |
 | 5 | `Your phone number (10 digits)` | Short answer, response validation: regex matches `^[0-9]{10}$` | — | **Yes** | `enquirer_phone` (country code is always `+91`, the DB/bridge default) |
 | 6 | `Your relation to the patient` | Dropdown | Son / Daughter / Spouse / Sibling / Grandchild / Nephew or Niece / Friend / Other | No | `enquirer_relation` |
 | 7 | `Where are you from (location)` | Short answer | — | No | `enquirer_location` |
@@ -53,12 +53,12 @@ a typo here breaks that field silently.
 | 9 | `Patient's age` | Short answer *(planned validation: number 0-120 - NOT applied on the built form)* | — | No | `patient_age` |
 | 10 | `Patient's gender` | Dropdown | Male / Female / Other | No | `patient_gender` |
 | 11 | `What does the patient have? (select all that apply)` | Checkboxes | Alzheimer's / Dementia / Parkinson's / Cancer / Post-Stroke / Post-Operative / Post-Transplant / Bedridden / Diabetes / Cardiac / Mobility Impaired / Other | No | `patient_conditions` |
-| 12 | `Medical history` | Paragraph | — | No | `medical_history` |
-| 13 | `Current condition / mobility` | Paragraph | — | No | `current_condition` |
+| 12 | `Current condition / mobility` | Paragraph | — | No | `current_condition` |
+| 13 | `Medical history` | Paragraph | — | No | `medical_history` |
 | 14 | `Service(s) wanted (select all that apply)` | Checkboxes | Assisted Living / Palliative Care / Post-Transplant Care / Cancer Care / Medical Recovery / Dementia Care / Day Care | No | `service_wanted` |
 | 15 | `Room type preferred` | Dropdown | Single Room / Double Sharing / Full Flat | No | `accommodation_type` |
-| 16 | `Budget - maximum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_max` |
-| 17 | `Budget - minimum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_min` |
+| 16 | `Budget - minimum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_min` |
+| 17 | `Budget - maximum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_max` |
 | 18 | `Amenities requested (select all that apply)` | Checkboxes | AC / Lift / Attached Bathroom / Ground Floor / Female Attendant / Private Nurse / Veg Food / Other | No | `amenities_requested` |
 | 19 | `Any special requirements` | Paragraph | — | No | `special_requirements` |
 | 20 | `What would you like to ask us?` | Paragraph | — | No | `queries` |
@@ -69,7 +69,7 @@ a typo here breaks that field silently.
 - The **Country code** question was deleted (always +91; the bridge already defaults to +91 when the answer is missing).
 - Options removed: relation → *Self*, *Hospital Staff*; services → *Respite Care*; room type → *Triple Sharing*, *Dormitory*, *Not Sure*. The database check constraints, the bridge maps and `LeadFormOptions.kt` still accept those values (old rows stay valid); the form just no longer offers them.
 - **Every question title now carries a number prefix** (`1. How did they first contact us?` … `22. Preferred visit date (if known)`). The numbers in the first column above are those live numbers. The bridge's `getAnswer` ignores a leading `N. ` and treats curly apostrophes as straight, so the *title text after the number* is still the contract. The numbering was applied by a one-off Apps Script (`FormApp`), because Google Forms has no built-in question numbering.
-- **Known cosmetic quirk:** the live order differs slightly from the original plan ("Your name" comes before "If referral or other", "Medical history" before "Current condition", and **Budget - maximum before Budget - minimum**). It doesn't affect the bridge (it matches titles, not positions) but the budget order looks odd to enquirers.
+- **Order fixed (2026-09-25, second pass):** a one-off script moved the questions into the order above and renumbered them. Earlier the order had drifted ("Your name" before "If referral or other", "Medical history" before "Current condition", and Budget - maximum before minimum). The bridge matches titles, not positions, so it was never affected.
 
 **Deliberately left off the form**: `next_follow_up_date` — that's an
 internal scheduling field staff set later, not something to ask the
