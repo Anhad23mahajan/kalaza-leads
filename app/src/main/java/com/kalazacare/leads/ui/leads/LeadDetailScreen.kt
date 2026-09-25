@@ -15,6 +15,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -27,9 +28,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kalazacare.leads.data.model.Lead
 import com.kalazacare.leads.data.model.UpdateLeadRequest
+
+/** Offered options plus a lead's current value, so a value no longer offered by the form stays visible and editable. */
+private fun withCurrent(options: List<String>, current: String?): List<String> =
+    if (current != null && current !in options) options + current else options
+
+private fun withCurrent(options: List<String>, current: List<String>): List<String> =
+    options + current.filter { it !in options }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,7 +56,6 @@ fun LeadDetailScreen(
     var howHeard by remember { mutableStateOf(lead.howHeard) }
 
     var enquirerName by remember { mutableStateOf(lead.enquirerName) }
-    var countryCode by remember { mutableStateOf(lead.enquirerCountryCode) }
     var enquirerPhone by remember { mutableStateOf(lead.enquirerPhone) }
     var enquirerRelation by remember { mutableStateOf(lead.enquirerRelation) }
     var enquirerLocation by remember { mutableStateOf(lead.enquirerLocation ?: "") }
@@ -80,8 +88,12 @@ fun LeadDetailScreen(
     fun toggle(list: List<String>, value: String) =
         if (value in list) list - value else list + value
 
+    val titleText = lead.patientName?.takeIf { it.isNotBlank() }
+        ?.let { "${lead.enquirerName} (for $it)" }
+        ?: lead.enquirerName
+
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(lead.enquirerName) })
+        TopAppBar(title = { Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis) })
 
         Column(
             modifier = Modifier
@@ -109,31 +121,6 @@ fun LeadDetailScreen(
                 )
             }
 
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-            Text("Send WhatsApp", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.padding(top = 8.dp))
-            Text(
-                "Opens WhatsApp with a message pre-filled — review or edit it there before sending.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.padding(top = 10.dp))
-            WhatsAppTemplate.entries.forEach { template ->
-                Button(
-                    onClick = { launchWhatsApp(context, lead, buildWhatsAppMessage(template, lead)) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(template.label)
-                }
-                Spacer(Modifier.padding(top = 8.dp))
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-            lead.id?.let { leadId ->
-                ContactLogSection(leadId = leadId, viewModel = activitiesViewModel)
-            }
-
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
             Text("How did they reach out?", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 8.dp))
@@ -154,25 +141,20 @@ fun LeadDetailScreen(
             )
             Spacer(Modifier.padding(top = 10.dp))
 
-            Row {
-                EnumDropdown(
-                    "Code", COUNTRY_CODES, COUNTRY_CODES.associateWith { it }, countryCode,
-                    { if (it != null) countryCode = it },
-                    modifier = Modifier.width(100.dp),
-                )
-                Spacer(Modifier.padding(start = 8.dp))
-                OutlinedTextField(
-                    value = enquirerPhone,
-                    onValueChange = { enquirerPhone = it.filter { c -> c.isDigit() }.take(10) },
-                    label = { Text("Phone * (10 digits)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                )
-            }
+            OutlinedTextField(
+                value = enquirerPhone,
+                onValueChange = { enquirerPhone = it.filter { c -> c.isDigit() }.take(10) },
+                label = { Text("Phone * (10 digits)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            )
             Spacer(Modifier.padding(top = 10.dp))
 
-            EnumDropdown("Relation to patient", RELATIONS, RELATION_LABELS, enquirerRelation, { enquirerRelation = it })
+            EnumDropdown(
+                "Relation to patient", withCurrent(RELATIONS_OFFERED, enquirerRelation), RELATION_LABELS,
+                enquirerRelation, { enquirerRelation = it },
+            )
             Spacer(Modifier.padding(top = 10.dp))
 
             OutlinedTextField(
@@ -239,12 +221,15 @@ fun LeadDetailScreen(
             Text("Requirement", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 8.dp))
 
-            MultiSelectChips("Service wanted", SERVICES, SERVICE_LABELS, serviceWanted) {
+            MultiSelectChips("Service wanted", withCurrent(SERVICES_OFFERED, serviceWanted), SERVICE_LABELS, serviceWanted) {
                 serviceWanted = toggle(serviceWanted, it)
             }
             Spacer(Modifier.padding(top = 14.dp))
 
-            EnumDropdown("Room type", ACCOMMODATIONS, ACCOMMODATION_LABELS, accommodationType, { accommodationType = it })
+            EnumDropdown(
+                "Room type", withCurrent(ACCOMMODATIONS_OFFERED, accommodationType), ACCOMMODATION_LABELS,
+                accommodationType, { accommodationType = it },
+            )
             Spacer(Modifier.padding(top = 10.dp))
 
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -282,16 +267,6 @@ fun LeadDetailScreen(
             )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-            Text("Scheduling", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.padding(top = 8.dp))
-
-            DateField("Planned visit date", plannedVisitDate, { plannedVisitDate = it })
-            Spacer(Modifier.padding(top = 10.dp))
-            DateField("Actual visit date", actualVisitDate, { actualVisitDate = it })
-            Spacer(Modifier.padding(top = 10.dp))
-            DateField("Next follow-up date", nextFollowUpDate, { nextFollowUpDate = it })
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
             Text("Notes", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 8.dp))
 
@@ -311,7 +286,44 @@ fun LeadDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2,
             )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            Text("Scheduling", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.padding(top = 8.dp))
+
+            DateField("Planned visit date", plannedVisitDate, { plannedVisitDate = it })
             Spacer(Modifier.padding(top = 10.dp))
+            DateField("Actual visit date", actualVisitDate, { actualVisitDate = it })
+            Spacer(Modifier.padding(top = 10.dp))
+            DateField("Next follow-up date", nextFollowUpDate, { nextFollowUpDate = it })
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            Text("Send WhatsApp", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.padding(top = 8.dp))
+            Text(
+                "Opens WhatsApp with a message pre-filled — review or edit it there before sending.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.padding(top = 10.dp))
+            WhatsAppTemplate.entries.forEach { template ->
+                Button(
+                    onClick = { launchWhatsApp(context, lead, buildWhatsAppMessage(template, lead)) },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(template.label)
+                }
+                Spacer(Modifier.padding(top = 8.dp))
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            lead.id?.let { leadId ->
+                ContactLogSection(leadId = leadId, viewModel = activitiesViewModel)
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            Text("Outcome", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.padding(top = 8.dp))
 
             OutlinedTextField(
                 value = finalRemarks,
@@ -343,7 +355,7 @@ fun LeadDetailScreen(
                             contactChannel = contactChannel,
                             howHeard = howHeard,
                             enquirerName = enquirerName.trim(),
-                            enquirerCountryCode = countryCode,
+                            enquirerCountryCode = lead.enquirerCountryCode,
                             enquirerPhone = enquirerPhone.trim(),
                             enquirerRelation = enquirerRelation,
                             enquirerLocation = enquirerLocation.trim().ifBlank { null },
@@ -383,7 +395,7 @@ fun LeadDetailScreen(
 
             Spacer(Modifier.padding(top = 8.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = onBack,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLoading,

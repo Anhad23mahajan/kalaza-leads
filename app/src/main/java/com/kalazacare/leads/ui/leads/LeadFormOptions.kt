@@ -103,7 +103,13 @@ val NOT_CONVERTED_REASON_LABELS = mapOf(
     "other" to "Other",
 )
 
-val COUNTRY_CODES = listOf("+91", "+1", "+44", "+971", "+61")
+
+// What the Google Form (and therefore the picker in the app) offers since 2026-09-25.
+// The full lists above stay valid: the database still accepts those values and old leads may
+// hold them, so the detail screen also shows a lead's current value even if it is not offered.
+val RELATIONS_OFFERED = RELATIONS - setOf("self", "hospital_staff")
+val SERVICES_OFFERED = SERVICES - setOf("respite_care")
+val ACCOMMODATIONS_OFFERED = ACCOMMODATIONS - setOf("triple_sharing", "dormitory", "not_sure")
 
 // Contact activity log (docs/sql/003_contact_activities.sql)
 val ACTIVITY_TYPES = listOf("call", "whatsapp", "visit", "email", "sms")
