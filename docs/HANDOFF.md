@@ -169,6 +169,8 @@ Dates are 2026. Commit hashes are anchors you can `git show`. (Sessions were lon
 
 **Sep 25 (later still) — required questions.** Seven of the 24 questions were made required (red star): contact channel, how they heard, name, phone, relation to the patient, patient's name, service(s) wanted. Applied with another one-off `FormApp` script (deleted afterwards; the live Apps Script was re-verified byte-identical to the repo file) and confirmed on the live form (7 required, 17 optional).
 
+**Sep 25 (last) — question 1 reworded.** "How did *they* first contact us?" became "How did *you* first contact us?" (it is answered by the family, not staff). The bridge was updated first to accept both titles (new title first, old as fallback), the live Apps Script was re-verified byte-identical to the repo file, and only then was the form question renamed with a one-off `FormApp` script (deleted afterwards). Offline tests cover new title, old title, unnumbered title and absent answer.
+
 ---
 
 ---
