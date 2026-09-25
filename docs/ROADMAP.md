@@ -12,7 +12,7 @@ This is the **"what do we do next"** doc. For how the auto-reply system should w
 |---|---|
 | **Track A — Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, follow-up notifications, CSV export, reports, `wa.me` one-tap messages. |
 | **Security** | Single admin (2026-09-24): no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). RLS = "any logged-in user" = the one admin. |
-| **Intake** | Done. Google Form (23 fields) → Apps Script → Supabase `leads`. In-app "New Enquiry" screen removed. Verified end-to-end 2026-09-17. |
+| **Intake** | Done. Google Form (22 numbered questions) → Apps Script → Supabase `leads`. In-app "New Enquiry" screen removed. Verified end-to-end 2026-09-17. |
 | **Track B — Meta/WhatsApp onboarding** | **Not started.** Prep docs are ready (`TRACK_B_*`). Needs a decision + paperwork from the supervisor/NGO. |
 | **Track C — NGO content** (FAQ answers, price list, packs) | **Not started.** NGO-authored. |
 | **Track D — WhatsApp automation** | **Not started.** This is what the supervisor considers "the product". |

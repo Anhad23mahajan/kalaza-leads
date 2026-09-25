@@ -25,7 +25,7 @@ An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO i
 - **Single-admin app** (2026-09-24): no signup, roster, roles or assignment. The one admin account is created in the Supabase dashboard and "Allow new users to sign up" is OFF (`docs/sql/007_single_admin.sql`). On a fresh database: run 001…007, then Authentication → Users → Add user, then disable signups (HANDOFF section 7.4).
 - Supabase project has "Automatically expose new tables" **off**: every table needs an explicit `GRANT` *and* a policy.
 - Login is by **name**; the app synthesizes `name@kalazaleads.app` (Confirm-email is OFF; passwords ≥ 6 chars).
-- The Google Form's **question titles are the contract** with `tools/google-form-bridge/KalazaFormBridge.gs`. Changing a title silently breaks that field. Enum lists must stay in sync across `LeadFormOptions.kt`, the SQL check constraints and the bridge maps.
+- The Google Form's **question titles are the contract** with `tools/google-form-bridge/KalazaFormBridge.gs`. Changing a title silently breaks that field (a leading question number like `12. ` and curly apostrophes are ignored since 2026-09-25). Enum lists must stay in sync across `LeadFormOptions.kt`, the SQL check constraints and the bridge maps.
 - Build only from the canonical clone (on Anhad's machine `C:\Dev\kalaza-leads`, not the OneDrive copy).
 - The bot must **never invent facts**, must hand distress and no-match to a human, and must honour opt-outs (`docs/AUTOMATION_DESIGN.md`).
 
