@@ -167,6 +167,8 @@ Dates are 2026. Commit hashes are anchors you can `git show`. (Sessions were lon
 
 **Sep 25 (later) — dates on the form.** Anhad noticed the lead screen has three date fields the form didn't ask for. `Preferred visit date` already fed *Planned visit date*; two optional date questions were added — *"When would you like us to follow up with you?"* → `next_follow_up_date` (so form leads finally show up in *Follow-ups Due*) and *"If you have already visited us, on which date?"* → `actual_visit_date`. While doing this a latent bug was found and fixed: the bridge parsed dates from the Sheet's regional *text* (breaks on day-first formats), so it now reads the real Date value from the response row. The live Apps Script was updated and verified byte-identical to the repo file (fingerprint check); a live test submission with the dates filled is still to be done.
 
+**Sep 25 (later still) — required questions.** Seven of the 24 questions were made required (red star): contact channel, how they heard, name, phone, relation to the patient, patient's name, service(s) wanted. Applied with another one-off `FormApp` script (deleted afterwards; the live Apps Script was re-verified byte-identical to the repo file) and confirmed on the live form (7 required, 17 optional).
+
 ---
 
 ---

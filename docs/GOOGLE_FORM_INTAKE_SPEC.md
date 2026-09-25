@@ -42,20 +42,20 @@ a typo here breaks that field silently.
 
 | # | Question title (type it exactly) | Type | Options (exact text) | Required? | → Database field |
 |---|---|---|---|---|---|
-| 1 | `How did they first contact us?` | Dropdown | Phone Call / WhatsApp / Walk-in / Website / Email / Instagram DM | No | `contact_channel` |
-| 2 | `How did you hear about Kalaza Care?` | Dropdown | Google Search / Google Maps / Instagram / Facebook / Referral - Friend or Family / Referral - Hospital / Referral - Doctor / Passing By / Newspaper / Other | No | `how_heard` |
+| 1 | `How did they first contact us?` | Dropdown | Phone Call / WhatsApp / Walk-in / Website / Email / Instagram DM | **Yes** | `contact_channel` |
+| 2 | `How did you hear about Kalaza Care?` | Dropdown | Google Search / Google Maps / Instagram / Facebook / Referral - Friend or Family / Referral - Hospital / Referral - Doctor / Passing By / Newspaper / Other | **Yes** | `how_heard` |
 | 3 | `If referral or other, please give details` | Short answer | — | No | `how_heard_detail` |
 | 4 | `Your name` | Short answer | — | **Yes** | `enquirer_name` |
 | 5 | `Your phone number (10 digits)` | Short answer, response validation: regex matches `^[0-9]{10}$` | — | **Yes** | `enquirer_phone` (country code is always `+91`, the DB/bridge default) |
-| 6 | `Your relation to the patient` | Dropdown | Son / Daughter / Spouse / Sibling / Grandchild / Nephew or Niece / Friend / Other | No | `enquirer_relation` |
+| 6 | `Your relation to the patient` | Dropdown | Son / Daughter / Spouse / Sibling / Grandchild / Nephew or Niece / Friend / Other | **Yes** | `enquirer_relation` |
 | 7 | `Where are you from (location)` | Short answer | — | No | `enquirer_location` |
-| 8 | `Patient's name` | Short answer | — | No | `patient_name` |
+| 8 | `Patient's name` | Short answer | — | **Yes** | `patient_name` |
 | 9 | `Patient's age` | Short answer *(planned validation: number 0-120 - NOT applied on the built form)* | — | No | `patient_age` |
 | 10 | `Patient's gender` | Dropdown | Male / Female / Other | No | `patient_gender` |
 | 11 | `What does the patient have? (select all that apply)` | Checkboxes | Alzheimer's / Dementia / Parkinson's / Cancer / Post-Stroke / Post-Operative / Post-Transplant / Bedridden / Diabetes / Cardiac / Mobility Impaired / Other | No | `patient_conditions` |
 | 12 | `Current condition / mobility` | Paragraph | — | No | `current_condition` |
 | 13 | `Medical history` | Paragraph | — | No | `medical_history` |
-| 14 | `Service(s) wanted (select all that apply)` | Checkboxes | Assisted Living / Palliative Care / Post-Transplant Care / Cancer Care / Medical Recovery / Dementia Care / Day Care | No | `service_wanted` |
+| 14 | `Service(s) wanted (select all that apply)` | Checkboxes | Assisted Living / Palliative Care / Post-Transplant Care / Cancer Care / Medical Recovery / Dementia Care / Day Care | **Yes** | `service_wanted` |
 | 15 | `Room type preferred` | Dropdown | Single Room / Double Sharing / Full Flat | No | `accommodation_type` |
 | 16 | `Budget - minimum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_min` |
 | 17 | `Budget - maximum (Rs.)` | Short answer *(planned validation: number - NOT applied on the built form)* | — | No | `budget_max` |
@@ -73,6 +73,7 @@ a typo here breaks that field silently.
 - **Every question title now carries a number prefix** (`1. How did they first contact us?` … `22. Preferred visit date (if known)`). The numbers in the first column above are those live numbers. The bridge's `getAnswer` ignores a leading `N. ` and treats curly apostrophes as straight, so the *title text after the number* is still the contract. The numbering was applied by a one-off Apps Script (`FormApp`), because Google Forms has no built-in question numbering.
 - **Order fixed (2026-09-25, second pass):** a one-off script moved the questions into the order above and renumbered them. Earlier the order had drifted ("Your name" before "If referral or other", "Medical history" before "Current condition", and Budget - maximum before minimum). The bridge matches titles, not positions, so it was never affected.
 - **Dates hardened (2026-09-25, third pass):** the two date questions above were added (numbers 23 and 24). The bridge used to build dates by parsing the Sheet's *text* with `new Date(...)`, which breaks under India's day-first format (30/09/2026 fails; 05/10/2026 silently becomes 10 May). It now reads the **real Date value from the response row** (`getDateAnswer`, using `e.range`), which ignores regional format; text is parsed only as a last resort and read day-first, returning null rather than a wrong date. Offline tests cover Date cells, day-first text, impossible dates, blanks and missing columns.
+- **Required questions (2026-09-25, fourth pass):** 7 of the 24 now carry the red star — 1 contact channel, 2 how they heard, 4 name, 5 phone, 6 relation to the patient, 8 patient's name, 14 service(s) wanted. Chosen because they identify the caller and the need and drive the source reports, while staying quick to answer. Deliberately **left optional**: age (no number check, so forcing it invites junk like "old"), medical details and budget (sensitive, often unknown at first contact), and all dates. Note: `required` is enforced by Google Forms only; the bridge itself still only refuses a submission whose name or phone is blank.
 
 **Reworded for the enquirer (2026-09-25):** `next_follow_up_date` and `actual_visit_date` were originally kept off the form as staff-only fields. Anhad asked for them on the form, so they were added as questions an enquirer *can* answer ("when would you like us to follow up?" and "if you have already visited us, on which date?"). A follow-up date supplied this way makes the lead appear in the app's *Follow-ups Due* tab on that day — leads from the form otherwise have no follow-up date and never appear there. Staff can still change all dates in the app. `status`, `assigned`-style fields and final remarks remain staff-only.
 
