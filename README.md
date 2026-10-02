@@ -37,16 +37,19 @@ The supervisor's own words, decoded: *"the primary task is to take the follow-up
 app/src/main/java/com/kalazacare/leads/
   KalazaLeadsApp.kt                    Application class
   data/
-    model/                             Lead, UpdateLeadRequest, StaffMember
+    model/                             Lead, UpdateLeadRequest, ContactActivity
     remote/SupabaseClients.kt          Supabase client, wired to local.properties
-    repository/                        Auth / Leads / Staff / ContactActivities repos
+    repository/                        Auth / Leads / ContactActivities repos
+  notifications/                       Follow-up reminder worker, scheduler, notification builder
   ui/
     MainActivity.kt                    Screen state machine (no NavHost)
     login/                             Login screen + ViewModel
-    leads/                             Leads list, detail/edit, staff, reports screens
+    leads/                             Leads list, detail/edit, reports screens, WhatsApp quick-messages
     theme/                             Material 3 theme (teal, distinct from Kalaza Care's red)
 tools/google-form-bridge/
   KalazaFormBridge.gs                  Apps Script bridge (Google Form -> Supabase)
 ```
+
+Single admin, no staff roster or roles — there is exactly one user account.
 
 Copy `local.properties.example` to `local.properties` and fill in a Supabase project's URL/anon key before building.
