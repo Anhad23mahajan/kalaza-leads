@@ -48,12 +48,12 @@ private val TERMINAL_STATUSES = setOf("CONVERTED", "NOT_CONVERTED", "DORMANT")
 private data class Segment(val label: String, val filter: (List<Lead>, String) -> List<Lead>)
 
 private val SEGMENTS = listOf(
+    Segment("All") { leads, _ -> leads },
     Segment("Follow-ups Due") { leads, today ->
         leads
             .filter { it.nextFollowUpDate != null && it.nextFollowUpDate <= today && it.status !in TERMINAL_STATUSES }
             .sortedBy { it.nextFollowUpDate }
     },
-    Segment("All") { leads, _ -> leads },
     Segment("Active") { leads, _ -> leads.filter { it.status in ACTIVE_STATUSES } },
     Segment("Converted") { leads, _ -> leads.filter { it.status == "CONVERTED" } },
     Segment("Not Converted") { leads, _ -> leads.filter { it.status == "NOT_CONVERTED" } },
@@ -136,7 +136,7 @@ fun LeadsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = if (selectedTab == 0) "Nothing due right now." else "No leads in this list.",
+                            text = if (SEGMENTS[selectedTab].label == "Follow-ups Due") "Nothing due right now." else "No leads in this list.",
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
