@@ -1,14 +1,15 @@
 # Kalaza Leads — What's Been Built (for the demo conversation)
 
+> ⚠️ **Written before the 2026-10-02 pivot.** The app walkthrough below is still accurate —
+> nothing about the CRM itself changed. But the "separate conversation about the WhatsApp
+> auto-reply piece" it refers to never happened the way this script expected: that whole
+> plan was abandoned (`docs/HANDOFF.md` §15). Skip any paragraph below that references Track
+> B/C/Meta/paperwork — there is no such conversation to have anymore.
+
 A walkthrough script for showing the app to the supervisor. Plain language,
 no tech jargon — this is about what the app *does*, not how it's built.
 Go through it feature by feature, demo each one live on the phone if
 possible, and pause for his reaction/opinion at each ⭐ point.
-
-After this, there's a separate conversation about the WhatsApp auto-reply
-piece (Track B/C) — see `docs/TRACK_B_MEETING_CHEATSHEET.md` and
-`docs/TRACK_B_SUPERVISOR_MEETING_SCRIPT.md`. Don't mix the two; this one is
-about proving the staff app is finished and working.
 
 ---
 

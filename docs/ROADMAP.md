@@ -1,95 +1,121 @@
 # Kalaza Leads — Roadmap (what's done, what's next)
 
-Written 2026-09-18, after Track A shipped and the intake moved to a Google Form.
-This is the **"what do we do next"** doc. For how the auto-reply system should work (rules, sequences, tables) see
-`docs/AUTOMATION_DESIGN.md`; for the engineering log see `docs/PROGRESS.md`.
+Rewritten 2026-10-02 after a major scope change. Everything below this point reflects the
+**current, simplified project** — not the earlier WhatsApp-bot plan. If you see a reference
+to "Track B/C/D" anywhere else in this repo, it describes a path that was **abandoned**
+(see `docs/HANDOFF.md` §15 for why) — ignore it, this file is authoritative for "what's next."
 
 ---
 
-## 1. Where we are
+## 1. The pivot (read this first)
+
+For about six weeks the plan was: CRM first (Track A, done), then a Meta/WhatsApp Business
+Platform auto-reply bot (Tracks B/C/D). On 2026-10-01 Anhad and the supervisor began the real
+Meta setup (Business Portfolio, Developer App, phone-number registration) and hit a wall of
+compounding problems — number-migration errors, unclear payment-method rules, business
+verification paperwork, and a general sense that none of it was going to resolve quickly for
+a solo student project. **On 2026-10-02, Anhad decided to drop the WhatsApp Business Platform
+integration entirely.** No Meta account, no Cloud API, no auto-reply bot. That part of the
+project is over, not paused.
+
+**What replaces it — the project is now three simple things:**
+1. **Google Form → Supabase intake.** Already built and working. No changes planned.
+2. **Follow-up reminder notifications**, fixed and made supervisor-configurable.
+3. **A redesigned WhatsApp quick-message feature** — a categorized list of pre-filled message
+   templates the supervisor picks from and sends manually (replacing the old fixed 3 buttons).
+
+Plus a one-time **end-of-project handoff**: moving the Google Form/Sheet/Script and the
+Supabase project from Anhad's personal accounts to the NGO's own accounts, so the supervisor
+is fully independent once Anhad is no longer actively maintaining it.
+
+No Meta Business Portfolio, Developer App, or phone-number work is needed anywhere in this
+plan. (The half-finished "Kalaza Care Assistant" Meta app created on 2026-10-01 was never
+verified or billed — it can simply be ignored or deleted later; it isn't referenced by
+anything in this repo.)
+
+---
+
+## 2. Where we are
 
 | Area | State |
 |---|---|
-| **Track A — Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, follow-up notifications, CSV export, reports, `wa.me` one-tap messages. |
-| **Security** | Single admin (2026-09-24): no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). RLS = "any logged-in user" = the one admin. |
-| **Intake** | Done. Google Form (24 numbered questions) → Apps Script → Supabase `leads`. In-app "New Enquiry" screen removed. Verified end-to-end 2026-09-17. |
-| **Track B — Meta/WhatsApp onboarding** | **Not started.** Prep docs are ready (`TRACK_B_*`). Needs a decision + paperwork from the supervisor/NGO. |
-| **Track C — NGO content** (FAQ answers, price list, packs) | **Not started.** NGO-authored. |
-| **Track D — WhatsApp automation** | **Not started.** This is what the supervisor considers "the product". |
-
-**The honest read:** the CRM is finished. Everything left that matters to the
-supervisor (auto-replies) depends on things only he/the NGO can supply — a
-number decision, Meta paperwork, and written answers. So the plan below is:
-finish the small loose ends, unblock B/C, and use the waiting time productively
-instead of idling.
+| **Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, CSV export, reports. |
+| **Security** | Single admin: no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). |
+| **Intake** | Done. Google Form (24 questions) → Apps Script → Supabase `leads`. No changes planned. |
+| **Follow-up notifications** | Built, but **broken in practice**: fires at random times, not a fixed schedule, and only shows a count, not names. Needs fixing — see §3. |
+| **WhatsApp quick-messages** | Built (3 fixed templates: Thank You, Follow-up, Visit Feedback), but the supervisor wants a richer, categorized list instead of 3 flat buttons. Needs redesigning — see §4. |
+| **WhatsApp Business Platform / auto-reply bot** | **Abandoned 2026-10-02.** Not part of the project anymore. |
+| **Final handoff to the NGO** | Not started. See §5. |
 
 ---
 
-## 2. Phase 1 — Loose ends (this week, all in Anhad's hands)
+## 3. Workstream 1 — Fix the follow-up notification system
 
-**Done 2026-09-25:** the single-admin change is applied (007 run, signups switched OFF, junk Auth users and test leads cleaned up). Still to do: build/install the reworked lead-detail screen and verify it on the phone.
+**Why it's broken:** the current implementation uses Android's `WorkManager` in periodic mode
+(`NotificationScheduler.kt`), which Android deliberately does not run at a fixed clock time —
+it batches/defers background jobs to save battery, and the drift compounds run over run. This
+is worse on Indian Android OEM skins (Xiaomi/Vivo/Oppo/Samsung), which are more aggressive
+about delaying background work than stock Android. This was always a known limitation
+(`FollowUpReminderWorker.kt` even has a comment acknowledging it), but it's now a real problem
+the supervisor is hitting daily.
 
-1. ~~Delete the test leads~~ **Done 2026-09-25** (one demo lead, "Anhad Test", was kept on purpose — delete it before real data arrives).
-2. **Solve "how does the form link reach the enquirer" with zero API cost.** This was parked; there's a free answer inside the WhatsApp Business *app*:
-   - Put the form link in the **greeting message** (auto-sent to first-time messagers) and in a **quick reply** (e.g. `/form`) for staff to fire on calls/walk-ins.
-   - Print a **QR code** of the responder link for the front desk.
-   - It costs nothing, and it gives the supervisor a visible auto-reply within days.
-3. **Move form ownership off the personal Gmail.** The Form, its response Sheet (full of family medical/contact data), and the Apps Script all live in Anhad's personal Google account. Before real use: create/borrow an NGO-owned Google account and transfer ownership (or at least add it as co-owner). Also decide who can see the response Sheet.
-4. **Supabase free-tier check.** Verified 2026-09-22: a Free project pauses after **7 days with no database queries** (dashboard visits don't count), stays restorable from the dashboard for **1 year** after pausing, then gets deleted; there are **zero days of backup retention** on Free (no automated backups at all, unlike Pro/Team). Paid plans can't be paused. Decide: is this OK for real data? If not — a scheduled export/backup, a periodic keep-alive query, or an upgrade — and record the decision.
-5. **Optional form additions** (deferred, low priority): consent checkbox → `consent_given`, preferred language → `preferred_language`. Steps are in `GOOGLE_FORM_INTAKE_SPEC.md` §6.
+**What to build:**
+1. **Replace periodic WorkManager with a self-rescheduling exact alarm.** Each time the check
+   runs, it immediately schedules the *next* one for the exact target time, using Android's
+   exact-alarm API. Still needs the app whitelisted from battery optimization on the phone (a
+   one-time setting) for real reliability — explain this honestly, don't oversell "guaranteed."
+2. **A Settings screen** where the supervisor sets what time he wants the daily check to run.
+   Persist with DataStore/SharedPreferences; the scheduler reads it. (Frequency/multiple-times-
+   a-day can be added later if he asks for it — start with "one configurable time per day.")
+3. **Show actual lead names/details in the notification**, not just a count. Currently
+   `NotificationHelper.kt` shows "3 follow-ups due" with generic body text and a fixed
+   notification ID (so a second run overwrites rather than stacks). Needs to list who's due
+   (e.g. an `InboxStyle` notification with one line per lead) and tapping it should jump to
+   that lead's detail screen when there's exactly one, or a filtered list when there's more
+   than one.
 
-## 3. Phase 2 — Unblock Track B and C (needs the supervisor)
+## 4. Workstream 2 — Redesign the WhatsApp quick-message feature
 
-**Gate: the Track B conversation.** Use `TRACK_B_MEETING_CHEATSHEET.md` (glance sheet) and `TRACK_B_SUPERVISOR_MEETING_SCRIPT.md` (rehearsal). Its outcome picks the path in `TRACK_B_PAPERWORK_PLAYBOOK.md`:
+**Current state:** `WhatsAppHelper.kt` defines exactly 3 static templates (Thank You,
+Follow-up, Visit Feedback), rendered as 3 always-visible buttons in `LeadDetailScreen.kt`'s
+"Send WhatsApp" section, regardless of the lead's pipeline stage.
 
-- **Path 1 — Coexistence** (keep the current number; needs a BSP / Tech Provider, has a monthly fee).
-- **Path 2 — New dedicated number** (cost-safe default; no BSP requirement).
-- **Path 3 — Stall** (supervisor won't/can't act yet) → do Phase 4 work only.
+**What the supervisor wants instead:** an expandable/dropdown list of message templates,
+grouped by the actual conversation context — e.g. "they seem interested" (a follow-up nudge),
+"they've gone quiet" (a check-in), "they're not considering" (a why/what-happened message),
+plus keep Thank You and Visit Feedback. He picks the one that matches what actually happened
+with that family, previews/edits it, and sends manually via WhatsApp — same "review before
+sending" behavior as today, just a richer menu instead of 3 fixed icons. All templates should
+probably stay visible regardless of stage (his call, confirmed 2026-10-02) rather than being
+gated by status — he wants the freedom to pick any message at any time.
 
-> **Outcome (reported 2026-09-25):** the supervisor chose to use the **NGO centre's existing phone/number** for the assistant (details and open issues in `HANDOFF.md` §15). Still to settle: whether that number is the main one staff use in WhatsApp daily (→ Coexistence, needs a Tech Provider/BSP) or can be dedicated to the bot (→ direct Cloud API, staff reply via the app), the payment-method question, and business verification.
+**What to build:**
+1. Expand `WhatsAppTemplate` from 3 fixed entries into a larger, categorized set.
+2. Replace the 3-button row in `LeadDetailScreen.kt` with an expandable list/dropdown UI.
+3. **Open item:** the exact wording for the new template categories needs the supervisor's
+   input eventually (similar in spirit to the old "~20 FAQ answers" ask, but much smaller —
+   probably 6–10 short templates). Draft sensible placeholder wording to unblock building the
+   UI now; swap in his real wording once he gives it. Doesn't need to block starting the work.
 
-In parallel, hand over the **Track C worksheet**: the ~20 Q&A answers (list in `AUTOMATION_DESIGN.md` §5), price list PDF, five service info packs, posters/links. This is the single biggest schedule risk in the project. Ask for ~5 answers a week, not all at once, and put a date on it.
+## 5. Workstream 3 — End-of-project handoff to the NGO
 
-Track B execution (whoever owns the NGO's Meta account does it; Anhad advises): Business Portfolio → admin access → legal docs → payment method → number onboarding → business verification → template submission.
+Three separate ownership surfaces need to move before Anhad hands this off — don't conflate
+them, they live on different services:
 
-## 3b. Also unblocked right now
+| # | What | Currently owned by | Needs to move to |
+|---|---|---|---|
+| A | **Google Form + response Sheet + Apps Script bridge** | Anhad's personal Gmail (`anhadmahajan36@gmail.com`) | An NGO-owned Google account — this is the one holding real family contact/medical data |
+| B | **Supabase project** (database, API keys, dashboard) | Anhad's Supabase account | Supervisor/NGO's own Supabase account, added as full Owner |
+| C | **The app's internal single-admin login** (just a row in the database — not an external account) | `anhad@kalazaleads.app` | A new login created for whichever name the supervisor will use (e.g. `somnath@kalazaleads.app`) — trivial, one-time, no external sign-up needed |
 
-- Ask (again, or accept the "no") about the supervisor's Excel history — dropped as a blocker earlier, don't chase.
-- Hindi/Marathi: get a decision on which languages enquiries actually come in. It shapes the knowledge base and every template.
+The GitHub repository stays under Anhad's own account (portfolio project) — the NGO never
+needs source-code access, only the finished app and their own data. Flag this assumption
+before acting on it if it's ever unclear.
 
----
-
-## 4. Phase 3 — Track D, the automation (start when B/C give a foothold)
-
-Order of work (re-sequenced into thin slices so something works early; design in `AUTOMATION_DESIGN.md`):
-
-| Slice | What | Needs |
-|---|---|---|
-| **D-0** | Design the knowledge-base format + reply-router logic on paper; write it against **placeholder answers** | Nothing external |
-| **D-1** | Webhook receiver (Supabase Edge Function) + outbound send function | A WhatsApp number (Meta's sandbox test number may be enough to start — confirm current limits in the developer console) |
-| **D-2** | FAQ matching: incoming question → KB answer, **KB-only, no generated facts**; no-match → human handoff | Real answers from Track C to be useful, placeholders to build |
-| **D-3** | Guardrails: distress detection → immediate human handoff, opt-out handling | — |
-| **D-4** | Two-way sync: log every message into a `wa_messages` table + link to `leads` | — |
-| **D-5** | Scheduled outbound: honour "I'll tell you in 2–3 days", post-visit feedback ask | Approved templates (Track B) |
-| **D-6** | AI layer (translation / extraction), only after D-1…D-5 are solid | — |
-| **D-7** | *Option:* replace the Google Form with a native **WhatsApp Flow** (same fields, filled inside the chat, inserted into the same `leads` table) — see `WHATSAPP_CHATBOT_RESEARCH.md` §5 | Cloud API live (Track B) |
-
-Design rules carried over (they're the reason the risk register looks the way it does): never let the bot invent a facility capability; always hand off on no-match; staff can take over any thread at any time; honour opt-outs.
-
-**Realistic timing:** Original estimate was ~6–8 weeks once unblocked. Coursework/exams will stretch it — build the buffer into any date you tell the supervisor.
-
----
-
-## 5. Phase 4 — Parallel, always available (doesn't depend on anyone)
-
-Useful while B/C are waiting, and directly serves the portfolio goal:
-
-- **Demo package:** a 2–3 minute screen recording of the full loop (form → lead appears → follow-up → export/report), plus screenshots for the README.
-- **Hardening of what exists:**
-  - Bridge failure visibility — today a failed Supabase insert is only logged in Apps Script (the row still lives in the Sheet). Add an email-on-failure or a "backfill from sheet" script.
-  - Anon-insert spam guard (shared-secret field checked in the bridge, or move the insert behind an Edge Function) — noted as an accepted risk in `006_google_form_anon_insert.sql`, revisit if abuse appears.
-  - A few unit tests for the pure logic (`ReportsAnalytics.kt`, segment filters, the bridge's `normalize`/`mapMulti`).
-- **Resume/portfolio write-up** of the project — the story is strong: real NGO client, real device testing, security fix found and closed, architecture pivot to Google Forms.
+**Also re-decide before handoff:** the Supabase free-tier pause risk (pauses after 7 days with
+zero DB queries; zero-day backup retention on Free). With the supervisor using the app
+regularly day-to-day, this is less likely to trigger than it was under the old plan, but it's
+still worth a final explicit yes/no before real data depends on it, not an assumption.
 
 ---
 
@@ -97,20 +123,19 @@ Useful while B/C are waiting, and directly serves the portfolio goal:
 
 | # | Question | Who | Blocks |
 |---|---|---|---|
-| 1 | Coexistence vs new number vs stall | Supervisor | All of Track B/D |
-| 2 | Who owns the Google Form / Sheet / Script long-term | Anhad + supervisor | Real-data use of the form |
-| 3 | Who writes/approves the ~20 answers, by when | Supervisor | Track D usefulness |
-| 4 | Which languages | Supervisor | KB + templates |
-| 5 | Supabase free tier vs paid/backup | Anhad | Real-data use |
-| 6 | Does anything more get added to the Google Form (consent, language)? | Anhad | Nothing |
+| 1 | Exact wording for the new WhatsApp message-template categories | Supervisor | Workstream 2's final content (not the build) |
+| 2 | Who owns the new NGO Google account for the Form/Sheet/Script | Supervisor/NGO | Workstream 3A |
+| 3 | Does the Supabase free-tier pause risk matter given real daily app use? | Anhad | Workstream 3, final go-live |
+| 4 | Does the supervisor want more than one notification time per day? | Supervisor | Workstream 1's settings screen scope (default: no, start with one) |
 
 ## 7. Known and accepted (not planned work)
 
-- Follow-up notifications fire same-day but not at an exact time (WorkManager/Doze). Exact alarms deemed not worth the complexity.
+- No WhatsApp Business Platform / Cloud API / Meta Business account anywhere in this project — dropped for good, not deferred.
 - There is one admin account; RLS is `auth.uid() is not null` and signups are disabled.
-- Anyone holding the anon key can insert junk leads (not read/edit/delete).
+- Anyone holding the anon key can insert junk leads via the form bridge (not read/edit/delete) — accepted risk, unchanged.
 - `Realtime` is installed but unused.
+- Exact-alarm notifications still cannot be *guaranteed* to the minute on all Android phones — battery optimization on some OEM skins can still delay them even when done correctly. Be honest about this with the supervisor; "far more reliable than today" is the right framing, not "guaranteed."
 
 ## 8. Suggested order, in one line
 
-Delete test data → free form-link delivery via WhatsApp greeting/quick-reply/QR → move form ownership → **have the Track B meeting and record the outcome** → hand over the Track C worksheet → build Track D slices D-0…D-4 as far as the outcome allows → keep the demo/portfolio work going alongside.
+Fix follow-up notification timing + add the settings screen + show lead names → redesign the WhatsApp message list → test both on the phone → do the three-part ownership handoff (Google account, Supabase, admin login) once everything is verified working.

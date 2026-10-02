@@ -2,12 +2,18 @@
 
 **You are probably a fresh Claude instance with no memory of this project. Start here.**
 
-1. Read **`docs/HANDOFF.md`** — the complete guide (history, architecture, database, build, workflow, decisions, gotchas, open items). Sections 1, 12 and 17 first.
-2. Then `docs/ROADMAP.md` (what to do next) and `docs/PROGRESS.md` (newest engineering facts).
-3. Before doing anything, ask the human what the outcome of the **Track B supervisor meeting** was and what they want to work on (details: HANDOFF §15–§16).
+> ⚠️ **Major pivot, 2026-10-02:** the WhatsApp Business Platform auto-reply bot (Tracks B/C/D)
+> was **abandoned entirely**, not paused. Ignore any older context, doc, or memory suggesting
+> it's still the plan. Current scope is three things: the Google Form intake (done), fixing the
+> follow-up notification system, and redesigning the WhatsApp quick-message buttons. Plus an
+> eventual ownership handoff to the NGO. `docs/ROADMAP.md` is authoritative for current scope.
+
+1. Read **`docs/HANDOFF.md`** — the complete guide (history, architecture, database, build, workflow, decisions, gotchas, open items). Sections 1, 12 and 17 first — and the pivot banner at the top of §0.
+2. Then `docs/ROADMAP.md` (what to do next — **authoritative current scope**) and `docs/PROGRESS.md` (newest engineering facts).
+3. Before doing anything, ask the human which of the three current workstreams they want to work on (ROADMAP.md §3–§5: fix notifications, redesign WhatsApp messages, or the NGO handoff).
 
 ## What this is
-An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO in Pune. The single admin tracks enquiries, follow-ups and contacts. **Track A (the app) is finished and tested on a real phone.** New leads arrive through a **Google Form → Apps Script → Supabase** bridge; there is deliberately **no in-app "add enquiry" screen**. The WhatsApp auto-reply bot (Tracks B/C/D) has not started.
+An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO in Pune. The single admin tracks enquiries, follow-ups and contacts. **The app is finished and tested on a real phone.** New leads arrive through a **Google Form → Apps Script → Supabase** bridge; there is deliberately **no in-app "add enquiry" screen**. **The WhatsApp auto-reply bot (Tracks B/C/D) was abandoned 2026-10-02** after real-world Meta setup hit compounding blockers — see `docs/HANDOFF.md` §15. The project is now simpler: form intake (done) + follow-up notifications (being fixed) + WhatsApp quick-message templates (being redesigned) + a final handoff of the Google/Supabase accounts to the NGO.
 
 ## Rules that prevent mistakes
 1. **The repo is PUBLIC.** Never commit or write into any doc: tokens, keys, passwords, the Supabase service-role key, real families' data, or personal contact details. `local.properties` is gitignored — keep it that way. Use fake data ("TEST …") for tests.
@@ -27,7 +33,9 @@ An Android CRM (Kotlin, Jetpack Compose, MVVM, Supabase) for an elder-care NGO i
 - Login is by **name**; the app synthesizes `name@kalazaleads.app` (Confirm-email is OFF; passwords ≥ 6 chars).
 - The Google Form's **question titles are the contract** with `tools/google-form-bridge/KalazaFormBridge.gs`. Changing a title silently breaks that field (a leading question number like `12. ` and curly apostrophes are ignored since 2026-09-25). Enum lists must stay in sync across `LeadFormOptions.kt`, the SQL check constraints and the bridge maps.
 - Build only from the canonical clone (on Anhad's machine `C:\Dev\kalaza-leads`, not the OneDrive copy).
-- The bot must **never invent facts**, must hand distress and no-match to a human, and must honour opt-outs (`docs/AUTOMATION_DESIGN.md`).
+- **No WhatsApp bot, no Meta account, no Cloud API anywhere in this project** — dropped for good 2026-10-02. If a doc, memory, or earlier conversation implies otherwise, it's describing history, not current scope.
+- Follow-up notifications currently fire at unpredictable times and show only a count, not names — this is a known, currently-being-fixed problem, not a mystery to re-diagnose from scratch (`docs/ROADMAP.md` §3).
+- The WhatsApp quick-message feature (`WhatsAppHelper.kt`) is being expanded from 3 fixed buttons to a categorized, expandable list (`docs/ROADMAP.md` §4) — all templates stay visible regardless of lead pipeline stage (the supervisor's explicit preference, don't add status-gating).
 
 ## Layout
 `app/` Android code (`com.kalazacare.leads`) · `docs/` all documentation · `docs/sql/001…007` migrations (run in order) · `tools/google-form-bridge/` Apps Script source · `gradle/libs.versions.toml` all versions.

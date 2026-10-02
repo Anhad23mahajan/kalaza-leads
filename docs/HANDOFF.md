@@ -34,11 +34,19 @@ Written 2026-09-21. It is meant to be enough, on its own, to continue the projec
 
 ## 0. How to use this document
 
+> **⚠️ Major pivot, 2026-10-02: the WhatsApp Business Platform / auto-reply bot (Tracks B/C/D)
+> was abandoned entirely.** Most of this document was written while that plan was still live,
+> so historical sections (timeline, decision log, §15) describe it accurately as *history*, but
+> **`docs/ROADMAP.md` is the authoritative "what's next" doc** and reflects only the current,
+> simplified project: the Google Form intake (done), fixing follow-up notifications, redesigning
+> the WhatsApp quick-message buttons, and a final ownership handoff to the NGO. Read ROADMAP.md
+> for current scope before trusting any "what's next" statement elsewhere in this file.
+
 **Reading order for a new Claude Code instance**
 1. This file, §1 then §12 (how to behave) then §17 (what not to do with secrets).
-2. `docs/ROADMAP.md` — what to do next.
+2. `docs/ROADMAP.md` — what to do next (**authoritative current scope**).
 3. `docs/PROGRESS.md` — the running engineering log (newest facts about the build).
-4. Then only what the task needs: `docs/GOOGLE_FORM_INTAKE_SPEC.md` (form), `docs/AUTOMATION_DESIGN.md` (bot design), `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` (Meta onboarding), `docs/TRACK_A_TECHNICAL_SUMMARY.md` (feature-by-feature build notes).
+4. Then only what the task needs: `docs/GOOGLE_FORM_INTAKE_SPEC.md` (form), `docs/TRACK_A_TECHNICAL_SUMMARY.md` (feature-by-feature build notes).
 
 **Where facts live (so you don't duplicate them)**
 
@@ -49,28 +57,28 @@ Written 2026-09-21. It is meant to be enough, on its own, to continue the projec
 | Everything, from the start, incl. history and *why* | **this file** |
 | The database schema | `docs/sql/001…007` (run in order) and `Lead.kt` |
 | Google Form questions and bridge setup | `docs/GOOGLE_FORM_INTAKE_SPEC.md`, `tools/google-form-bridge/KalazaFormBridge.gs` |
-| WhatsApp bot rules, sequences, tables | `docs/AUTOMATION_DESIGN.md` |
-| What real healthcare enterprises do on WhatsApp, Meta's AI policy, WhatsApp Flows | `docs/WHATSAPP_CHATBOT_RESEARCH.md` (researched 2026-09-24) |
-| Meta / WhatsApp onboarding decision + steps | `docs/TRACK_B_PAPERWORK_PLAYBOOK.md` |
-| Track B meeting prep (glance sheet / rehearsal script) | `docs/TRACK_B_MEETING_CHEATSHEET.md`, `docs/TRACK_B_SUPERVISOR_MEETING_SCRIPT.md` |
 | Track A feature-by-feature build notes | `docs/TRACK_A_TECHNICAL_SUMMARY.md` |
-| Plain-language script for demoing Track A to the supervisor | `docs/SUPERVISOR_DEMO_SCRIPT_TRACK_A.md` |
+| Plain-language script for demoing Track A to the supervisor | `docs/SUPERVISOR_DEMO_SCRIPT_TRACK_A.md` (written before the pivot — the CRM parts still apply, the Track B/C framing at the end doesn't) |
 
 **Recovering deleted documents.** Some older docs were deliberately deleted as superseded. They still exist in git history. Commit `ffe8913` still contains all three:
 `git show ffe8913:docs/MASTER_PLAN_V2.md` (787 lines — the original three-track plan, supervisor quotes, cost analysis),
 `git show ffe8913:docs/PROJECT_SPEC.md` (the v1 spec),
 `git show ffe8913:docs/TRACK_B_META_ONBOARDING_PLAN.md` (the original Meta research with source links).
+The entire WhatsApp-bot doc set (`AUTOMATION_DESIGN.md`, `WHATSAPP_CHATBOT_RESEARCH.md`,
+`TRACK_B_PAPERWORK_PLAYBOOK.md`, `TRACK_B_MEETING_CHEATSHEET.md`,
+`TRACK_B_SUPERVISOR_MEETING_SCRIPT.md`) was deleted 2026-10-02 when that track was abandoned —
+recoverable the same way from any commit before that date if ever needed for reference.
 
 **Your first 30 minutes (checklist)**
 1. `git clone` the repo, `git log --oneline -5`, and read `CLAUDE.md`, then this file's sections 1, 12 and 17.
-2. Ask Anhad: *What happened in the Track B supervisor meeting? Which of these do you have on this machine: `local.properties` (Supabase URL + anon key), an Android phone, Android Studio? What do you want to work on today?* (Section 15 and section 16 explain why these matter.)
+2. Ask Anhad what he wants to work on today — current scope is `docs/ROADMAP.md`'s three workstreams (notification fix, WhatsApp message redesign, NGO handoff). Which of these do you have on this machine: `local.properties` (Supabase URL + anon key), an Android phone, Android Studio?
 3. Don't assume the build works from your shell: try `gradlew` once; if it fails with a loopback error, ask the human to run it (section 10.4).
 4. Before changing anything, run `git status` and read `docs/PROGRESS.md` (newest facts) and `docs/ROADMAP.md`.
 5. When you finish something: update `docs/PROGRESS.md` (and `ROADMAP.md`), and follow the commit/push routine in section 11.
 
 **Keep this document alive.** When something material changes, update the relevant section and the "Last verified" line below, and keep `docs/PROGRESS.md` and `docs/ROADMAP.md` in step. A stale handoff is worse than none.
 
-Last verified against the repo: **2026-09-21** (main in sync with GitHub). External facts (Meta WhatsApp pricing/limits, Supabase free-tier terms, BSP pricing) last checked by live web search: **2026-09-22** — see the inline notes in §7 and §15 for what changed and the sources.
+Last verified against the repo: **2026-10-02** (main in sync with GitHub, WhatsApp-bot docs removed after the pivot — see the banner at the top of §0). Earlier external facts (Meta WhatsApp pricing/limits, Supabase free-tier terms, BSP pricing), last checked **2026-09-22**, are now historical only — the Meta-related ones no longer apply to this project; see §15 for the pivot and why.
 
 ---
 
@@ -78,14 +86,14 @@ Last verified against the repo: **2026-09-21** (main in sync with GitHub). Exter
 
 - **What it is:** *Kalaza Leads* — an Android app (Kotlin, Jetpack Compose, Supabase) that helps an elder-care NGO in Pune (**Kalaza Care**) never lose an enquiry from a family asking about care for a parent. It tracks every enquiry, schedules follow-ups, keeps a contact log, and reports on conversion.
 - **Who built it:** Anhad Mahajan, solo, as a portfolio/coursework project for a real client (the NGO supervisor is the requester).
-- **State (2026-09-21):**
-  - **Track A — the Android CRM: 100% built and tested on a real phone.** Login, leads list (7 tabs), lead detail/edit, contact log, follow-up notifications, CSV export, reports, one-tap WhatsApp (`wa.me`). **It is a single-admin app (2026-09-24): exactly one person uses it, so there is no staff roster, no roles and no lead assignment.**
+- **State (2026-10-02):**
+  - **The Android CRM: 100% built and tested on a real phone.** Login, leads list (7 tabs), lead detail/edit, contact log, follow-up notifications, CSV export, reports, one-tap WhatsApp (`wa.me`). **It is a single-admin app (2026-09-24): exactly one person uses it, so there is no staff roster, no roles and no lead assignment.**
   - **Security:** there is **no signup in the app**. The one admin account is created in the Supabase dashboard and "Allow new users to sign up" is switched OFF (`docs/sql/007_single_admin.sql`). (On Sep 17 signup had been gated by a staff roster; that machinery was removed with the move to a single admin.)
   - **Intake moved to a Google Form** feeding the same database through a Google Apps Script bridge. The in-app "New Enquiry" screen was **deleted on purpose**. Verified end-to-end.
-  - **Track B (Meta/WhatsApp Business onboarding), Track C (NGO-written content), Track D (the auto-reply bot): not started.** They depend on decisions and paperwork only the NGO can supply.
-- **The supervisor's real priority is the WhatsApp auto-reply bot** (Track D). The CRM was the unblocked part, so it was built first.
-- **What's next:** see `docs/ROADMAP.md`. In one line: tidy loose ends → get the Track B decision from the supervisor → collect NGO content → build the bot in thin slices.
-- **The Supabase project and the Google Form/Sheet/Script belong to Anhad's personal accounts.** You cannot reach them without Anhad. See §17–§18.
+  - **⚠️ 2026-10-02 pivot: the WhatsApp Business Platform auto-reply bot (Tracks B/C/D) was abandoned entirely** after hitting compounding real-world blockers during the actual Meta setup (number migration, payment-method rules, business verification). It is not paused — it's dropped. See §15.
+  - **Current work instead:** two known-broken/incomplete features need fixing — the follow-up notification system (fires at random times, shows only a count not names) and the WhatsApp quick-message buttons (3 fixed templates, the supervisor wants a categorized expandable list instead). See `docs/ROADMAP.md`.
+- **What's next:** see `docs/ROADMAP.md` — the authoritative current plan. In one line: fix notification timing + add a settings screen + show lead names → redesign the WhatsApp message list → final ownership handoff to the NGO (Google account, Supabase, admin login).
+- **The Supabase project and the Google Form/Sheet/Script belong to Anhad's personal accounts, and still need to be handed off to the NGO before the project is truly finished** — see `docs/ROADMAP.md` §5. You cannot reach the live ones without Anhad. See §17–§18.
 
 ---
 
@@ -108,7 +116,7 @@ Last verified against the repo: **2026-09-21** (main in sync with GitHub). Exter
 - *Why Android and not web.* The first recommendation was Flask + Supabase on a hosted server (a CRM is a "desk tool"). Two facts flipped it: it's **solo** (so team-skill arguments vanish) and **reusing the Kalaza Care skeleton** is a big accelerant; also the killer feature — "3 follow-ups due today" — is best as a phone notification, and `wa.me` is smoother on the phone. Acknowledged weaknesses of Android: typing long medical notes on a phone is unpleasant (which is partly why intake later moved to a Google Form), and reports look cramped (mitigated by CSV export).
 - *Deployment correction.* An early message wrongly assumed Kalaza Care used Railway; Railway belonged to a different project. The web-hosting discussion (Render / PythonAnywhere) became moot once Android was chosen: only the thin serverless layer (Supabase Edge Functions) needs hosting.
 - *Security principles fixed on day one:* the Claude API key must never be in the APK (all AI calls go through Edge Functions); no secrets in a shared Claude cloud environment's env-var box; scheduled jobs and the WhatsApp bot run server-side. Consent/sensitivity: the app stores medical history and budgets of elderly people — collect only what's needed, get consent before messaging, keep access staff-only.
-- *Three places AI was meant to earn its place (still future):* drafting personalised messages, parsing a pasted raw WhatsApp enquiry into fields, summarising a lead's history — all via Edge Functions. See `docs/AUTOMATION_DESIGN.md` for the current, stricter role of AI (matching, translating approved answers, extracting fields — never inventing facts).
+- *Three places AI was meant to earn its place (never built, now moot):* drafting personalised messages, parsing a pasted raw WhatsApp enquiry into fields, summarising a lead's history — all via Edge Functions that were never built. The doc that described AI's stricter intended role (`AUTOMATION_DESIGN.md`) was deleted 2026-10-02 along with the rest of the WhatsApp-bot plan (§15) — no AI features exist or are planned anywhere in this project now.
 
 **Naming/packaging.** Repo `kalaza-leads`; Android package `com.kalazacare.leads` ("one product family, two apps"); teal theme deliberately distinct from Care's red so both apps can sit on one phone.
 
@@ -171,6 +179,10 @@ Dates are 2026. Commit hashes are anchors you can `git show`. (Sessions were lon
 
 **Sep 25 (last) — question 1 reworded.** "How did *they* first contact us?" became "How did *you* first contact us?" (it is answered by the family, not staff). The bridge was updated first to accept both titles (new title first, old as fallback), the live Apps Script was re-verified byte-identical to the repo file, and only then was the form question renamed with a one-off `FormApp` script (deleted afterwards). Offline tests cover new title, old title, unnumbered title and absent answer.
 
+**Oct 1 — Track B execution begins, for real.** With the supervisor's centre phone physically in hand, the actual Meta setup started: a Meta Business Portfolio ("Kalaza Care") was created under a real personal Facebook account (had to wait out Meta's "account too new" anti-fraud hold), a Meta Developer App ("Kalaza Care Assistant") was created and attached to it, the WhatsApp use case was added, and phone-number registration was attempted for the centre's number (already active in the WhatsApp Business app, real family chats, confirmed backed up). Registration hit a wall: the Cloud API wizard reported the number "already registered to a WhatsApp account," and its in-wizard "disconnect" link pointed at a WhatsApp Business Account the logged-in account had no access to — a dead end. The standard fix (deleting the WhatsApp Business account from the phone itself, Settings → Account → Delete my account) was explained and approved in principle, but **never executed** — the pivot below happened first. The centre phone's WhatsApp Business app was never touched.
+
+**Oct 2 — the pivot: WhatsApp Business Platform abandoned.** Anhad: *"we are gonna give up on the auto-reply whatsapp business integration part of the idea from our project 100%... we tried multiple ways... there were too many problems."* Full rationale and what replaces it: §15 and `docs/ROADMAP.md`. The five WhatsApp-bot-specific docs (`AUTOMATION_DESIGN.md`, `WHATSAPP_CHATBOT_RESEARCH.md`, `TRACK_B_PAPERWORK_PLAYBOOK.md`, `TRACK_B_MEETING_CHEATSHEET.md`, `TRACK_B_SUPERVISOR_MEETING_SCRIPT.md`) were deleted; `ROADMAP.md` and this file were rewritten to reflect the new three-workstream scope (fix follow-up notifications, redesign the WhatsApp quick-message buttons, final NGO handoff). The half-created Meta Business Portfolio/Developer App from Oct 1 were left as-is — nothing was ever paid for or verified, so there is nothing to clean up.
+
 ---
 
 ---
@@ -225,33 +237,38 @@ Columns as he listed them: enquiry date · enquirer · required for? · location
 
 ```
                          FAMILY / ENQUIRER
-              ┌──────────────┬──────────────────────┐
-     phone / walk-in / WhatsApp        (future) WhatsApp bot
-              │                                    │
-              ▼                                    ▼
-   Google Form (24 questions)        Meta WhatsApp Cloud API   ← NOT BUILT (Track B/D)
-              │                                    │ webhook
-              ▼                                    ▼
-   Google Sheet (responses)          Supabase Edge Functions   ← NOT BUILT (Track D)
-              │  onFormSubmit trigger              │
-              ▼                                    │
-   Apps Script bridge  ──HTTPS POST (anon key)──►  │
-              │                                    │
-              ▼                                    ▼
+                    phone / walk-in / WhatsApp
+                              │
+                              ▼
+                 Google Form (24 questions)
+                              │
+                              ▼
+                Google Sheet (responses)
+                   │  onFormSubmit trigger
+                   ▼
+   Apps Script bridge  ──HTTPS POST (anon key)──►
+                                                   │
+                                                   ▼
         ┌──────────────────────────────────────────────┐
         │  SUPABASE  (Postgres + Auth + RLS)           │
         │  tables: leads, contact_activities       │
         │  Auth: single admin, signups off             │
         └──────────────────────────────────────────────┘
                               ▲
-                              │  supabase-kt (Auth + Postgrest), signed-in staff only
+                              │  supabase-kt (Auth + Postgrest), signed-in admin only
                     ┌────────────────────┐
                     │  ANDROID APP       │  Kotlin + Compose, MVVM
-                    │  (Kalaza Leads)    │  the admin reads/edits the same tables
+                    │  (Kalaza Leads)    │  the admin reads/edits the same tables,
+                    │                    │  gets local follow-up notifications,
+                    │                    │  sends wa.me quick-messages manually
                     └────────────────────┘
 ```
 
-**The single most important design rule:** the Android app and the (future) WhatsApp bot **never talk to each other**. Both talk to the same database. That makes them feel like one product while being buildable and blockable independently.
+**⚠️ This diagram previously showed a second path through "Meta WhatsApp Cloud API" and
+"Supabase Edge Functions" for an auto-reply bot (Tracks B/C/D). That path was abandoned
+2026-10-02 (§15) — there is no server-side messaging component in this project. Everything
+the app does with WhatsApp is the local `wa.me` deep-link approach shown above: the admin
+picks a message, reviews it, and sends it manually from his own phone.**
 
 **App pattern:** `Repository` (talks to Supabase) → `ViewModel` (exposes a `StateFlow` of a state data class) → Composable `Screen` (collects state, renders, calls ViewModel). `MainActivity.onCreate` constructs every repository and ViewModel once and passes them down. **No DI framework and no `NavHost`** — a private `enum class Screen { LOGIN, LEADS, LEAD_DETAIL, STAFF, REPORTS }` held in `mutableStateOf` and a `when` choose what to render. Deliberately simple for a solo project at this size.
 
@@ -298,7 +315,7 @@ tools/google-form-bridge/KalazaFormBridge.gs   Apps Script source (pasted into G
 | `ui/leads/LeadFormOptions.kt` | **Shared enum lists + display labels** (must stay in sync with the SQL check constraints and with the Apps Script maps) |
 | `ui/leads/LeadExport.kt` | CSV export of the currently open tab + share sheet via `FileProvider` |
 | `ui/leads/ReportsAnalytics.kt`, `ReportsScreen.kt` | Pure analytics functions and the Reports UI |
-| `ui/leads/WhatsAppHelper.kt` | The three static message templates and the `wa.me` deep link builder |
+| `ui/leads/WhatsAppHelper.kt` | The three static message templates and the `wa.me` deep link builder — **being expanded into a larger, categorized template list** (`docs/ROADMAP.md` §4) |
 | `ui/theme/` | Teal Material 3 theme (`Color/Shape/Theme/Type`) |
 
 **Note on file names:** `LeadFormOptions.kt` and `FormComponents.kt` still carry "form" names from when there was an in-app Add Enquiry form; they are still used by the detail/edit screen.
@@ -352,8 +369,8 @@ All verified end-to-end on a real Android phone. Deep build notes: `docs/TRACK_A
 - **Leads screen (A5).** Seven scrollable tabs, each with a live count, all client-side filters over the already-fetched list: **Follow-ups Due** (follow-up date ≤ today and status not terminal, sorted by date), **All**, **Active** (NEW…CONSIDERING), **Converted**, **Not Converted** (cards show the reason), **Dormant**, **Backup**. Terminal statuses = CONVERTED, NOT_CONVERTED, DORMANT.
 - **Lead detail / edit (A2).** Every field editable, status with conditional not-converted reason/detail, planned vs actual visit date, final remarks. Saves via `UpdateLeadRequest`. **Since 2026-09-25** the section order follows the form (Pipeline → how they reached out → enquirer → patient → requirement → notes → scheduling → WhatsApp → contact log → outcome), the country-code picker is gone (the stored code is kept untouched; new leads are +91), the relation/service/room-type pickers offer only what the form offers (`*_OFFERED` lists in `LeadFormOptions.kt`) but still show a lead's current value if it was removed from the form, the screen title shows the patient's name, and Cancel is an outlined button.
 - **Contact log (A3).** Log a call/WhatsApp/visit/email/SMS with direction, outcome, optional callback date and notes; timeline shown newest first. This is the supervisor's "proof it happened" feature.
-- **Follow-up notifications (A4).** Local, not server push: WorkManager runs every 24 h (first run targets ~9 am), queries leads whose follow-up is due, filters terminal statuses, and shows one device notification if any exist; tapping opens the app. It awaits Supabase auth initialisation and no-ops if nobody is logged in. Needs the Android 13+ `POST_NOTIFICATIONS` permission (requested at launch). **Known, accepted limitation:** Doze can delay it by hours (observed: fired same-day evening). Exact alarms were rejected as not worth the complexity. True server push needs Firebase Cloud Messaging and a backend (Track D).
-- **`wa.me` messaging (A7).** Three static, personalised drafts (Thank You, Follow-up, Visit Feedback) opened in WhatsApp via a deep link; staff review and press send. Zero cost, zero Meta dependency, no ban risk. Not AI-generated.
+- **Follow-up notifications (A4).** Local, not server push: WorkManager runs every 24 h (first run targets ~9 am), queries leads whose follow-up is due, filters terminal statuses, and shows one device notification if any exist; tapping opens the app. It awaits Supabase auth initialisation and no-ops if nobody is logged in. Needs the Android 13+ `POST_NOTIFICATIONS` permission (requested at launch). **⚠️ No longer just an "accepted limitation" — this is now an active problem the supervisor is hitting daily** (random firing times, no per-lead detail in the notification). "Exact alarms rejected as not worth the complexity" is **reversed** as of the 2026-10-02 pivot — see `docs/ROADMAP.md` §3 for the fix plan (self-rescheduling exact alarm + a settings screen + lead names in the notification). True server push (FCM) is still not applicable — there is no backend in this project and never will be now that Track D is dropped.
+- **`wa.me` messaging (A7).** Three static, personalised drafts (Thank You, Follow-up, Visit Feedback) opened in WhatsApp via a deep link; staff review and press send. Zero cost, zero Meta dependency, no ban risk. Not AI-generated. **Being redesigned as of 2026-10-02** — the supervisor wants a categorized, expandable list of templates instead of 3 fixed buttons; see `docs/ROADMAP.md` §4.
 - **CSV export (A6).** Share icon exports whichever tab is open (respecting its filter), with human-readable labels, via the Android share sheet. **CSV, not .xlsx, on purpose** — Apache POI has known Android problems and would bloat the APK; CSV opens in Excel/Sheets/WhatsApp.
 - **No staff / roles / assignment** (removed 2026-09-24): one admin uses the app, so the Staff screen, the roster and the "Assigned to" dropdown are gone.
 - **Reports (A9).** All computed client-side (`ReportsAnalytics.kt`, pure functions): overview (total, converted, conversion rate, median days-to-convert), pipeline funnel, breakdowns by source / service (a lead counts toward every service it listed), not-converted reasons ranked, **Unmet demand** (free-text detail for `amenity_missing`/`service_not_offered` — the "why we lose families" report), budget distribution. Bars are plain `Box` fractions, no chart library.
@@ -549,7 +566,10 @@ Read this before "improving" something that looks odd — it may have been a del
 | Sep 17 | Doc cleanup: delete `PROJECT_SPEC.md`, first Meta research doc | Fully superseded | Done |
 | Sep 18 | Trim Master Plan → `AUTOMATION_DESIGN.md`; add `ROADMAP.md` | "it's all a little confusing" | Done |
 | Sep 24 | **Single admin: remove staff roster, roles, assignment and the signup gate** | Exactly one person uses the app; the multi-user machinery was dead weight and the roster gate had a residual weakness (unclaimed names). No signup + disabled signups is simpler and safer | Code + `007` written; run order in the SQL header |
-| — | **Not built on purpose:** FCM, exact alarms, xlsx, forgot-password, lead→resident handoff, Cloud API/webhook, AI features | See rows above / Track D | Open or rejected as stated |
+| Oct 1 | Aug 27's "exact alarms rejected" call is **reversed** | The timing imprecision stopped being a tolerable curiosity and became a daily real problem for the supervisor once notifications were actually in regular use | New plan: self-rescheduling exact alarm + settings screen (`ROADMAP.md` §3) |
+| Oct 2 | **Abandon the WhatsApp Business Platform integration entirely (Tracks B/C/D)** | Compounding real-world blockers during actual Meta setup (number-migration dead end, unclear payment-method rules, business verification paperwork) made it clearly not viable to finish as a solo student project in reasonable time | **Final.** Not paused — dropped. Replaced by: fix notifications, redesign WhatsApp quick-messages, NGO handoff (`ROADMAP.md`) |
+| Oct 2 | Keep all WhatsApp quick-message templates visible regardless of lead pipeline stage (no status-based gating) | Supervisor wants freedom to pick any message at any time based on his actual conversation with the family, not have the app guess | Final, confirmed by Anhad |
+| — | **Not built on purpose:** FCM, xlsx, forgot-password, lead→resident handoff, Cloud API/webhook, AI features, any Meta/WhatsApp Business Platform integration | See rows above | Rejected/abandoned as stated |
 
 ---
 
@@ -604,41 +624,47 @@ Read this before "improving" something that looks odd — it may have been a del
 
 ---
 
-## 15. Track B / C / D — the WhatsApp automation
+## 15. Track B / C / D — the WhatsApp automation (ABANDONED 2026-10-02)
 
-**Status: not started.** It waits on decisions and paperwork only the NGO can supply. The plan and the honest analysis are in the docs below; this section is the orientation.
+**Status: dropped entirely, not paused.** This section is kept as history — read it to understand
+*why* the project used to have a different shape, and why it doesn't anymore. For current scope,
+see `docs/ROADMAP.md`.
 
-**Track meanings**
-- **Track A** — the Android CRM: **done.**
-- **Track B** — Meta/WhatsApp Business Platform onboarding: business account, verification documents, payment method, number decision, templates. NGO-side; Anhad advises.
-- **Track C** — NGO-authored content: the ~20 FAQ answers, price list PDF, five service info packs, posters/videos/links, template wording, Hindi/Marathi versions. **The single biggest schedule risk** — Anhad can't write facility facts.
-- **Track D** — the automation: webhook receiver, reply engine, scheduler, message logging (design in `docs/AUTOMATION_DESIGN.md`; slices D-0…D-6 in `docs/ROADMAP.md`). Gated on B and C.
+**What it used to be.** Tracks B (Meta/WhatsApp Business Platform onboarding: business account,
+verification documents, payment method, number decision, templates), C (NGO-authored FAQ content),
+and D (the actual auto-reply automation: webhook receiver, reply engine, scheduler) were planned
+as the real "product" the supervisor wanted — he came back to the idea of automatic WhatsApp
+replies more than any other request (§4.1). Deep research went into the Meta Cloud API, Coexistence
+vs. a dedicated number, pricing, and business verification requirements; see the decision log (§13)
+for the full back-and-forth.
 
-**The core technical truth.** An app can never read WhatsApp. The only legitimate way is for the NGO's number to be enrolled in Meta's WhatsApp Business Platform (Cloud API): Meta forwards each incoming message to a webhook we host and we reply through the API. Non-official automation (whatsapp-web.js / Baileys) violates WhatsApp's terms and gets numbers banned — never use it on the NGO's number.
+**What actually happened (2026-10-01–02).** With the supervisor's centre phone in hand, Anhad and
+the supervisor did the real Meta setup: a Business Portfolio, a Developer App, and an attempt to
+register the centre's existing WhatsApp Business number with the Cloud API. It hit a dead end —
+the number was "already registered to a WhatsApp account" and the wizard's own "disconnect" link
+pointed at an inaccessible asset. Combined with unresolved open questions from the original plan
+(whether the centre number was the NGO's main number or a free one; unclear payment-method
+requirements; business verification paperwork with up to a 14-business-day SLA), Anhad concluded
+on 2026-10-02 that this path was not going to resolve in a reasonable time for a solo student
+project, and **dropped it completely**: *"we tried multiple ways, there were too many problems...
+keep it simplistic."*
 
-**The one decision needed from the supervisor** (`docs/TRACK_B_PAPERWORK_PLAYBOOK.md`; numbers re-verified by live web search 2026-09-22 — one material change found, see the callout after the table):
+**What survived the pivot, repurposed:** the 3 WhatsApp quick-message templates built as the
+"free MVP bridge" back in Track A (`wa.me` deep links — see §8) turned out to be the right design
+all along, just needing a richer template list. The follow-up-notification idea also survives, now
+with more urgency on fixing its timing. Both are now first-class work, not stopgaps — see
+`docs/ROADMAP.md` §3–§4.
 
-| | Option A — keep the existing number ("Coexistence") | Option B — a new dedicated number |
-|---|---|---|
-| Idea | Staff keep using the WhatsApp Business app on the same number while automation runs alongside | A second SIM/number used only by the bot |
-| Needs a Tech Provider/BSP? | **Yes** (Meta requires the connecting developer to be one) | **No** |
-| Needs Meta App Review? | Only on the free self-Tech-Provider route (no guaranteed timeline; time-box 2–3 weeks) | **No** |
-| Ongoing cost | ~₹550–650/yr Meta fees if the self-Tech-Provider attempt succeeds; else ~₹18,000–30,000/yr for a paid BSP (AiSensy from ~₹1,500/mo, Interakt ~₹2,142/mo, Wati from ~₹2,499/mo) | ~₹550–650/yr Meta fees + a basic SIM plan |
-| Trade-offs | Loses some features (group sync, disappearing messages, view-once, live location; broadcast lists read-only; WhatsApp for Windows unsupported; linked devices unlinked); needs Business app v2.24.17+ | Two numbers to run; the new number must be republished wherever the NGO shares its WhatsApp contact |
+**What did NOT survive, with no plan to revisit:** any Meta Business Portfolio/Developer App/Cloud
+API integration, the ~20-FAQ-answer knowledge base content worksheet, webhook receivers, message
+logging tables, AI-drafted replies, WhatsApp Flows as a form replacement, and the entire
+Coexistence-vs-dedicated-number decision. The half-created Meta assets from Oct 1 ("Kalaza Care"
+Business Portfolio, "Kalaza Care Assistant" Developer App) were left as-is — nothing was ever paid
+for or verified, so there was nothing to clean up, and nothing in this repo depends on them.
 
-> ⚠️ **Material update (verified 2026-09-22): the "replies are free" framing expires 1 October 2026.** From that date Meta charges ₹0.115/message for service replies and for utility templates sent inside the 24-hour window (both previously free) — but every phone number still gets **1,000 free service messages/month**, resetting monthly. At this NGO's real volume (~200–400 enquiries/year) that allowance almost certainly still covers everything, so the ~₹550–650/yr estimate probably still holds — but say "the first ~1,000 replies a month are free, and our volume is nowhere near that" to the supervisor, not "replies are unlimited free." Also: Meta describes Tech Provider enrollment for Option A as *mandatory* now (not just recommended), and **Embedded Signup v2 (used to onboard existing numbers under Coexistence) is deprecated 8 October 2026** — Option A must be built against **v4** from then on. Details and sources: `TRACK_B_PAPERWORK_PLAYBOOK.md`'s top-of-file note and §8/§10.
-
-The docs recommend **Option B as the cost-safe default**; the decision is the supervisor's. **A new number does NOT remove:** the Meta Business Portfolio, business verification (trust deed / society registration + GST or Udyam + address proof, name and address must match exactly; Meta's SLA is up to 14 business days, many clean submissions clear in 1–5), the payment method, message-template approval, the Track C content, or the Track D coding.
-
-**Universal steps** (either option): Business Portfolio (owned by the **NGO**, not an individual) → business verification → payment method (an NGO-controlled card) → number path (A or B) → templates (Utility category for follow-ups; each language is a separate submission). Unverified accounts start with a 250-contacts/day allowance and show a raw number instead of the business name — the plan is still to verify. Meta pricing (India, verified 2026-09-22): utility/authentication/service ₹0.115/message, marketing ₹0.8631/message, first 1,000 service messages/month/number free — **re-check Meta's current rate card before quoting numbers**, as rates and allowances do change.
-
-**Supervisor decision (reported by Anhad 2026-09-25): use the NGO centre's phone** — the supervisor has two phones, a personal one and the centre's, and the assistant is to run on the **centre phone's number** (the Meta Business account is to be created around that). A plain-language plan for him lives outside the repo at `Downloads\Kalaza_Care_WhatsApp_Assistant_Plan_Simple.docx` (dated 24 Sep 2026): assistant on a *separate* number, ₹0, no bank card, staff-sent follow-ups after the 24-hour window, ~20 answers from the care team, 6 steps. **Open issues found on review (2026-09-25):** (1) the plan assumes a *second* number, but the centre phone's number may be the main one families already message — then registering it to the Cloud API would knock it out of the WhatsApp app (needs Coexistence + a Tech Provider/BSP to keep both); (2) "no card needed / ₹0" is contradicted by secondary sources saying Meta blocks outgoing API messages without a payment method on file, and Meta's own page only confirms service messages become chargeable on 1 Oct 2026 (the 1,000-free-per-month allowance is from secondary sources — verify); (3) the plan omits **business verification** (documents, up to 14 business days). Track B is therefore *decided in principle, not yet executed*. (Earlier note, kept for history:) A supervisor meeting was expected Sep 17. Anhad said beforehand he was ~90% sure the supervisor would choose the new-number plan — an expectation, not a recorded result. **Ask Anhad what happened and record it in `ROADMAP.md` and `PROGRESS.md`** — everything downstream branches on it. Meeting aids: `TRACK_B_MEETING_CHEATSHEET.md` (glance sheet; four asks — does a Business Portfolio exist and who's admin; trust/society and where are the documents; who gets a new SIM; who writes the 20 answers and by when) and `TRACK_B_SUPERVISOR_MEETING_SCRIPT.md` (rehearsal script).
-
-**Free interim wins** (no API needed): WhatsApp Business *app* greeting message, away message and quick replies (e.g. `/form`, `/palliative`), plus a printed QR code for the intake form — the supervisor gets a visible "automatic reply" within days.
-
-**Design rules for the bot** (non-negotiable, in `AUTOMATION_DESIGN.md`): answer only from an NGO-approved knowledge base; hand off to a human on no match or distress; never negotiate price or give medical advice; be honest it's a bot; per-language templates; honour opt-outs; log every message. **Open design question:** with the Google Form collecting details, should the bot just send the form link instead of asking qualifying questions one by one?
-
-**Track D can start before Track B completes** on placeholder answers (slice D-0), and possibly against Meta's sandbox test number for D-1 (confirm its current limits in the developer console — unverified).
+**The centre phone's WhatsApp Business app was never touched** — the one irreversible step in the
+old plan (deleting its account to free the number for the Cloud API) was explained and approved in
+principle but never executed before the pivot happened. No recovery action is needed there.
 
 ---
 
@@ -646,33 +672,32 @@ The docs recommend **Option B as the cost-safe default**; the decision is the su
 
 ## 16. Open items and next steps
 
-The prioritised plan is `docs/ROADMAP.md`. This is the complete list of loose ends as of 2026-09-21, so nothing depends on anyone's memory.
+The prioritised plan is `docs/ROADMAP.md` (rewritten 2026-10-02 after the pivot — it is the
+authoritative "what's next," this list is a supplement with housekeeping detail).
 
-**Needs a decision or action from Anhad / the supervisor**
-1. **Record the Track B meeting outcome** (§15) — everything in Track B/D branches on it.
-2. **Hand over the Track C worksheet**: ~20 FAQ answers (list in `AUTOMATION_DESIGN.md` §5), price-list PDF, five service info packs, posters/links. Ask for ~5 answers a week with a date attached.
-3. **Decide the languages** enquiries actually come in (English/Hindi/Marathi) — shapes the knowledge base and every template.
-4. **Ownership of the Google Form / response Sheet / Apps Script.** They live in Anhad's *personal* Google account and will hold real families' medical/contact data. Move to (or co-own with) an NGO account and decide who may see the Sheet.
-5. **Supabase free-tier decision** for real data — verified 2026-09-22: pauses after 7 days with zero DB queries (restorable up to 1 year, then deleted), and there is no backup system at all on the Free plan (0-day retention). Options: a scheduled export/backup script, keep the project 'warm' with a periodic real query, or upgrade to Pro (paid plans can't be paused).
-6. **Deliver the form link to enquirers**: put it in the WhatsApp Business app's greeting message and a `/form` quick reply; print a QR code for the front desk.
+**Current workstreams (see `ROADMAP.md` §3–§5 for full detail)**
+1. **Fix the follow-up notification system** — replace periodic WorkManager with a self-rescheduling exact alarm, add a supervisor-facing settings screen for the trigger time, and show actual lead names/details in the notification instead of just a count.
+2. **Redesign the WhatsApp quick-message feature** — expand from 3 fixed buttons to a categorized, expandable list of templates; exact wording for the new categories still needs the supervisor's input (placeholder wording can unblock the build).
+3. **End-of-project handoff to the NGO** — three separate things to move: the Google Form/Sheet/Script (off Anhad's personal Gmail), the Supabase project (add the NGO as Owner), and the app's internal admin login (create one for whoever will actually use it day-to-day).
+
+**Needs a decision from Anhad / the supervisor**
+4. **Supabase free-tier decision** for real data — verified 2026-09-22: pauses after 7 days with zero DB queries (restorable up to 1 year, then deleted), and there is no backup system at all on the Free plan (0-day retention). Re-decide at handoff time given the app is now the sole interface (daily use likely keeps it active on its own, but don't assume).
+5. Does the supervisor want more than one notification time per day, or is one configurable time enough to start?
 
 **Housekeeping**
-7. ~~Delete test leads~~ **Done 2026-09-25:** the 5 old test leads and the one contact-log entry were deleted from Supabase; one test lead ("Anhad Test", from the 2026-09-25 form test) was deliberately kept for demos. A second test lead, "TEST Round Three" (the 15:45 end-to-end date test), was created afterwards. **Delete both before real families' data goes in.** (The response Sheet also still holds all earlier test rows.)
-8. **Revoke every outstanding GitHub PAT** at `github.com/settings/personal-access-tokens`, and confirm none is left active. Many were pasted into chat over the project's life and revocation was never confirmed for all.
-9. ~~Review Supabase Auth users~~ **Done 2026-09-25:** there were 33 accounts (32 junk ones from when signup was open); the 32 were deleted, leaving exactly one Auth user, `anhad@kalazaleads.app`. Verified by count (1 user, 1 lead, 0 activities).
-10. ~~Apply the single-admin change~~ **Done 2026-09-25:** `007_single_admin.sql` was run (2026-09-24), and "Allow new users to sign up" was switched OFF in Supabase (Authentication → Sign In / Providers) on 2026-09-25. **Still to verify on the phone:** the build with the reworked lead-detail screen (committed, not yet built/installed).
-11. **Docs**: `docs/PROGRESS.md` and `docs/GOOGLE_FORM_INTAKE_SPEC.md` had a few stale statements (in-app form still described in places; the spec's §1 table lists number-range validations the built form lacks). These were corrected on 2026-09-21; if you find more, fix them.
+6. ~~Delete test leads~~ **Done 2026-09-25:** the 5 old test leads and the one contact-log entry were deleted from Supabase; one test lead ("Anhad Test", from the 2026-09-25 form test) was deliberately kept for demos. A second test lead, "TEST Round Three" (the 15:45 end-to-end date test), was created afterwards. **Delete both before real families' data goes in.** (The response Sheet also still holds all earlier test rows.)
+7. **Revoke every outstanding GitHub PAT** at `github.com/settings/personal-access-tokens`, and confirm none is left active. Many were pasted into chat over the project's life and revocation was never confirmed for all.
+8. ~~Review Supabase Auth users~~ **Done 2026-09-25:** there were 33 accounts (32 junk ones from when signup was open); the 32 were deleted, leaving exactly one Auth user, `anhad@kalazaleads.app`. Verified by count (1 user, 1 lead, 0 activities).
+9. ~~Apply the single-admin change~~ **Done 2026-09-25:** `007_single_admin.sql` was run (2026-09-24), and "Allow new users to sign up" was switched OFF in Supabase (Authentication → Sign In / Providers) on 2026-09-25. **Still to verify on the phone:** the build with the reworked lead-detail screen (committed, not yet built/installed).
+10. **Docs**: on 2026-10-02 the entire WhatsApp-bot doc set was deleted and `ROADMAP.md`/this file rewritten for the pivot. If you find a remaining stale reference to Track B/C/D elsewhere (e.g. in `PROGRESS.md`, `TRACK_A_TECHNICAL_SUMMARY.md`, `SUPERVISOR_DEMO_SCRIPT_TRACK_A.md` — all written before the pivot and left as historical record, not rewritten), it's safe to leave as history but flag it if it could mislead someone about current scope.
 
 **Optional / later**
-12. Form additions: consent checkbox (`consent_given`), preferred-language dropdown (`preferred_language`), age/budget number validation. Steps: `GOOGLE_FORM_INTAKE_SPEC.md` §6 (+ add a `getAnswer` line in the bridge for each new question).
-13. Bridge hardening: today a failed insert is only logged in Apps Script Executions (the Sheet row still exists). Add an email-on-failure and/or a "backfill from Sheet" script; optionally an anon-spam guard (shared secret checked in the bridge, or an Edge Function).
-14. *(removed — roles no longer exist; single admin)*
-15. Replace deprecated `Icons.Filled.ArrowBack` (§10.7).
-16. Unit tests for pure logic (`ReportsAnalytics.kt`, the tab filters, the bridge's `normalize`/`mapMulti`).
-17. Exact-time notifications (AlarmManager) or real push (FCM) — only if the timing proves to matter or Track D exists.
-18. Lead → resident handoff into Kalaza Care (deferred; the databases are separate).
-19. Portfolio: a 2–3 minute demo recording of the whole loop, README screenshots, a project write-up.
-20. **Track D** slices D-0…D-6 (`ROADMAP.md` §4) once B/C give a foothold.
+11. Form additions: consent checkbox (`consent_given`), preferred-language dropdown (`preferred_language`), age/budget number validation. Steps: `GOOGLE_FORM_INTAKE_SPEC.md` §6 (+ add a `getAnswer` line in the bridge for each new question).
+12. Bridge hardening: today a failed insert is only logged in Apps Script Executions (the Sheet row still exists). Add an email-on-failure and/or a "backfill from Sheet" script; optionally an anon-spam guard (shared secret checked in the bridge, or an Edge Function).
+13. Replace deprecated `Icons.Filled.ArrowBack` (§10.7).
+14. Unit tests for pure logic (`ReportsAnalytics.kt`, the tab filters, the bridge's `normalize`/`mapMulti`).
+15. Lead → resident handoff into Kalaza Care (deferred; the databases are separate).
+16. Portfolio: a 2–3 minute demo recording of the whole loop, README screenshots, a project write-up.
 
 ---
 
@@ -731,7 +756,11 @@ GitHub holds all source, all docs, the SQL migrations and the Apps Script. It do
 
 ## 19. Glossary
 
-- **Track A / B / C / D** — A: the Android CRM (done). B: Meta/WhatsApp onboarding. C: NGO-written content. D: the WhatsApp automation engine.
+*Note: the terms below from "Track B" onward describe the WhatsApp Business Platform plan
+**abandoned 2026-10-02** (§15). They're kept because they still appear in historical sections
+of this file (timeline, decision log) — nothing in the current project uses them.*
+
+- **Track A / B / C / D** — A: the Android CRM (done, still the current app). B: Meta/WhatsApp onboarding (abandoned). C: NGO-written content for the bot (abandoned). D: the WhatsApp automation engine (abandoned).
 - **Enquirer / patient** — the person contacting the NGO (often a son/daughter) vs. the elderly person the care is for. Tracked separately on purpose.
 - **Lead** — one enquiry; a row in `leads`.
 - **Converted** — the family started living at the facility (supervisor's definition). **Days-to-convert** = converted date − enquiry date.

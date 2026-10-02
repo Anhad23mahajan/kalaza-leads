@@ -9,6 +9,12 @@ in build order. For the non-technical version (for the NGO supervisor), see
 **Status: Track A is 100% complete** — auth through follow-up notifications,
 all verified end-to-end on a real Android device.
 
+> ⚠️ **Written before the 2026-10-02 pivot.** Track A itself (everything below) is still
+> accurate and is now simply "the app" — there's no more Track B/C/D to distinguish it from.
+> Any mention below of Track B/C/D or a WhatsApp Cloud API/bot describes a plan that was
+> abandoned entirely (`docs/HANDOFF.md` §15); the follow-up-notification "known limitation"
+> noted here is also now being actively fixed, not just accepted — see `docs/ROADMAP.md` §3.
+
 ---
 
 ## 0. Project & architecture

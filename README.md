@@ -2,7 +2,7 @@
 
 An enquiry-to-conversion CRM Android app for **Kalaza Care**, an elder-care NGO in Pune. Companion to [Kalaza Care](https://github.com/Anhad23mahajan/kalaza-care) — where that app handles residents already in the facility, this one handles everyone *before* they become a resident: the families calling and messaging to enquire about care for a parent or relative.
 
-> **Status:** the Android CRM (Track A) is **fully built, tested end-to-end on a real device, and in use.** The next phase — hooking up automated WhatsApp replies (Track B: Meta/WhatsApp Business Platform onboarding, and Track C: NGO-authored content) — is paperwork/decisions on the NGO's side, not yet started.
+> **Status:** the Android CRM is **fully built, tested end-to-end on a real device, and in use.** A planned WhatsApp Business Platform auto-reply bot was attempted and then **abandoned (2026-10-02)** after real-world setup problems (number-migration dead ends, unclear payment/verification requirements) made it impractical for a solo project. Current work: fixing the follow-up notification system and redesigning the WhatsApp quick-message templates — see `docs/ROADMAP.md`.
 
 ## Why it exists
 
@@ -22,14 +22,12 @@ The supervisor's own words, decoded: *"the primary task is to take the follow-up
 **Client:** Kotlin, Jetpack Compose (Material 3), MVVM + `StateFlow`
 **Backend:** Supabase — Postgres, Auth (RLS-gated; single admin account, signups disabled)
 **Intake bridge:** Google Forms → Google Apps Script → Supabase REST API (anon, insert-only)
-**Messaging:** `wa.me` deep links for MVP; WhatsApp Business Cloud API is the planned Phase 2 (Track B/C/D — not started, gated on NGO-side onboarding).
+**Messaging:** `wa.me` deep links, reviewed and sent manually by the admin — a categorized list of templates is being built to replace the current 3 fixed buttons. (A WhatsApp Business Cloud API auto-reply bot was attempted and abandoned 2026-10-02 — see `docs/HANDOFF.md` §15.)
 
 ## Where to start reading
 
 - [`docs/HANDOFF.md`](docs/HANDOFF.md) — **start here if you're new**: the complete guide (history, architecture, database, build, decisions, gotchas, open items).
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — where the project stands and what's next, phase by phase.
-- [`docs/WHATSAPP_CHATBOT_RESEARCH.md`](docs/WHATSAPP_CHATBOT_RESEARCH.md) — research on how healthcare brands use WhatsApp bots, Meta's AI rules, and WhatsApp Flows.
-- [`docs/AUTOMATION_DESIGN.md`](docs/AUTOMATION_DESIGN.md) — how the WhatsApp auto-reply system should work and its safety rules (not built yet).
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — where the project stands and what's next, phase by phase (**authoritative current scope**).
 - [`docs/PROGRESS.md`](docs/PROGRESS.md) — the engineering build log: what's been built, how, and why, kept up to date as work lands.
 - [`docs/GOOGLE_FORM_INTAKE_SPEC.md`](docs/GOOGLE_FORM_INTAKE_SPEC.md) — the intake form's field spec and the Apps Script bridge setup.
 
