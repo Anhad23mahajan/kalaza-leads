@@ -84,7 +84,7 @@ the supervisor is hitting daily.
 **Status: the 7-template categorized list is done, verified on device 2026-10-02.** See
 `docs/PROGRESS.md` §1 for the exact files.
 
-**Also done the same day, off the back of seeing it on the phone — NOT yet verified:** two more
+**Also done the same day, off the back of seeing it on the phone, verified on device:** two more
 changes to the same Lead Detail screen, both at the supervisor's request after testing the
 message list above:
 1. **The Contact Log section was removed entirely** (he found it unnecessary). Deleted
@@ -96,8 +96,8 @@ message list above:
    back arrow (top-left) acts as Cancel/back, and a "Save" text action sits top-right, both
    reachable without scrolling to the bottom.
 
-Verify before calling these two done: the screen still works with Contact Log gone, Save
-actually persists and returns to the list, and the back arrow discards without saving.
+**Also done, verified:** the Leads screen's default/first tab was changed from "Follow-ups Due"
+to "All," per the supervisor's preference for landing on the full list when opening the app.
 
 **Previous state (now replaced):** `WhatsAppHelper.kt` defines exactly 3 static templates (Thank You,
 Follow-up, Visit Feedback), rendered as 3 always-visible buttons in `LeadDetailScreen.kt`'s
