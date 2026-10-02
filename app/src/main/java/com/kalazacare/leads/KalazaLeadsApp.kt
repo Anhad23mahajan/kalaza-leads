@@ -17,8 +17,10 @@ class KalazaLeadsApp : Application() {
         // rather than on the first screen that happens to need data.
         SupabaseClients.main
 
-        // Local (device-only) daily check for leads with a follow-up due (A4 part 2).
-        // No-ops quietly if nobody's logged in yet -- see FollowUpReminderWorker.
-        NotificationScheduler.schedule(this)
+        // Local (device-only) daily check for leads with a follow-up due. Re-arms the next
+        // exact alarm on every app start (cheap and idempotent) as a backstop alongside the
+        // boot receiver and the worker's own self-rescheduling. No-ops quietly if nobody's
+        // logged in yet when the alarm actually fires -- see FollowUpReminderWorker.
+        NotificationScheduler.scheduleNext(this)
     }
 }

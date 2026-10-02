@@ -23,11 +23,12 @@ import com.kalazacare.leads.ui.leads.LeadDetailScreen
 import com.kalazacare.leads.ui.leads.LeadsScreen
 import com.kalazacare.leads.ui.leads.LeadsViewModel
 import com.kalazacare.leads.ui.leads.ReportsScreen
+import com.kalazacare.leads.ui.leads.SettingsScreen
 import com.kalazacare.leads.ui.login.LoginScreen
 import com.kalazacare.leads.ui.login.LoginViewModel
 import com.kalazacare.leads.ui.theme.KalazaLeadsTheme
 
-private enum class Screen { LOGIN, LEADS, LEAD_DETAIL, REPORTS }
+private enum class Screen { LOGIN, LEADS, LEAD_DETAIL, REPORTS, SETTINGS }
 
 class MainActivity : ComponentActivity() {
     private var currentScreen by mutableStateOf(Screen.LOGIN)
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
                                 currentScreen = Screen.LEAD_DETAIL
                             },
                             onViewReports = { currentScreen = Screen.REPORTS },
+                            onOpenSettings = { currentScreen = Screen.SETTINGS },
                             onLogout = {
                                 loginViewModel.logout()
                                 currentScreen = Screen.LOGIN
@@ -94,6 +96,9 @@ class MainActivity : ComponentActivity() {
                         }
                         Screen.REPORTS -> ReportsScreen(
                             leadsViewModel = leadsViewModel,
+                            onBack = { currentScreen = Screen.LEADS },
+                        )
+                        Screen.SETTINGS -> SettingsScreen(
                             onBack = { currentScreen = Screen.LEADS },
                         )
                     }

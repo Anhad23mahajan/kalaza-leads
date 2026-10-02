@@ -51,7 +51,13 @@ anything in this repo.)
 
 ## 3. Workstream 1 — Fix the follow-up notification system
 
-**Why it's broken:** the current implementation uses Android's `WorkManager` in periodic mode
+**Status (2026-10-02): built and committed, NOT yet installed/verified on the phone.** See
+`docs/PROGRESS.md` §1 for the exact files changed. Don't call this done until it's been seen
+working on the device — build, install, change a lead's follow-up date to today, and confirm
+the notification shows the real name(s), then test the Settings screen's time picker and the
+two permission-fix buttons.
+
+**Why it was broken:** the current implementation uses Android's `WorkManager` in periodic mode
 (`NotificationScheduler.kt`), which Android deliberately does not run at a fixed clock time —
 it batches/defers background jobs to save battery, and the drift compounds run over run. This
 is worse on Indian Android OEM skins (Xiaomi/Vivo/Oppo/Samsung), which are more aggressive

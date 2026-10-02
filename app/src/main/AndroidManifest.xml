@@ -3,9 +3,16 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- For the follow-up-due local notifications (see docs/PROGRESS.md,
+    <!-- For the follow-up-due local notifications (see docs/ROADMAP.md §3,
          "Follow-up reminder notifications"); requested at runtime in MainActivity. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Lets the daily follow-up check fire at the supervisor-chosen time instead of
+         drifting. Auto-granted on Android 12; the user can see/revoke it on Android 13+
+         (Settings screen explains and offers the toggle). -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Required for the Settings screen's "disable battery optimization" button to work. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:name=".KalazaLeadsApp"
@@ -36,6 +43,18 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <receiver
+            android:name=".notifications.FollowUpAlarmReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".notifications.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 
