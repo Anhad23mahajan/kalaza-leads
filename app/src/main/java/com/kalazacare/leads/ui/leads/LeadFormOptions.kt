@@ -111,19 +111,3 @@ val RELATIONS_OFFERED = RELATIONS - setOf("self", "hospital_staff")
 val SERVICES_OFFERED = SERVICES - setOf("respite_care")
 val ACCOMMODATIONS_OFFERED = ACCOMMODATIONS - setOf("triple_sharing", "dormitory", "not_sure")
 
-// Contact activity log (docs/sql/003_contact_activities.sql)
-val ACTIVITY_TYPES = listOf("call", "whatsapp", "visit", "email", "sms")
-val ACTIVITY_TYPE_LABELS = mapOf(
-    "call" to "Call", "whatsapp" to "WhatsApp", "visit" to "Visit",
-    "email" to "Email", "sms" to "SMS",
-)
-
-val ACTIVITY_DIRECTIONS = listOf("outbound", "inbound")
-val ACTIVITY_DIRECTION_LABELS = mapOf("outbound" to "We contacted them", "inbound" to "They contacted us")
-
-val ACTIVITY_OUTCOMES = listOf("positive", "negative", "no_answer", "callback_requested", "not_reachable")
-val ACTIVITY_OUTCOME_LABELS = mapOf(
-    "positive" to "Positive", "negative" to "Negative", "no_answer" to "No Answer",
-    "callback_requested" to "Callback Requested", "not_reachable" to "Not Reachable",
-)
-

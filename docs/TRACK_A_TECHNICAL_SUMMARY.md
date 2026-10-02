@@ -9,11 +9,15 @@ in build order. For the non-technical version (for the NGO supervisor), see
 **Status: Track A is 100% complete** — auth through follow-up notifications,
 all verified end-to-end on a real Android device.
 
-> ⚠️ **Written before the 2026-10-02 pivot.** Track A itself (everything below) is still
-> accurate and is now simply "the app" — there's no more Track B/C/D to distinguish it from.
-> Any mention below of Track B/C/D or a WhatsApp Cloud API/bot describes a plan that was
-> abandoned entirely (`docs/HANDOFF.md` §15); the follow-up-notification "known limitation"
-> noted here is also now being actively fixed, not just accepted — see `docs/ROADMAP.md` §3.
+> ⚠️ **Written before the 2026-10-02 pivot and the follow-up round of changes that day.** Track A
+> itself (everything below) is still accurate and is now simply "the app" — there's no more
+> Track B/C/D to distinguish it from. Any mention below of Track B/C/D or a WhatsApp Cloud
+> API/bot describes a plan that was abandoned entirely (`docs/HANDOFF.md` §15); the
+> follow-up-notification "known limitation" noted here was fixed the same day, not just
+> accepted (`docs/ROADMAP.md` §3). Two more things changed after this doc was written and
+> aren't reflected below: the **Contact Log feature was removed entirely** (the supervisor
+> found it unnecessary), and the 3 fixed WhatsApp buttons became a 7-template categorized list
+> (`docs/ROADMAP.md` §4). Save/Cancel on Lead Detail also moved into the top app bar.
 
 ---
 

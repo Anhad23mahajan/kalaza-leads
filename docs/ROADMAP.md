@@ -39,11 +39,11 @@ anything in this repo.)
 
 | Area | State |
 |---|---|
-| **Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, CSV export, reports. |
+| **Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, CSV export, reports. (Contact log was removed 2026-10-02 — see §4.) |
 | **Security** | Single admin: no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). |
 | **Intake** | Done. Google Form (24 questions) → Apps Script → Supabase `leads`. No changes planned. |
 | **Follow-up notifications** | **Fixed and verified on device (2026-10-02).** Exact-alarm timing, supervisor-configurable via a Settings screen, shows real lead names. See §3. |
-| **WhatsApp quick-messages** | **Redesigned (2026-10-02), not yet verified on device.** 7 templates in 4 categories, expandable list. See §4. |
+| **WhatsApp quick-messages** | **Redesigned and verified on device (2026-10-02).** 7 templates in 4 categories, expandable list. See §4. |
 | **WhatsApp Business Platform / auto-reply bot** | **Abandoned 2026-10-02.** Not part of the project anymore. |
 | **Final handoff to the NGO** | Not started. See §5. |
 
@@ -81,10 +81,23 @@ the supervisor is hitting daily.
 
 ## 4. Workstream 2 — Redesign the WhatsApp quick-message feature
 
-**Status (2026-10-02): built and committed, NOT yet installed/verified on the phone.** See
-`docs/PROGRESS.md` §1 for the exact files. Don't call this done until it's been seen working —
-build, install, open a lead's detail screen, expand the new message list, and confirm each
-category/template shows and opens WhatsApp with sensible pre-filled text.
+**Status: the 7-template categorized list is done, verified on device 2026-10-02.** See
+`docs/PROGRESS.md` §1 for the exact files.
+
+**Also done the same day, off the back of seeing it on the phone — NOT yet verified:** two more
+changes to the same Lead Detail screen, both at the supervisor's request after testing the
+message list above:
+1. **The Contact Log section was removed entirely** (he found it unnecessary). Deleted
+   `ContactLogSection.kt`, `ActivitiesViewModel.kt`, `ContactActivitiesRepository`/
+   `SupabaseContactActivitiesRepository.kt`, `ContactActivity.kt`, and the dead `ACTIVITY_*`
+   lists in `LeadFormOptions.kt`. The `contact_activities` table itself was left in Supabase,
+   unused (same treatment as the old `staff` table).
+2. **Save/Cancel moved from the bottom of the long scrolling form into the top app bar** — a
+   back arrow (top-left) acts as Cancel/back, and a "Save" text action sits top-right, both
+   reachable without scrolling to the bottom.
+
+Verify before calling these two done: the screen still works with Contact Log gone, Save
+actually persists and returns to the list, and the back arrow discards without saving.
 
 **Previous state (now replaced):** `WhatsAppHelper.kt` defines exactly 3 static templates (Thank You,
 Follow-up, Visit Feedback), rendered as 3 always-visible buttons in `LeadDetailScreen.kt`'s

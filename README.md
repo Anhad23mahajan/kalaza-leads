@@ -12,8 +12,7 @@ The supervisor's own words, decoded: *"the primary task is to take the follow-up
 
 - **Multi-channel intake via Google Form** — every enquiry (WhatsApp / call / walk-in) is filled in by the enquirer themselves on a Google Form, which lands in the same `leads` table through an Apps Script bridge, with the family's context, the elderly person's medical history, budget, room preference, and how they heard about the NGO.
 - **Follow-up-due list** as a home-screen tab — a phone notification tells staff *"you have follow-ups due today"* so no lead is forgotten.
-- **Contact log per lead** — every call, message, and visit recorded with outcome (positive / negative / no answer / call back later) and notes. Doubles as an audit trail and a reminder engine.
-- **One-tap WhatsApp** — the app drafts the right message for the right lead at the right time; staff tap a `wa.me` deep link that opens WhatsApp with everything pre-filled, and hit send. Zero API cost, zero ban risk, fully within WhatsApp's rules.
+- **A categorized WhatsApp quick-message list** — pick the message that matches the actual conversation (reaching out, checking in, after a visit, if they're not considering) and it opens WhatsApp with the text pre-filled; staff review and hit send themselves. Zero API cost, zero ban risk, fully within WhatsApp's rules.
 - **Single admin** — the app is used by one person. There is no signup: the one admin account lives in Supabase and new signups are switched off.
 - **CSV export + reports/analytics** — export any filtered list of leads to CSV, and a reports screen breaks down conversion rate, pipeline funnel, source/service/staff performance, and unmet demand (e.g. "families lost because we don't have a lift").
 

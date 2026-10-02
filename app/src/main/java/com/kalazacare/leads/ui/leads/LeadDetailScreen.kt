@@ -10,14 +10,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -45,12 +47,10 @@ private fun withCurrent(options: List<String>, current: List<String>): List<Stri
 fun LeadDetailScreen(
     lead: Lead,
     viewModel: LeadsViewModel,
-    activitiesViewModel: ActivitiesViewModel,
     onBack: () -> Unit,
     onSaved: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
 
     var contactChannel by remember { mutableStateOf(lead.contactChannel) }
     var howHeard by remember { mutableStateOf(lead.howHeard) }
@@ -92,8 +92,63 @@ fun LeadDetailScreen(
         ?.let { "${lead.enquirerName} (for $it)" }
         ?: lead.enquirerName
 
+    val canSave = enquirerName.isNotBlank() && enquirerPhone.length == 10 && !state.isLoading
+
+    fun saveChanges() {
+        val leadId = lead.id ?: return
+        viewModel.updateLead(
+            leadId,
+            UpdateLeadRequest(
+                contactChannel = contactChannel,
+                howHeard = howHeard,
+                enquirerName = enquirerName.trim(),
+                enquirerCountryCode = lead.enquirerCountryCode,
+                enquirerPhone = enquirerPhone.trim(),
+                enquirerRelation = enquirerRelation,
+                enquirerLocation = enquirerLocation.trim().ifBlank { null },
+                patientName = patientName.trim().ifBlank { null },
+                patientAge = patientAge.toIntOrNull(),
+                patientGender = patientGender,
+                patientConditions = patientConditions,
+                currentCondition = currentCondition.trim().ifBlank { null },
+                medicalHistory = medicalHistory.trim().ifBlank { null },
+                serviceWanted = serviceWanted,
+                accommodationType = accommodationType,
+                budgetMin = budgetMin.toDoubleOrNull(),
+                budgetMax = budgetMax.toDoubleOrNull(),
+                amenitiesRequested = amenitiesRequested,
+                specialRequirements = specialRequirements.trim().ifBlank { null },
+                queries = queries.trim().ifBlank { null },
+                comments = comments.trim().ifBlank { null },
+                status = status,
+                plannedVisitDate = plannedVisitDate,
+                actualVisitDate = actualVisitDate,
+                nextFollowUpDate = nextFollowUpDate,
+                notConvertedReason = if (status == "NOT_CONVERTED") notConvertedReason else null,
+                notConvertedDetail = if (status == "NOT_CONVERTED") notConvertedDetail.trim().ifBlank { null } else null,
+                finalRemarks = finalRemarks.trim().ifBlank { null },
+            ),
+            onSaved,
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis) })
+        TopAppBar(
+            title = { Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+            navigationIcon = {
+                IconButton(onClick = onBack, enabled = !state.isLoading) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back / cancel")
+                }
+            },
+            actions = {
+                TextButton(onClick = ::saveChanges, enabled = canSave) {
+                    if (state.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
+                    }
+                    Text(if (state.isLoading) "Saving..." else "Save")
+                }
+            },
+        )
 
         Column(
             modifier = Modifier
@@ -309,11 +364,6 @@ fun LeadDetailScreen(
             WhatsAppQuickMessages(lead)
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
-            lead.id?.let { leadId ->
-                ContactLogSection(leadId = leadId, viewModel = activitiesViewModel)
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
             Text("Outcome", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 8.dp))
 
@@ -332,67 +382,6 @@ fun LeadDetailScreen(
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
-            }
-
-            Spacer(Modifier.padding(top = 24.dp))
-
-            val canSave = enquirerName.isNotBlank() && enquirerPhone.length == 10 && !state.isLoading
-
-            Button(
-                onClick = {
-                    val leadId = lead.id ?: return@Button
-                    viewModel.updateLead(
-                        leadId,
-                        UpdateLeadRequest(
-                            contactChannel = contactChannel,
-                            howHeard = howHeard,
-                            enquirerName = enquirerName.trim(),
-                            enquirerCountryCode = lead.enquirerCountryCode,
-                            enquirerPhone = enquirerPhone.trim(),
-                            enquirerRelation = enquirerRelation,
-                            enquirerLocation = enquirerLocation.trim().ifBlank { null },
-                            patientName = patientName.trim().ifBlank { null },
-                            patientAge = patientAge.toIntOrNull(),
-                            patientGender = patientGender,
-                            patientConditions = patientConditions,
-                            currentCondition = currentCondition.trim().ifBlank { null },
-                            medicalHistory = medicalHistory.trim().ifBlank { null },
-                            serviceWanted = serviceWanted,
-                            accommodationType = accommodationType,
-                            budgetMin = budgetMin.toDoubleOrNull(),
-                            budgetMax = budgetMax.toDoubleOrNull(),
-                            amenitiesRequested = amenitiesRequested,
-                            specialRequirements = specialRequirements.trim().ifBlank { null },
-                            queries = queries.trim().ifBlank { null },
-                            comments = comments.trim().ifBlank { null },
-                            status = status,
-                            plannedVisitDate = plannedVisitDate,
-                            actualVisitDate = actualVisitDate,
-                            nextFollowUpDate = nextFollowUpDate,
-                            notConvertedReason = if (status == "NOT_CONVERTED") notConvertedReason else null,
-                            notConvertedDetail = if (status == "NOT_CONVERTED") notConvertedDetail.trim().ifBlank { null } else null,
-                            finalRemarks = finalRemarks.trim().ifBlank { null },
-                        ),
-                        onSaved,
-                    )
-                },
-                enabled = canSave,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
-                }
-                Text(if (state.isLoading) "Saving..." else "Save Changes")
-            }
-
-            Spacer(Modifier.padding(top = 8.dp))
-
-            OutlinedButton(
-                onClick = onBack,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading,
-            ) {
-                Text("Cancel")
             }
 
             Spacer(Modifier.padding(bottom = 24.dp))
