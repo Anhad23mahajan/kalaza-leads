@@ -43,7 +43,7 @@ anything in this repo.)
 | **Security** | Single admin: no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). |
 | **Intake** | Done. Google Form (24 questions) → Apps Script → Supabase `leads`. No changes planned. |
 | **Follow-up notifications** | **Fixed and verified on device (2026-10-02).** Exact-alarm timing, supervisor-configurable via a Settings screen, shows real lead names. See §3. |
-| **WhatsApp quick-messages** | Built (3 fixed templates: Thank You, Follow-up, Visit Feedback), but the supervisor wants a richer, categorized list instead of 3 flat buttons. Needs redesigning — see §4. |
+| **WhatsApp quick-messages** | **Redesigned (2026-10-02), not yet verified on device.** 7 templates in 4 categories, expandable list. See §4. |
 | **WhatsApp Business Platform / auto-reply bot** | **Abandoned 2026-10-02.** Not part of the project anymore. |
 | **Final handoff to the NGO** | Not started. See §5. |
 
@@ -81,7 +81,12 @@ the supervisor is hitting daily.
 
 ## 4. Workstream 2 — Redesign the WhatsApp quick-message feature
 
-**Current state:** `WhatsAppHelper.kt` defines exactly 3 static templates (Thank You,
+**Status (2026-10-02): built and committed, NOT yet installed/verified on the phone.** See
+`docs/PROGRESS.md` §1 for the exact files. Don't call this done until it's been seen working —
+build, install, open a lead's detail screen, expand the new message list, and confirm each
+category/template shows and opens WhatsApp with sensible pre-filled text.
+
+**Previous state (now replaced):** `WhatsAppHelper.kt` defines exactly 3 static templates (Thank You,
 Follow-up, Visit Feedback), rendered as 3 always-visible buttons in `LeadDetailScreen.kt`'s
 "Send WhatsApp" section, regardless of the lead's pipeline stage.
 

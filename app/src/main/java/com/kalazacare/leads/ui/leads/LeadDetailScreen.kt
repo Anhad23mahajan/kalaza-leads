@@ -306,15 +306,7 @@ fun LeadDetailScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.padding(top = 10.dp))
-            WhatsAppTemplate.entries.forEach { template ->
-                Button(
-                    onClick = { launchWhatsApp(context, lead, buildWhatsAppMessage(template, lead)) },
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(template.label)
-                }
-                Spacer(Modifier.padding(top = 8.dp))
-            }
+            WhatsAppQuickMessages(lead)
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
             lead.id?.let { leadId ->
