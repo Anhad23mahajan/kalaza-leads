@@ -42,7 +42,7 @@ anything in this repo.)
 | **Android CRM** | Done, tested on a real device, on GitHub. Leads (7 tabs), detail/edit, contact log, CSV export, reports. |
 | **Security** | Single admin: no signup in the app, signups disabled in Supabase (`docs/sql/007_single_admin.sql`). |
 | **Intake** | Done. Google Form (24 questions) → Apps Script → Supabase `leads`. No changes planned. |
-| **Follow-up notifications** | Built, but **broken in practice**: fires at random times, not a fixed schedule, and only shows a count, not names. Needs fixing — see §3. |
+| **Follow-up notifications** | **Fixed and verified on device (2026-10-02).** Exact-alarm timing, supervisor-configurable via a Settings screen, shows real lead names. See §3. |
 | **WhatsApp quick-messages** | Built (3 fixed templates: Thank You, Follow-up, Visit Feedback), but the supervisor wants a richer, categorized list instead of 3 flat buttons. Needs redesigning — see §4. |
 | **WhatsApp Business Platform / auto-reply bot** | **Abandoned 2026-10-02.** Not part of the project anymore. |
 | **Final handoff to the NGO** | Not started. See §5. |
@@ -51,11 +51,10 @@ anything in this repo.)
 
 ## 3. Workstream 1 — Fix the follow-up notification system
 
-**Status (2026-10-02): built and committed, NOT yet installed/verified on the phone.** See
-`docs/PROGRESS.md` §1 for the exact files changed. Don't call this done until it's been seen
-working on the device — build, install, change a lead's follow-up date to today, and confirm
-the notification shows the real name(s), then test the Settings screen's time picker and the
-two permission-fix buttons.
+**Status: done, verified on device 2026-10-02.** See `docs/PROGRESS.md` §1 for the exact files
+changed and what was tested. Still open (lower priority, not blocking): a longer patience-test
+across a day or two, and confirming the boot receiver actually re-arms the alarm after a real
+phone restart.
 
 **Why it was broken:** the current implementation uses Android's `WorkManager` in periodic mode
 (`NotificationScheduler.kt`), which Android deliberately does not run at a fixed clock time —
