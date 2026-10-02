@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -66,6 +67,7 @@ fun LeadsScreen(
     viewModel: LeadsViewModel,
     onLeadClick: (Lead) -> Unit,
     onViewReports: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     onLogout: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsState()
@@ -94,6 +96,9 @@ fun LeadsScreen(
                         }
                         IconButton(onClick = onViewReports) {
                             Icon(Icons.Filled.Assessment, contentDescription = "Reports")
+                        }
+                        IconButton(onClick = onOpenSettings) {
+                            Icon(Icons.Filled.Settings, contentDescription = "Settings")
                         }
                         IconButton(onClick = { showLogoutConfirm = true }) {
                             Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
