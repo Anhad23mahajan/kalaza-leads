@@ -37,6 +37,7 @@ import com.kalazacare.leads.ui.login.LoginViewModel
 import com.kalazacare.leads.ui.theme.KalazaLeadsTheme
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
+import kotlinx.coroutines.flow.first
 
 private enum class Screen { LOGIN, LEADS, LEAD_DETAIL, REPORTS, SETTINGS }
 
@@ -89,10 +90,18 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(Unit) {
                         val auth = SupabaseClients.main.auth
                         auth.awaitInitialization()
-                        if (auth.sessionStatus.value is SessionStatus.Authenticated) {
+                        val initial = auth.sessionStatus.value
+                        if (initial is SessionStatus.Authenticated) {
                             enterApp()
                         } else {
                             checkingSession = false
+                            // A saved login whose token had expired could not be refreshed with no
+                            // connection. The library keeps retrying, so go in by itself once it
+                            // recovers (unless the admin has already logged in by hand).
+                            if (initial is SessionStatus.RefreshFailure) {
+                                auth.sessionStatus.first { it is SessionStatus.Authenticated }
+                                if (currentScreen == Screen.LOGIN) enterApp()
+                            }
                         }
                     }
 
@@ -209,15 +218,19 @@ class MainActivity : ComponentActivity() {
 
         // Coming from a notification: load fresh data first, so the lead that opens is current
         // (saving an old copy would overwrite newer edits).
+        val screenWhenTapped = currentScreen
         leadsViewModel.refresh {
-            val target = (open as? PendingOpen.Lead)
-                ?.let { request -> leadsViewModel.state.value.leads.firstOrNull { it.id == request.id } }
-            if (target != null) {
-                leadsViewModel.selectLead(target)
-                currentScreen = Screen.LEAD_DETAIL
-            } else {
-                leadsTab = FOLLOW_UPS_TAB_INDEX
-                currentScreen = Screen.LEADS
+            // If the admin moved to another screen while the data loaded, don't pull them away.
+            if (currentScreen == screenWhenTapped || currentScreen == Screen.LOGIN) {
+                val target = (open as? PendingOpen.Lead)
+                    ?.let { request -> leadsViewModel.state.value.leads.firstOrNull { it.id == request.id } }
+                if (target != null) {
+                    leadsViewModel.selectLead(target)
+                    currentScreen = Screen.LEAD_DETAIL
+                } else {
+                    leadsTab = FOLLOW_UPS_TAB_INDEX
+                    currentScreen = Screen.LEADS
+                }
             }
             checkingSession = false
         }
