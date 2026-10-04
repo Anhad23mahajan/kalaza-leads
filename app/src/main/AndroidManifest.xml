@@ -6,10 +6,17 @@
     <!-- For the follow-up-due local notifications (see docs/ROADMAP.md §3,
          "Follow-up reminder notifications"); requested at runtime in MainActivity. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Lets the daily follow-up check fire at the supervisor-chosen time instead of
-         drifting. Auto-granted on Android 12; the user can see/revoke it on Android 13+
-         (Settings screen explains and offers the toggle). -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Lets the daily follow-up check fire at the supervisor-chosen time instead of drifting.
+         USE_EXACT_ALARM (Android 13+) is granted automatically at install and can't be revoked,
+         which matters because on Android 14+ SCHEDULE_EXACT_ALARM is OFF by default for new
+         installs. It is policy-restricted on Google Play, which doesn't apply here (sideloaded
+         APK); if this app were ever published there, revisit. SCHEDULE_EXACT_ALARM remains only
+         for Android 12/12L (API 31-32), where it is granted by default but user-revocable
+         (the Settings screen explains and offers the toggle). -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Required for the Settings screen's "disable battery optimization" button to work. -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -27,6 +34,7 @@
             android:name=".ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

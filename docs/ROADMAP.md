@@ -56,10 +56,29 @@ See `docs/PROGRESS.md` §1 for the exact files changed and what was tested. Stil
 priority, not blocking): a longer patience-test across a day or two, and confirming the boot
 receiver actually re-arms the alarm after a real phone restart.
 
-**Correction (2026-10-04): one item below was never built, although this section used to read
-as fully done.** "Tapping the notification jumps to the due lead" (item 3's last clause) was
-skipped on 2026-10-02 and not recorded — tapping just opens the app, which then starts on the
-login screen. Found by Harsh's test report; tracked with the other findings from it.
+**Correction (2026-10-04): one item below was not built when this section was marked done.**
+"Tapping the notification jumps to the due lead" (item 3's last clause) was skipped on
+2026-10-02 and not recorded. It was found by a friend's test report and is now built (tap opens
+the lead when one is due, or the Follow-ups Due tab when several are) — **built, not yet verified
+on the phone.** The same report led to the other fixes listed in §3b below.
+
+### 3b. Fixes from the friend's test report (2026-10-04) — built, NOT yet verified on a device
+
+| Finding | Status |
+|---|---|
+| Budgets typed with commas / "k" / "lakh" saved wrong (`20,000` → 20) | Fixed in the bridge and **live in Google Apps Script** (checked identical to the repo); a real form submission still to be run through it |
+| "Median days to convert" always blank — nothing set `converted_at` | Fixed: editable "Converted on" date on Lead Detail when status is Converted |
+| Exact reminders off by default on Android 14+; not re-armed after granting | Fixed: `USE_EXACT_ALARM`, and Settings re-arms on resume |
+| Reminder lost if the phone is offline at that time | Fixed: waits for a network, retries up to 5 times |
+| App opens on login every time; rotation resets it; Back exits the app | Fixed: saved login restored, portrait lock, Back handler |
+| Tapping the notification doesn't open the lead | Fixed (see above) |
+| Lint error in `themes.xml` | Fixed |
+| CSV cells starting `=` `+` `-` `@` run as formulas in Excel | Fixed, keeping `+91`/phone numbers intact |
+| Typed impossible date (31/02) rejects a submission | Not fixed on purpose: the form's date picker can't produce one |
+| *(Found while checking, not in the report)* clearing a field and saving didn't clear it, because the update request omitted values equal to their defaults | Fixed: `UpdateLeadRequest` has no defaults now |
+
+Not done on purpose: **no number validation on the form's budget questions** — the bridge now
+reads `30k` / `1,00,000` / `1.5 lakh`, and strict validation would reject exactly what people type.
 
 **Why it was broken:** the current implementation uses Android's `WorkManager` in periodic mode
 (`NotificationScheduler.kt`), which Android deliberately does not run at a fixed clock time —
