@@ -16,6 +16,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -135,15 +136,21 @@ class MainActivity : ComponentActivity() {
                                 val leadsState by leadsViewModel.state.collectAsState()
                                 val selected = leadsState.selectedLead
                                 if (selected != null) {
-                                    LeadDetailScreen(
-                                        lead = selected,
-                                        viewModel = leadsViewModel,
-                                        onBack = {
-                                            leadsViewModel.clearSelection()
-                                            currentScreen = Screen.LEADS
-                                        },
-                                        onSaved = { currentScreen = Screen.LEADS },
-                                    )
+                                    // The form fields are remembered without a key, so when a tapped
+                                    // notification switches lead A to lead B while this screen is
+                                    // open, the screen must be rebuilt -- otherwise it would keep A's
+                                    // values and Save would write them over B.
+                                    key(selected.id) {
+                                        LeadDetailScreen(
+                                            lead = selected,
+                                            viewModel = leadsViewModel,
+                                            onBack = {
+                                                leadsViewModel.clearSelection()
+                                                currentScreen = Screen.LEADS
+                                            },
+                                            onSaved = { currentScreen = Screen.LEADS },
+                                        )
+                                    }
                                 } else {
                                     currentScreen = Screen.LEADS
                                 }
