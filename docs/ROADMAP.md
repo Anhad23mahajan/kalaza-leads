@@ -51,10 +51,15 @@ anything in this repo.)
 
 ## 3. Workstream 1 — Fix the follow-up notification system
 
-**Status: done, verified on device 2026-10-02.** See `docs/PROGRESS.md` §1 for the exact files
-changed and what was tested. Still open (lower priority, not blocking): a longer patience-test
-across a day or two, and confirming the boot receiver actually re-arms the alarm after a real
-phone restart.
+**Status: timing fix, settings screen and lead names are done, verified on device 2026-10-02.**
+See `docs/PROGRESS.md` §1 for the exact files changed and what was tested. Still open (lower
+priority, not blocking): a longer patience-test across a day or two, and confirming the boot
+receiver actually re-arms the alarm after a real phone restart.
+
+**Correction (2026-10-04): one item below was never built, although this section used to read
+as fully done.** "Tapping the notification jumps to the due lead" (item 3's last clause) was
+skipped on 2026-10-02 and not recorded — tapping just opens the app, which then starts on the
+login screen. Found by Harsh's test report; tracked with the other findings from it.
 
 **Why it was broken:** the current implementation uses Android's `WorkManager` in periodic mode
 (`NotificationScheduler.kt`), which Android deliberately does not run at a fixed clock time —
