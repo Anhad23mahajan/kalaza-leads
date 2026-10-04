@@ -62,7 +62,7 @@ receiver actually re-arms the alarm after a real phone restart.
 the lead when one is due, or the Follow-ups Due tab when several are) — **built, not yet verified
 on the phone.** The same report led to the other fixes listed in §3b below.
 
-### 3b. Fixes from the friend's test report (2026-10-04) — built, NOT yet verified on a device
+### 3b. Fixes from the friend's test report (2026-10-04) — verified on the phone 2026-10-04 (Anhad: "all worked"; the optional live-form budget test was not separately confirmed)
 
 | Finding | Status |
 |---|---|
