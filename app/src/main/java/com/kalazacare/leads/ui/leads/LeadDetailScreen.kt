@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kalazacare.leads.data.model.Lead
 import com.kalazacare.leads.data.model.UpdateLeadRequest
+import java.time.LocalDate
 
 /** Offered options plus a lead's current value, so a value no longer offered by the form stays visible and editable. */
 private fun withCurrent(options: List<String>, current: String?): List<String> =
@@ -80,6 +81,12 @@ fun LeadDetailScreen(
     var plannedVisitDate by remember { mutableStateOf(lead.plannedVisitDate) }
     var actualVisitDate by remember { mutableStateOf(lead.actualVisitDate) }
     var nextFollowUpDate by remember { mutableStateOf(lead.nextFollowUpDate) }
+    // "Converted on" feeds the days-to-convert report. Nothing ever set it before 2026-10-04, so
+    // a lead that is already CONVERTED but has no date is pre-filled with today (editable, and
+    // only saved if the admin presses Save).
+    var convertedAt by remember {
+        mutableStateOf(lead.convertedAt ?: if (lead.status == "CONVERTED") LocalDate.now().toString() else null)
+    }
 
     var notConvertedReason by remember { mutableStateOf(lead.notConvertedReason) }
     var notConvertedDetail by remember { mutableStateOf(lead.notConvertedDetail ?: "") }
@@ -124,6 +131,7 @@ fun LeadDetailScreen(
                 plannedVisitDate = plannedVisitDate,
                 actualVisitDate = actualVisitDate,
                 nextFollowUpDate = nextFollowUpDate,
+                convertedAt = if (status == "CONVERTED") convertedAt else null,
                 notConvertedReason = if (status == "NOT_CONVERTED") notConvertedReason else null,
                 notConvertedDetail = if (status == "NOT_CONVERTED") notConvertedDetail.trim().ifBlank { null } else null,
                 finalRemarks = finalRemarks.trim().ifBlank { null },
@@ -158,7 +166,17 @@ fun LeadDetailScreen(
         ) {
             Text("Pipeline", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 8.dp))
-            EnumDropdown("Status", STATUSES, STATUS_LABELS, status, { if (it != null) status = it })
+            EnumDropdown("Status", STATUSES, STATUS_LABELS, status, {
+                if (it != null) {
+                    status = it
+                    if (it == "CONVERTED" && convertedAt == null) convertedAt = LocalDate.now().toString()
+                }
+            })
+
+            if (status == "CONVERTED") {
+                Spacer(Modifier.padding(top = 10.dp))
+                DateField("Converted on (date they moved in)", convertedAt, { convertedAt = it })
+            }
 
             if (status == "NOT_CONVERTED") {
                 Spacer(Modifier.padding(top = 10.dp))

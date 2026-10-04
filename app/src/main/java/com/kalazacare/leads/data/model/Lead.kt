@@ -60,40 +60,50 @@ data class Lead(
     @SerialName("preferred_language") val preferredLanguage: String = "en",
 )
 
-/** Update payload for the Lead Detail edit screen — everything that can be changed after saving. */
+/**
+ * Update payload for the Lead Detail edit screen — everything that can be changed after saving.
+ *
+ * Deliberately NO default values on any property. supabase-kt's JSON encoder is kotlinx's
+ * default (encodeDefaults = false), which silently leaves out any property whose value equals
+ * its declared default -- so with `= null` / `= emptyList()` defaults, clearing a text field or
+ * un-ticking the last chip would be dropped from the request and the old value would survive
+ * the save. With no defaults every property is always sent, and an explicit null clears the
+ * column. Every column here is nullable or always given a real value (see 002_leads_v2_migration.sql).
+ */
 @Serializable
 data class UpdateLeadRequest(
-    @SerialName("contact_channel") val contactChannel: String? = null,
-    @SerialName("how_heard") val howHeard: String? = null,
+    @SerialName("contact_channel") val contactChannel: String?,
+    @SerialName("how_heard") val howHeard: String?,
 
     @SerialName("enquirer_name") val enquirerName: String,
-    @SerialName("enquirer_country_code") val enquirerCountryCode: String = "+91",
+    @SerialName("enquirer_country_code") val enquirerCountryCode: String,
     @SerialName("enquirer_phone") val enquirerPhone: String,
-    @SerialName("enquirer_relation") val enquirerRelation: String? = null,
-    @SerialName("enquirer_location") val enquirerLocation: String? = null,
+    @SerialName("enquirer_relation") val enquirerRelation: String?,
+    @SerialName("enquirer_location") val enquirerLocation: String?,
 
-    @SerialName("patient_name") val patientName: String? = null,
-    @SerialName("patient_age") val patientAge: Int? = null,
-    @SerialName("patient_gender") val patientGender: String? = null,
-    @SerialName("patient_conditions") val patientConditions: List<String> = emptyList(),
-    @SerialName("current_condition") val currentCondition: String? = null,
-    @SerialName("medical_history") val medicalHistory: String? = null,
+    @SerialName("patient_name") val patientName: String?,
+    @SerialName("patient_age") val patientAge: Int?,
+    @SerialName("patient_gender") val patientGender: String?,
+    @SerialName("patient_conditions") val patientConditions: List<String>,
+    @SerialName("current_condition") val currentCondition: String?,
+    @SerialName("medical_history") val medicalHistory: String?,
 
-    @SerialName("service_wanted") val serviceWanted: List<String> = emptyList(),
-    @SerialName("accommodation_type") val accommodationType: String? = null,
-    @SerialName("budget_min") val budgetMin: Double? = null,
-    @SerialName("budget_max") val budgetMax: Double? = null,
-    @SerialName("amenities_requested") val amenitiesRequested: List<String> = emptyList(),
-    @SerialName("special_requirements") val specialRequirements: String? = null,
-    val queries: String? = null,
-    val comments: String? = null,
+    @SerialName("service_wanted") val serviceWanted: List<String>,
+    @SerialName("accommodation_type") val accommodationType: String?,
+    @SerialName("budget_min") val budgetMin: Double?,
+    @SerialName("budget_max") val budgetMax: Double?,
+    @SerialName("amenities_requested") val amenitiesRequested: List<String>,
+    @SerialName("special_requirements") val specialRequirements: String?,
+    val queries: String?,
+    val comments: String?,
 
     val status: String,
-    @SerialName("planned_visit_date") val plannedVisitDate: String? = null,
-    @SerialName("actual_visit_date") val actualVisitDate: String? = null,
-    @SerialName("next_follow_up_date") val nextFollowUpDate: String? = null,
+    @SerialName("planned_visit_date") val plannedVisitDate: String?,
+    @SerialName("actual_visit_date") val actualVisitDate: String?,
+    @SerialName("next_follow_up_date") val nextFollowUpDate: String?,
+    @SerialName("converted_at") val convertedAt: String?,
 
-    @SerialName("not_converted_reason") val notConvertedReason: String? = null,
-    @SerialName("not_converted_detail") val notConvertedDetail: String? = null,
-    @SerialName("final_remarks") val finalRemarks: String? = null,
+    @SerialName("not_converted_reason") val notConvertedReason: String?,
+    @SerialName("not_converted_detail") val notConvertedDetail: String?,
+    @SerialName("final_remarks") val finalRemarks: String?,
 )

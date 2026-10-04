@@ -30,7 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,10 +60,16 @@ private val SEGMENTS = listOf(
     Segment("Backup") { leads, _ -> leads.filter { it.status == "BACKUP" } },
 )
 
+/** Index of the "Follow-ups Due" tab, for opening straight onto it from a notification. */
+val FOLLOW_UPS_TAB_INDEX: Int = SEGMENTS.indexOfFirst { it.label == "Follow-ups Due" }
+
+/** [selectedTab] lives in MainActivity so it survives opening a lead and coming back. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeadsScreen(
     viewModel: LeadsViewModel,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
     onLeadClick: (Lead) -> Unit,
     onViewReports: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
@@ -72,7 +77,6 @@ fun LeadsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var selectedTab by remember { mutableIntStateOf(0) }
     var showLogoutConfirm by remember { mutableStateOf(false) }
     val today = remember { LocalDate.now().toString() }
 
@@ -110,7 +114,7 @@ fun LeadsScreen(
                         val count = remember(state.leads, today) { segment.filter(state.leads, today).size }
                         Tab(
                             selected = selectedTab == index,
-                            onClick = { selectedTab = index },
+                            onClick = { onTabSelected(index) },
                             text = { Text("${segment.label} ($count)") },
                         )
                     }

@@ -21,16 +21,17 @@ class LeadsViewModel(private val repository: LeadsRepository) : ViewModel() {
     private val _state = MutableStateFlow(LeadsState())
     val state: StateFlow<LeadsState> = _state
 
-    init {
-        refresh()
-    }
+    // No refresh() in init: nobody is signed in when this is constructed, so it could only fail --
+    // and a late failure could land after a successful load and leave a stale error message
+    // showing. MainActivity calls refresh() once a session exists (login or restored session).
 
-    fun refresh() {
+    /** [onDone] runs on the main thread after the load finishes, whether it succeeded or failed. */
+    fun refresh(onDone: (() -> Unit)? = null) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, errorMessage = null)
             repository.getLeads()
                 .onSuccess { leads ->
-                    _state.value = _state.value.copy(isLoading = false, leads = leads)
+                    _state.value = _state.value.copy(isLoading = false, leads = leads, errorMessage = null)
                 }
                 .onFailure { error ->
                     _state.value = _state.value.copy(
@@ -38,6 +39,7 @@ class LeadsViewModel(private val repository: LeadsRepository) : ViewModel() {
                         errorMessage = error.message ?: "Failed to load leads",
                     )
                 }
+            onDone?.invoke()
         }
     }
 

@@ -62,6 +62,9 @@ fun SettingsScreen(onBack: () -> Unit) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 exactAlarmsAllowed = NotificationScheduler.canScheduleExactAlarms(context)
                 batteryUnrestricted = batteryManager?.isIgnoringBatteryOptimizations(context.packageName) ?: true
+                // An alarm armed while the permission was missing stays inexact until it is
+                // set again, so re-arm it now (cheap and idempotent).
+                NotificationScheduler.scheduleNext(context)
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

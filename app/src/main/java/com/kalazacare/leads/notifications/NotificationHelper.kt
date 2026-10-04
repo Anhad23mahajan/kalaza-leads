@@ -21,6 +21,12 @@ private const val MAX_NAMES_SHOWN = 5
 
 object NotificationHelper {
 
+    /** Read by MainActivity: open this lead's detail screen (exactly one follow-up due)... */
+    const val EXTRA_OPEN_LEAD_ID = "open_lead_id"
+
+    /** ...or open the Leads screen on its "Follow-ups Due" tab (several due). */
+    const val EXTRA_OPEN_FOLLOW_UPS = "open_follow_ups"
+
     fun ensureChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
@@ -43,8 +49,14 @@ object NotificationHelper {
 
         ensureChannel(context)
 
+        val singleLeadId = dueLeads.singleOrNull()?.id
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (singleLeadId != null) {
+                putExtra(EXTRA_OPEN_LEAD_ID, singleLeadId)
+            } else {
+                putExtra(EXTRA_OPEN_FOLLOW_UPS, true)
+            }
         }
         val pendingIntent = PendingIntent.getActivity(
             context,

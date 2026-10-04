@@ -45,7 +45,24 @@ private val EXPORT_COLUMNS: List<Pair<String, (Lead) -> String>> = listOf(
     "Final Remarks" to { it.finalRemarks.orEmpty() },
 )
 
-private fun csvEscape(value: String): String {
+/** Plain numbers/phone-like text that may legitimately start with + or -, e.g. "+91" or "+91 98765 43210". */
+private val PLAIN_NUMBER = Regex("^[+-]?[0-9][0-9 ().-]*$")
+
+/**
+ * Excel and Sheets run a cell that starts with = + - or @ as a formula. Lead text comes from a
+ * public form, so a stranger could plant one (e.g. a name of `=HYPERLINK(...)`). A leading
+ * apostrophe makes it plain text. Numbers like the "+91" country code are left alone.
+ */
+private fun neutraliseFormula(value: String): String {
+    if (value.isEmpty()) return value
+    val first = value[0]
+    val risky = first == '=' || first == '@' || first == '\t' || first == '\r' ||
+        ((first == '+' || first == '-') && !PLAIN_NUMBER.matches(value))
+    return if (risky) "'$value" else value
+}
+
+private fun csvEscape(raw: String): String {
+    val value = neutraliseFormula(raw)
     return if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) {
         "\"${value.replace("\"", "\"\"")}\""
     } else {

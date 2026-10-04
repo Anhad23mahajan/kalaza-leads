@@ -10,8 +10,10 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.postgrest.postgrest
 import java.time.LocalDate
+import kotlin.coroutines.cancellation.CancellationException
 
 private const val TAG = "FollowUpReminderWorker"
+private const val MAX_RETRIES = 5
 private val TERMINAL_STATUSES = setOf("CONVERTED", "NOT_CONVERTED", "DORMANT")
 
 /**
@@ -33,9 +35,11 @@ class FollowUpReminderWorker(
         return try {
             checkAndNotify()
             Result.success()
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            Log.e(TAG, "doWork failed", e)
-            Result.failure()
+            Log.e(TAG, "doWork failed (attempt ${runAttemptCount + 1})", e)
+            if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
         } finally {
             NotificationScheduler.scheduleNext(applicationContext)
         }

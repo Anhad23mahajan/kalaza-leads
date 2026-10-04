@@ -198,6 +198,26 @@ function logError(message, context) {
   console.error(message, JSON.stringify(context));
 }
 
+/**
+ * Reads an amount a family typed into a free-text box: "20000", "20,000", "1,00,000" (Indian
+ * grouping), "Rs. 25000", "30k", "1.5 lakh", "2 lac", "1 crore". Returns a number, or null when no
+ * usable number is found. If a range is typed ("20000-30000") the first number is used.
+ * (parseFloat alone turned "20,000" into 20 and "1,00,000" into 1.)
+ */
+function parseAmount(raw) {
+  if (raw === null || raw === undefined) return null;
+  var s = String(raw).toLowerCase().replace(/,/g, '');
+  var m = s.match(/(\d+(?:\.\d+)?)\s*(thousand|lakhs?|lacs?|crores?|cr|k|l)?(?![a-z])/);
+  if (!m) return null;
+  var value = parseFloat(m[1]);
+  if (isNaN(value)) return null;
+  var unit = m[2] || '';
+  if (unit === 'k' || unit === 'thousand') value *= 1000;
+  else if (unit === 'l' || /^lakh|^lac/.test(unit)) value *= 100000;
+  else if (unit === 'cr' || /^crore/.test(unit)) value *= 10000000;
+  return value;
+}
+
 /** Installable trigger target -- do not rename without updating setupTrigger(). */
 function handleFormSubmit(e) {
   try {
@@ -210,13 +230,8 @@ function handleFormSubmit(e) {
     var age = ageRaw ? parseInt(ageRaw, 10) : null;
     if (age !== null && isNaN(age)) age = null;
 
-    var budgetMinRaw = getAnswer(nv, 'Budget - minimum (Rs.)');
-    var budgetMin = budgetMinRaw ? parseFloat(budgetMinRaw) : null;
-    if (budgetMin !== null && isNaN(budgetMin)) budgetMin = null;
-
-    var budgetMaxRaw = getAnswer(nv, 'Budget - maximum (Rs.)');
-    var budgetMax = budgetMaxRaw ? parseFloat(budgetMaxRaw) : null;
-    if (budgetMax !== null && isNaN(budgetMax)) budgetMax = null;
+    var budgetMin = parseAmount(getAnswer(nv, 'Budget - minimum (Rs.)'));
+    var budgetMax = parseAmount(getAnswer(nv, 'Budget - maximum (Rs.)'));
 
     var plannedVisitDate = getDateAnswer(e, 'Preferred visit date (if known)');
     var nextFollowUpDate = getDateAnswer(e, 'When would you like us to follow up with you?');
