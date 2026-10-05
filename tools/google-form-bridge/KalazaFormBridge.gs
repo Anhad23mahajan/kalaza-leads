@@ -207,7 +207,9 @@ function logError(message, context) {
 function parseAmount(raw) {
   if (raw === null || raw === undefined) return null;
   var s = String(raw).toLowerCase().replace(/,/g, '');
-  var m = s.match(/(\d+(?:\.\d+)?)\s*(thousand|lakhs?|lacs?|crores?|cr|k|l)?(?![a-z])/);
+  // (?!\d) stops the number from giving back digits; the letter check applies only to a unit.
+  // Before this, "25000rs" / "40000pm" backtracked to 2500 / 4000 to satisfy "no letter after".
+  var m = s.match(/(\d+(?:\.\d+)?)(?!\d)\s*(?:(thousand|lakhs?|lacs?|crores?|cr|k|l)(?![a-z]))?/);
   if (!m) return null;
   var value = parseFloat(m[1]);
   if (isNaN(value)) return null;

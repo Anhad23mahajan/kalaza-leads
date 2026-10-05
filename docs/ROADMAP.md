@@ -180,7 +180,9 @@ auto-refresh on launch / on return / every 60 s (logcat timestamps), CSV saved t
 age > 120 and budget min > max block Save with inline errors, discard dialog (Keep editing / Discard), delete dialog
 (opened and cancelled), save + "Changes saved" + clearing a field really clears it, Reports 2×2, Settings, WhatsApp list,
 crash screen via `adb shell am crash` (details + Restart back into the app, still logged in).
-**Not yet exercised: an actual lead delete** (only the dialog was tested; no lead was deleted).
+Actual delete verified 2026-10-05: "TEST Round Three" deleted from the app, "Lead deleted" snackbar, list 3 → 2, and the row is gone in Supabase.
+
+**Bridge budget fix (2026-10-05, repo only — the LIVE Apps Script still has the old line):** `parseAmount()` turned "25000rs" / "25000inr" / "40000pm" into 2500 / 2500 / 4000 (the regex backtracked a digit to satisfy its no-letter-after rule). Fixed with `(?!\d)` and a unit-only letter check; 25 budget cases pass offline. Until the live script is updated (see CLAUDE.md "Facts that bite" for the steps), the old behaviour is what families' submissions get.
 
 Also: Reports overview is a 2×2 grid of tiles (the four stats in one row ran into each other), and list
 loading vs saving are separate states, so a background refresh never disables the Save button.
