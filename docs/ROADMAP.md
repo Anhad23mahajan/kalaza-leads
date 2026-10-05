@@ -75,6 +75,7 @@ on the phone.** The same report led to the other fixes listed in §3b below.
 | Lint error in `themes.xml` | Fixed |
 | CSV cells starting `=` `+` `-` `@` run as formulas in Excel | Fixed, keeping `+91`/phone numbers intact |
 | Typed impossible date (31/02) rejects a submission | Not fixed on purpose: the form's date picker can't produce one |
+| *(Found later, 2026-10-05, by the same tester)* `25000rs` saved as 2500 — the amount regex backtracked past its unit check | Fixed in the bridge and **live in Google Apps Script** (sha16 `de5aab7d77c7e597`) |
 | *(Found while checking, not in the report)* clearing a field and saving didn't clear it, because the update request omitted values equal to their defaults | Fixed: `UpdateLeadRequest` has no defaults now |
 
 Not done on purpose: **no number validation on the form's budget questions** — the bridge now
@@ -154,6 +155,8 @@ them, they live on different services:
 | A | **Google Form + response Sheet + Apps Script bridge** | Anhad's personal Gmail (`anhadmahajan36@gmail.com`) | An NGO-owned Google account — this is the one holding real family contact/medical data |
 | B | **Supabase project** (database, API keys, dashboard) | Anhad's Supabase account | Supervisor/NGO's own Supabase account, added as full Owner |
 | C | **The app's internal single-admin login** (just a row in the database — not an external account) | `anhad@kalazaleads.app` | A new login created for whichever name the supervisor will use (e.g. `somnath@kalazaleads.app`) — trivial, one-time, no external sign-up needed |
+
+**When moving the Apps Script (3A):** copy the *current* repo file `tools/google-form-bridge/KalazaFormBridge.gs` (LF-normalised SHA-256 starts `de5aab7d77c7e597`) — the live script was fixed on 2026-10-05 for `25000rs` being read as 2500, so an older copy would bring the bug back. Re-create the Script Properties and the form-submit trigger, then test with a submission.
 
 The GitHub repository stays under Anhad's own account (portfolio project) — the NGO never
 needs source-code access, only the finished app and their own data. Flag this assumption

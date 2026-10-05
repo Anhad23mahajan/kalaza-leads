@@ -207,7 +207,8 @@ function logError(message, context) {
 function parseAmount(raw) {
   if (raw === null || raw === undefined) return null;
   var s = String(raw).toLowerCase().replace(/,/g, '');
-  var m = s.match(/(\d+(?:\.\d+)?)\s*(thousand|lakhs?|lacs?|crores?|cr|k|l)?(?![a-z])/);
+  // (?!\d) stops the number being cut short; the unit carries its own (?![a-z]) so "25000rs" is 25000, not 2500.
+  var m = s.match(/(\d+(?:\.\d+)?)(?!\d)\s*(?:(thousand|lakhs?|lacs?|crores?|cr|k|l)(?![a-z]))?/);
   if (!m) return null;
   var value = parseFloat(m[1]);
   if (isNaN(value)) return null;
