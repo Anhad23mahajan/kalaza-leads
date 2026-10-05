@@ -20,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -34,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -131,6 +133,26 @@ fun LeadsScreen(
                 state.isLoading && state.leads.isEmpty() -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+                // A failed load must not look like an empty list ("No leads") -- say so and offer a retry.
+                state.errorMessage != null && state.leads.isEmpty() -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = state.errorMessage!!,
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                        Button(
+                            onClick = { viewModel.refresh() },
+                            modifier = Modifier.padding(top = 16.dp),
+                        ) { Text("Retry") }
+                    }
+                }
                 visibleLeads.isEmpty() -> {
                     Column(
                         modifier = Modifier
@@ -144,7 +166,7 @@ fun LeadsScreen(
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = if (state.leads.isEmpty()) "Tap + to add the first one." else " ",
+                            text = if (state.leads.isEmpty()) "New enquiries arrive from the Google Form." else " ",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

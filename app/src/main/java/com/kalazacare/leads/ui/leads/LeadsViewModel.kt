@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kalazacare.leads.data.model.Lead
 import com.kalazacare.leads.data.model.UpdateLeadRequest
 import com.kalazacare.leads.data.repository.LeadsRepository
+import com.kalazacare.leads.ui.userFacingMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,7 +37,7 @@ class LeadsViewModel(private val repository: LeadsRepository) : ViewModel() {
                 .onFailure { error ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        errorMessage = error.message ?: "Failed to load leads",
+                        errorMessage = userFacingMessage(error, "Couldn't load the leads. Pull down to try again."),
                     )
                 }
             onDone?.invoke()
@@ -63,7 +64,7 @@ class LeadsViewModel(private val repository: LeadsRepository) : ViewModel() {
                 .onFailure { error ->
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        errorMessage = error.message ?: "Failed to update lead",
+                        errorMessage = userFacingMessage(error, "Couldn't save the changes. Please try again."),
                     )
                 }
         }

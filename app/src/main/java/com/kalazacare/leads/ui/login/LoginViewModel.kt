@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalazacare.leads.data.repository.AuthRepository
+import com.kalazacare.leads.ui.userFacingMessage
+import io.github.jan.supabase.exceptions.RestException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -48,7 +50,12 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                     Log.e(TAG, "login failed", error)
                     _state.value = _state.value.copy(
                         isLoading = false,
-                        errorMessage = error.message ?: "Login failed",
+                        // The repository already words a refused login; network/rate-limit errors are mapped here.
+                        errorMessage = if (error is RestException || error is java.io.IOException) {
+                            userFacingMessage(error, "Login failed. Please try again.")
+                        } else {
+                            error.message ?: "Login failed. Please try again."
+                        },
                     )
                 }
         }
