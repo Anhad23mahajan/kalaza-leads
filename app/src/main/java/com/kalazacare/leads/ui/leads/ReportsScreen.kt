@@ -2,6 +2,8 @@ package com.kalazacare.leads.ui.leads
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -121,14 +123,30 @@ private fun OverviewSection(overview: ReportOverview) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Overview", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.padding(top = 10.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                StatTile("Total enquiries", overview.total.toString())
-                StatTile("Converted", overview.converted.toString())
-                StatTile(
-                    "Conversion rate",
-                    overview.conversionRateOfDecided?.let { "${(it * 100).roundToInt()}%" } ?: "—",
-                )
-                StatTile("Median days to convert", overview.medianDaysToConvert?.toString() ?: "—")
+            // 2 x 2 grid: four tiles in one row left no room between the labels on a phone.
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    StatTile("Total enquiries", overview.total.toString(), Modifier.weight(1f).fillMaxHeight())
+                    StatTile("Converted", overview.converted.toString(), Modifier.weight(1f).fillMaxHeight())
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    StatTile(
+                        "Conversion rate",
+                        overview.conversionRateOfDecided?.let { "${(it * 100).roundToInt()}%" } ?: "—",
+                        Modifier.weight(1f).fillMaxHeight(),
+                    )
+                    StatTile(
+                        "Median days to convert",
+                        overview.medianDaysToConvert?.toString() ?: "—",
+                        Modifier.weight(1f).fillMaxHeight(),
+                    )
+                }
             }
         }
     }
@@ -136,9 +154,14 @@ private fun OverviewSection(overview: ReportOverview) {
 }
 
 @Composable
-private fun StatTile(label: String, value: String) {
-    Column {
+private fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
         Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(2.dp))
         Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

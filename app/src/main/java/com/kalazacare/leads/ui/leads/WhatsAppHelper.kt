@@ -60,11 +60,11 @@ fun buildWhatsAppMessage(template: WhatsAppTemplate, lead: Lead): String {
         }
         WhatsAppTemplate.GONE_QUIET -> {
             "Hi $firstName, we haven't heard back since we last spoke about Kalaza Care. " +
-                "No pressure at all -- just let us know if you'd like to continue the conversation, or if your plans have changed."
+                "No pressure at all. Just let us know if you'd like to continue the conversation, or if your plans have changed."
         }
         WhatsAppTemplate.CONFIRM_VISIT -> buildString {
             append("Hi $firstName, just confirming your visit to Kalaza Care")
-            if (lead.plannedVisitDate != null) append(" on ${lead.plannedVisitDate}")
+            if (lead.plannedVisitDate != null) append(" on ${displayDate(lead.plannedVisitDate)}")
             append(". Let us know if that still works for you, or if you'd like to reschedule.")
         }
         WhatsAppTemplate.VISIT_FEEDBACK -> {
@@ -72,8 +72,8 @@ fun buildWhatsAppMessage(template: WhatsAppTemplate, lead: Lead): String {
                 "Was our staff helpful? Anything we could improve?"
         }
         WhatsAppTemplate.WHAT_HAPPENED -> {
-            "Hi $firstName, thank you again for considering Kalaza Care. We understand you've decided not to move forward for now -- " +
-                "would you mind sharing what made you decide against it? It really helps us improve."
+            "Hi $firstName, thank you again for considering Kalaza Care. We understand you've decided not to move forward for now. " +
+                "Would you mind sharing what made you decide against it? It really helps us improve."
         }
     }
 }

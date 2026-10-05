@@ -12,6 +12,8 @@ class KalazaLeadsApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // First, so a crash anywhere below still lands on our crash screen.
+        CrashHandler.install(this)
         // Touching SupabaseClients.main here (rather than waiting for first repository
         // use) surfaces a misconfigured local.properties immediately on app start,
         // rather than on the first screen that happens to need data.
