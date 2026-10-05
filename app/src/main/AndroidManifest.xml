@@ -42,6 +42,13 @@
             </intent-filter>
         </activity>
 
+        <!-- Our own crash screen (see CrashHandler). Separate task so it survives the crashed one. -->
+        <activity
+            android:name=".CrashActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:taskAffinity=".crash" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

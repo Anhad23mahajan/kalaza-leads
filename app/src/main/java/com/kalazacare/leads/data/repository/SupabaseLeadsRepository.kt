@@ -17,7 +17,8 @@ class SupabaseLeadsRepository(private val client: SupabaseClient) : LeadsReposit
                 order("created_at", Order.DESCENDING)
             }
             .decodeList<Lead>()
-        Log.d(TAG, "getLeads: fetched ${leads.size} leads")
+        // Info, not debug: some phones (Vivo) drop debug-level app logs entirely.
+        Log.i(TAG, "getLeads: fetched ${leads.size} leads")
         Result.success(leads)
     } catch (e: Exception) {
         Log.e(TAG, "getLeads failed", e)
@@ -37,6 +38,27 @@ class SupabaseLeadsRepository(private val client: SupabaseClient) : LeadsReposit
         Result.success(updated)
     } catch (e: Exception) {
         Log.e(TAG, "updateLead failed", e)
+        Result.failure(e)
+    }
+
+    override suspend fun deleteLead(id: String): Result<Unit> = try {
+        // select() returns the deleted rows: RLS silently filters a delete it doesn't allow
+        // (0 rows, no error), so "nothing came back" has to be treated as a failure.
+        val deleted = client.postgrest.from("leads")
+            .delete {
+                filter { eq("id", id) }
+                select()
+            }
+            .decodeList<Lead>()
+        if (deleted.isEmpty()) {
+            Log.e(TAG, "deleteLead: no row deleted for $id")
+            Result.failure(IllegalStateException("This lead was not found. It may already have been deleted."))
+        } else {
+            Log.d(TAG, "deleteLead: deleted lead $id")
+            Result.success(Unit)
+        }
+    } catch (e: Exception) {
+        Log.e(TAG, "deleteLead failed", e)
         Result.failure(e)
     }
 }

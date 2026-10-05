@@ -171,6 +171,7 @@ cost, zero Meta dependency, works today. (`WhatsAppHelper.kt`)
 
 ## 8. A6 — CSV export + share
 
+(Updated 2026-10-05: the icon is now a download icon and the CSV is saved straight to the phone's Downloads folder; the share sheet below remains only for Android 8-9.)
 Share icon on the Leads screen top bar exports whichever segmented tab is
 currently open (respects that tab's filter) to CSV, with human-readable
 labels via the existing `*_LABELS` maps (not raw enum codes), then opens
