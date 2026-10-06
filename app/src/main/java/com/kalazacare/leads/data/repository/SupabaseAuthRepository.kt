@@ -30,8 +30,9 @@ class SupabaseAuthRepository(private val client: SupabaseClient) : AuthRepositor
         }
         Result.success(client.auth.currentUserOrNull()?.id ?: "")
     } catch (e: RestException) {
-        Log.e(TAG, "signIn rejected", e)
-        Result.failure(Exception("Incorrect name or password."))
+        Log.e(TAG, "signIn rejected (HTTP ${e.statusCode})", e)
+        // 429 = Supabase rate limit; anything else on sign-in means the credentials were refused.
+        if (e.statusCode == 429) Result.failure(e) else Result.failure(Exception("Incorrect name or password."))
     } catch (e: Exception) {
         Log.e(TAG, "signIn failed", e)
         Result.failure(e)

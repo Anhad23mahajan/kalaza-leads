@@ -46,6 +46,7 @@ anything in this repo.)
 | **WhatsApp quick-messages** | **Redesigned and verified on device (2026-10-02).** 7 templates in 4 categories, expandable list. See §4. |
 | **WhatsApp Business Platform / auto-reply bot** | **Abandoned 2026-10-02.** Not part of the project anymore. |
 | **Final handoff to the NGO** | Not started. See §5. |
+| **Usability pass (2026-10-05)** | Built: search, delete lead, "Changes saved" snackbar, discard-changes warning, refresh button + auto-refresh, age/budget checks, crash screen, 2×2 Reports overview. See §4b. |
 
 ---
 
@@ -144,6 +145,48 @@ gated by status — he wants the freedom to pick any message at any time.
    input eventually (similar in spirit to the old "~20 FAQ answers" ask, but much smaller —
    probably 6–10 short templates). Draft sensible placeholder wording to unblock building the
    UI now; swap in his real wording once he gives it. Doesn't need to block starting the work.
+
+## 4b. Usability pass (2026-10-05)
+
+Gaps found by comparing this app with Kalaza Care, chosen by Harsh (taking over from Anhad).
+Deliberately **not** done: idle auto-logout, offline cache, version scheme, server push, roles/audit/Wi-Fi gate.
+
+1. **Search** (magnifier in the Leads top bar): matches enquirer name, patient name, location, and phone digits (3+).
+   Applies across all tabs; tab counts follow the search.
+2. **Delete lead** (bottom of Lead Detail, red outline button) with a "can't be undone" confirmation. The delete
+   asks Supabase to return the deleted row, because RLS silently ignores a delete it doesn't allow.
+3. **Snackbar** after save ("Changes saved") and delete ("Lead deleted"); save/delete errors also show there
+   (they used to sit at the very bottom of the long edit form, out of sight).
+4. **Discard-changes warning** on Back / the back arrow when the form has unsaved edits.
+5. **Refresh**: button in the top bar, plus automatic reload when the app returns to the foreground and every
+   60 s while the list is on screen. A failed reload keeps the old list and shows a red "Couldn't refresh" strip.
+6. **Input checks**: age at most 120; budget max must be at least the min. Save is disabled until fixed.
+7. **Crash screen** (`CrashHandler` / `CrashActivity`, ported from Kalaza Care): plain message, Restart,
+   Share details, technical details folded away; a crash within 5 s of another just closes (no loop).
+
+8. **CSV download** (Harsh, 2026-10-05): the export button (download icon) now saves straight to the phone's
+   **Downloads** folder via MediaStore (Android 10+, no permission) and confirms with a snackbar; Android 8-9 phones
+   still get the share sheet. The file starts with a UTF-8 BOM so Excel shows ₹ and Hindi/Marathi names correctly.
+
+Found and fixed while testing on the phone (Vivo, Android 14):
+- "Due today" / "Overdue" was shown on closed leads (Not Converted, Dormant) while the Follow-ups Due tab said 0.
+- Dates read "2 Oct 2026" instead of `2026-10-02` (cards, date fields, the confirm-visit WhatsApp message).
+- A date could be set but never removed: the date picker now has **Clear**.
+- On Lead Detail the keyboard covered the field being typed in, and the bottom of the form sat under the nav bar.
+- The search box now takes focus when opened, and Back closes it instead of leaving the app.
+- WhatsApp templates no longer contain "--".
+
+Verified on the phone 2026-10-05: search (name, phone digits, patient, no-match), Back closes search, refresh button,
+auto-refresh on launch / on return / every 60 s (logcat timestamps), CSV saved to Downloads (3 rows, 34 columns, BOM),
+age > 120 and budget min > max block Save with inline errors, discard dialog (Keep editing / Discard), delete dialog
+(opened and cancelled), save + "Changes saved" + clearing a field really clears it, Reports 2×2, Settings, WhatsApp list,
+crash screen via `adb shell am crash` (details + Restart back into the app, still logged in).
+Actual delete verified 2026-10-05: "TEST Round Three" deleted from the app, "Lead deleted" snackbar, list 3 → 2, and the row is gone in Supabase.
+
+**Bridge budget fix (2026-10-05, repo only — the LIVE Apps Script still has the old line):** `parseAmount()` turned "25000rs" / "25000inr" / "40000pm" into 2500 / 2500 / 4000 (the regex backtracked a digit to satisfy its no-letter-after rule). Fixed with `(?!\d)` and a unit-only letter check; 25 budget cases pass offline. Until the live script is updated (see CLAUDE.md "Facts that bite" for the steps), the old behaviour is what families' submissions get.
+
+Also: Reports overview is a 2×2 grid of tiles (the four stats in one row ran into each other), and list
+loading vs saving are separate states, so a background refresh never disables the Save button.
 
 ## 5. Workstream 3 — End-of-project handoff to the NGO
 

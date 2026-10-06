@@ -11,7 +11,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,9 +23,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.kalazacare.leads.data.remote.SupabaseClients
 import com.kalazacare.leads.data.repository.SupabaseAuthRepository
 import com.kalazacare.leads.data.repository.SupabaseLeadsRepository
@@ -172,6 +178,22 @@ class MainActivity : ComponentActivity() {
                                 onBack = { currentScreen = Screen.LEADS },
                             )
                         }
+                    }
+
+                    // One snackbar for every screen: "Changes saved", "Lead deleted", save errors.
+                    val snackbarState = remember { SnackbarHostState() }
+                    val message = leadsViewModel.state.collectAsState().value.userMessage
+                    LaunchedEffect(message) {
+                        if (message != null) {
+                            snackbarState.showSnackbar(message.text)
+                            leadsViewModel.messageShown(message.id)
+                        }
+                    }
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                        SnackbarHost(
+                            hostState = snackbarState,
+                            modifier = Modifier.navigationBarsPadding().padding(16.dp),
+                        )
                     }
                 }
             }
