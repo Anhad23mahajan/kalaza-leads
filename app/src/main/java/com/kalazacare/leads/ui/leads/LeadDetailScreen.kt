@@ -1,23 +1,30 @@
 package com.kalazacare.leads.ui.leads
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -99,13 +106,18 @@ fun LeadDetailScreen(
         ?.let { "${lead.enquirerName} (for $it)" }
         ?: lead.enquirerName
 
-    val canSave = enquirerName.isNotBlank() && enquirerPhone.length == 10 && !state.isLoading
+    // Input checks: the fields only accept digits, but not sensible ranges.
+    val ageValue = patientAge.toIntOrNull()
+    val ageError = if (ageValue != null && ageValue > 120) "Age must be 120 or less" else null
+    val minValue = budgetMin.toDoubleOrNull()
+    val maxValue = budgetMax.toDoubleOrNull()
+    val budgetError = if (minValue != null && maxValue != null && minValue > maxValue) {
+        "Max must be at least the min"
+    } else {
+        null
+    }
 
-    fun saveChanges() {
-        val leadId = lead.id ?: return
-        viewModel.updateLead(
-            leadId,
-            UpdateLeadRequest(
+    fun buildRequest() = UpdateLeadRequest(
                 contactChannel = contactChannel,
                 howHeard = howHeard,
                 enquirerName = enquirerName.trim(),
@@ -135,25 +147,47 @@ fun LeadDetailScreen(
                 notConvertedReason = if (status == "NOT_CONVERTED") notConvertedReason else null,
                 notConvertedDetail = if (status == "NOT_CONVERTED") notConvertedDetail.trim().ifBlank { null } else null,
                 finalRemarks = finalRemarks.trim().ifBlank { null },
-            ),
-            onSaved,
-        )
+            )
+
+    // What the screen would save if nothing were touched; anything different = unsaved edits.
+    val initialRequest = remember { buildRequest() }
+    val hasUnsavedChanges = buildRequest() != initialRequest
+
+    val canSave = enquirerName.isNotBlank() && enquirerPhone.length == 10 &&
+        ageError == null && budgetError == null && !state.isSaving
+
+    var showDiscardConfirm by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    fun leave() {
+        if (hasUnsavedChanges) showDiscardConfirm = true else onBack()
+    }
+
+    // Takes over from MainActivity's Back handling only while there is something to lose.
+    BackHandler(enabled = hasUnsavedChanges && !state.isSaving) { showDiscardConfirm = true }
+
+    fun saveChanges() {
+        val leadId = lead.id ?: return
+        viewModel.updateLead(leadId, buildRequest(), onSaved)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(titleText, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             navigationIcon = {
-                IconButton(onClick = onBack, enabled = !state.isLoading) {
+                IconButton(onClick = ::leave, enabled = !state.isSaving) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back / cancel")
                 }
             },
             actions = {
                 TextButton(onClick = ::saveChanges, enabled = canSave) {
-                    if (state.isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
+                    if (state.isSaving) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(end = 8.dp).size(18.dp),
+                            strokeWidth = 2.dp,
+                        )
                     }
-                    Text(if (state.isLoading) "Saving..." else "Save")
+                    Text(if (state.isSaving) "Saving..." else "Save")
                 }
             },
         )
@@ -161,6 +195,10 @@ fun LeadDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                // Without these the keyboard covers the field being typed in, and the last items
+                // (Delete) sit under the navigation bar -- the app draws edge to edge.
+                .imePadding()
+                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
         ) {
@@ -254,8 +292,10 @@ fun LeadDetailScreen(
             Row {
                 OutlinedTextField(
                     value = patientAge,
-                    onValueChange = { patientAge = it.filter { c -> c.isDigit() } },
+                    onValueChange = { patientAge = it.filter { c -> c.isDigit() }.take(3) },
                     label = { Text("Age") },
+                    isError = ageError != null,
+                    supportingText = ageError?.let { { Text(it) } },
                     modifier = Modifier.width(120.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -319,6 +359,8 @@ fun LeadDetailScreen(
                     value = budgetMax,
                     onValueChange = { budgetMax = it.filter { c -> c.isDigit() } },
                     label = { Text("Budget max (₹)") },
+                    isError = budgetError != null,
+                    supportingText = budgetError?.let { { Text(it) } },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -393,16 +435,56 @@ fun LeadDetailScreen(
                 minLines = 2,
             )
 
-            if (state.errorMessage != null) {
-                Spacer(Modifier.padding(top = 12.dp))
-                Text(
-                    text = state.errorMessage!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                )
+            HorizontalDivider(modifier = Modifier.padding(vertical = 20.dp))
+            OutlinedButton(
+                onClick = { showDeleteConfirm = true },
+                enabled = !state.isSaving && lead.id != null,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+            ) {
+                Text("Delete this lead")
             }
 
             Spacer(Modifier.padding(bottom = 24.dp))
         }
+    }
+
+    if (showDiscardConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDiscardConfirm = false },
+            title = { Text("Discard changes?") },
+            text = { Text("You have edits that aren't saved. Leave without saving them?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDiscardConfirm = false
+                    onBack()
+                }) { Text("Discard") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardConfirm = false }) { Text("Keep editing") }
+            },
+        )
+    }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete this lead?") },
+            text = {
+                Text("This permanently removes ${lead.enquirerName}'s enquiry and all its details. It can't be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteConfirm = false
+                        lead.id?.let { viewModel.deleteLead(it, onBack) }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text("Delete") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel") }
+            },
+        )
     }
 }

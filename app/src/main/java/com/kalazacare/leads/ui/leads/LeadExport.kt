@@ -80,16 +80,56 @@ private fun buildLeadsCsv(leads: List<Lead>): String = buildString {
 }
 
 /**
- * Writes [leads] to a CSV in the app's cache dir and opens the Android share
+ * Saves [leads] as a CSV straight into the phone's Downloads folder and returns the file name,
+ * or null if it could not be written. Uses MediaStore (Android 10+, no permission needed).
+ * On Android 8-9 writing to Downloads would need a storage permission, so those phones get the
+ * share sheet instead (see [exportAndShareLeads]).
+ *
+ * A UTF-8 byte-order mark goes first: without it Excel reads the file as ANSI and garbles the
+ * rupee sign and any Hindi/Marathi names.
+ */
+fun exportLeadsToDownloads(context: Context, leads: List<Lead>, segmentLabel: String): String? {
+    val fileName = exportFileName(segmentLabel)
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+        exportAndShareLeads(context, leads, segmentLabel)
+        return null
+    }
+    return try {
+        val resolver = context.contentResolver
+        val values = android.content.ContentValues().apply {
+            put(android.provider.MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(android.provider.MediaStore.Downloads.MIME_TYPE, "text/csv")
+            put(android.provider.MediaStore.Downloads.IS_PENDING, 1)
+        }
+        val uri = resolver.insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+            ?: return null
+        resolver.openOutputStream(uri)?.use { it.write(("\uFEFF" + buildLeadsCsv(leads)).toByteArray(Charsets.UTF_8)) }
+            ?: return null
+        values.clear()
+        values.put(android.provider.MediaStore.Downloads.IS_PENDING, 0)
+        resolver.update(uri, values, null, null)
+        fileName
+    } catch (e: Exception) {
+        android.util.Log.e("LeadExport", "Saving CSV to Downloads failed", e)
+        null
+    }
+}
+
+private fun exportFileName(segmentLabel: String): String {
+    val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm"))
+    val safeSegment = segmentLabel.replace(Regex("[^A-Za-z0-9]+"), "_").trim('_')
+    return "kalaza_leads_${safeSegment}_$timestamp.csv"
+}
+
+/**
+ * Fallback for Android 8-9: writes [leads] to a CSV in the app's cache dir and opens the Android share
  * sheet so it can be sent to WhatsApp, email, Drive, etc. (roadmap A6 /
  * supervisor request #7 — "Excel data file saved and shared").
  */
 fun exportAndShareLeads(context: Context, leads: List<Lead>, segmentLabel: String) {
     val exportsDir = File(context.cacheDir, "exports").apply { mkdirs() }
-    val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm"))
-    val safeSegment = segmentLabel.replace(Regex("[^A-Za-z0-9]+"), "_").trim('_')
-    val file = File(exportsDir, "kalaza_leads_${safeSegment}_$timestamp.csv")
-    file.writeText(buildLeadsCsv(leads))
+    val file = File(exportsDir, exportFileName(segmentLabel))
+    file.writeText("\uFEFF" + buildLeadsCsv(leads))
 
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     val shareIntent = Intent(Intent.ACTION_SEND).apply {

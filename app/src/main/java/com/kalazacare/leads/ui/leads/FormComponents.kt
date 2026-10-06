@@ -103,6 +103,14 @@ fun MultiSelectChips(
     }
 }
 
+/** "2026-10-02" -> "2 Oct 2026" (dates are stored ISO, shown the way people read them). */
+fun displayDate(isoDate: String?): String =
+    isoDate?.let {
+        runCatching {
+            java.time.LocalDate.parse(it).format(DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.ENGLISH))
+        }.getOrDefault(it)
+    } ?: ""
+
 /** Read-only text field that opens a Material3 DatePickerDialog, storing an ISO yyyy-MM-dd string. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,7 +123,7 @@ fun DateField(
     var showDialog by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        value = isoDate ?: "",
+        value = displayDate(isoDate),
         onValueChange = {},
         readOnly = true,
         label = { Text(label) },
@@ -146,7 +154,16 @@ fun DateField(
                 }) { Text("OK") }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                androidx.compose.foundation.layout.Row {
+                    // Without this a date, once set (e.g. a follow-up), could be changed but never removed.
+                    if (isoDate != null) {
+                        TextButton(onClick = {
+                            onSelect(null)
+                            showDialog = false
+                        }) { Text("Clear") }
+                    }
+                    TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                }
             },
         ) {
             DatePicker(state = state)

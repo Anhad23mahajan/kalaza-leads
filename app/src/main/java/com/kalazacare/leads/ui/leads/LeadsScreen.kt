@@ -1,5 +1,7 @@
 package com.kalazacare.leads.ui.leads
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,14 +14,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Assessment
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
@@ -28,18 +36,41 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import com.kalazacare.leads.data.model.Lead
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.delay
 import java.time.LocalDate
+
+/** How often the list reloads by itself while it is on screen. */
+private const val AUTO_REFRESH_MS = 60_000L
+
+/** Case-insensitive match on the names, location and phone (digits only, so "98765 43210" finds it too). */
+private fun Lead.matches(query: String): Boolean {
+    val q = query.trim().lowercase()
+    if (q.isEmpty()) return true
+    val digits = q.filter { it.isDigit() }
+    return enquirerName.lowercase().contains(q) ||
+        patientName?.lowercase()?.contains(q) == true ||
+        enquirerLocation?.lowercase()?.contains(q) == true ||
+        (digits.length >= 3 && enquirerPhone.contains(digits))
+}
 
 private val ACTIVE_STATUSES = setOf("NEW", "CONTACTED", "INFO_SENT", "VISIT_SCHEDULED", "VISITED", "CONSIDERING")
 private val TERMINAL_STATUSES = setOf("CONVERTED", "NOT_CONVERTED", "DORMANT")
@@ -78,10 +109,43 @@ fun LeadsScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     var showLogoutConfirm by remember { mutableStateOf(false) }
-    val today = remember { LocalDate.now().toString() }
+    var searchOpen by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    // Re-read on every reload, so an app left open past midnight moves follow-ups to "due".
+    val today = remember(state.leads) { LocalDate.now().toString() }
 
-    val visibleLeads = remember(state.leads, today, selectedTab) {
-        SEGMENTS[selectedTab].filter(state.leads, today)
+    val searchedLeads = remember(state.leads, query) { state.leads.filter { it.matches(query) } }
+    val visibleLeads = remember(searchedLeads, today, selectedTab) {
+        SEGMENTS[selectedTab].filter(searchedLeads, today)
+    }
+
+    // Back closes the search first, instead of leaving the app.
+    BackHandler(enabled = searchOpen) {
+        searchOpen = false
+        query = ""
+    }
+
+    // Auto-refresh: reload when the app comes back to the foreground, and every minute while the
+    // list is on screen, so a new Google Form enquiry shows up without restarting the app.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        var firstResume = true
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // The first resume is the screen opening; MainActivity has just loaded the list.
+                if (firstResume) firstResume = false else viewModel.refresh()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(AUTO_REFRESH_MS)
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                viewModel.refresh()
+            }
+        }
     }
 
     Scaffold(
@@ -90,13 +154,34 @@ fun LeadsScreen(
                 TopAppBar(
                     title = { Text("Leads") },
                     actions = {
+                        IconButton(onClick = {
+                            searchOpen = !searchOpen
+                            if (!searchOpen) query = ""
+                        }) {
+                            Icon(
+                                if (searchOpen) Icons.Filled.Close else Icons.Filled.Search,
+                                contentDescription = if (searchOpen) "Close search" else "Search leads",
+                            )
+                        }
+                        IconButton(onClick = { viewModel.refresh() }, enabled = !state.isLoading) {
+                            Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
+                        }
                         IconButton(
                             onClick = {
-                                exportAndShareLeads(context, visibleLeads, SEGMENTS[selectedTab].label)
+                                val label = SEGMENTS[selectedTab].label
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                                    val saved = exportLeadsToDownloads(context, visibleLeads, label)
+                                    viewModel.showMessage(
+                                        if (saved != null) "Saved to Downloads: $saved"
+                                        else "Couldn't save the file. Please try again.",
+                                    )
+                                } else {
+                                    exportLeadsToDownloads(context, visibleLeads, label)
+                                }
                             },
                             enabled = visibleLeads.isNotEmpty(),
                         ) {
-                            Icon(Icons.Filled.Share, contentDescription = "Export ${SEGMENTS[selectedTab].label} to CSV")
+                            Icon(Icons.Filled.Download, contentDescription = "Download ${SEGMENTS[selectedTab].label} as CSV")
                         }
                         IconButton(onClick = onViewReports) {
                             Icon(Icons.Filled.Assessment, contentDescription = "Reports")
@@ -109,15 +194,45 @@ fun LeadsScreen(
                         }
                     },
                 )
+                if (searchOpen) {
+                    val focusRequester = remember { FocusRequester() }
+                    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+                    OutlinedTextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        placeholder = { Text("Search name, patient, phone or place") },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .focusRequester(focusRequester),
+                    )
+                }
                 ScrollableTabRow(selectedTabIndex = selectedTab) {
                     SEGMENTS.forEachIndexed { index, segment ->
-                        val count = remember(state.leads, today) { segment.filter(state.leads, today).size }
+                        val count = remember(searchedLeads, today) { segment.filter(searchedLeads, today).size }
                         Tab(
                             selected = selectedTab == index,
                             onClick = { onTabSelected(index) },
                             text = { Text("${segment.label} ($count)") },
                         )
                     }
+                }
+                // A reload with a list already showing: a thin bar instead of blanking the screen.
+                if (state.isLoading && state.leads.isNotEmpty()) {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+                if (state.errorMessage != null && state.leads.isNotEmpty()) {
+                    Text(
+                        text = "Couldn't refresh. Showing the last loaded list.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.errorContainer)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
                 }
             }
         },
@@ -131,6 +246,26 @@ fun LeadsScreen(
                 state.isLoading && state.leads.isEmpty() -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+                // A failed load must not look like an empty list ("No leads") -- say so and offer a retry.
+                state.errorMessage != null && state.leads.isEmpty() -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            text = state.errorMessage!!,
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                        Button(
+                            onClick = { viewModel.refresh() },
+                            modifier = Modifier.padding(top = 16.dp),
+                        ) { Text("Retry") }
+                    }
+                }
                 visibleLeads.isEmpty() -> {
                     Column(
                         modifier = Modifier
@@ -140,11 +275,15 @@ fun LeadsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = if (SEGMENTS[selectedTab].label == "Follow-ups Due") "Nothing due right now." else "No leads in this list.",
+                            text = when {
+                                query.isNotBlank() -> "No leads match \"${query.trim()}\"."
+                                SEGMENTS[selectedTab].label == "Follow-ups Due" -> "Nothing due right now."
+                                else -> "No leads in this list."
+                            },
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            text = if (state.leads.isEmpty()) "Tap + to add the first one." else " ",
+                            text = if (state.leads.isEmpty()) "New enquiries arrive from the Google Form." else " ",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -220,12 +359,14 @@ private fun LeadCard(lead: Lead, today: String, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (lead.nextFollowUpDate != null) {
+            // Closed leads (converted / not converted / dormant) are never "due" -- same rule as the
+            // Follow-ups Due tab and the daily reminder.
+            if (lead.nextFollowUpDate != null && lead.status !in TERMINAL_STATUSES) {
                 val isOverdue = lead.nextFollowUpDate < today
                 val isDueToday = lead.nextFollowUpDate == today
                 if (isOverdue || isDueToday) {
                     Text(
-                        text = if (isOverdue) "Overdue — was due ${lead.nextFollowUpDate}" else "Due today",
+                        text = if (isOverdue) "Overdue — was due ${displayDate(lead.nextFollowUpDate)}" else "Due today",
                         style = MaterialTheme.typography.labelMedium,
                         color = if (isOverdue) Color(0xFFCF2E2E) else Color(0xFFE58A00),
                     )
