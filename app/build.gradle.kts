@@ -18,6 +18,9 @@ val localProperties = Properties().apply {
     }
 }
 
+val supabaseUrl: String = localProperties.getProperty("SUPABASE_URL", "").trim()
+val supabaseAnonKey: String = localProperties.getProperty("SUPABASE_ANON_KEY", "").trim()
+
 android {
     namespace = "com.kalazacare.leads"
     compileSdk = 36
@@ -36,11 +39,11 @@ android {
 
         buildConfigField(
             "String", "SUPABASE_URL",
-            "\"${localProperties.getProperty("SUPABASE_URL", "")}\""
+            "\"$supabaseUrl\""
         )
         buildConfigField(
             "String", "SUPABASE_ANON_KEY",
-            "\"${localProperties.getProperty("SUPABASE_ANON_KEY", "")}\""
+            "\"$supabaseAnonKey\""
         )
     }
 
@@ -119,4 +122,19 @@ dependencies {
     // Testing
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+}
+
+// Refuse to build an APK without the Supabase config. A fresh clone (e.g. one Android Studio
+// created) has a local.properties with only sdk.dir; the app then silently falls back to
+// https://localhost and no phone can log in ("Can't reach the server") -- this happened on
+// 2026-10-06. Fail here, loudly, instead.
+tasks.named("preBuild") {
+    doFirst {
+        if (!supabaseUrl.startsWith("https://") || !supabaseUrl.contains(".supabase.co") || supabaseAnonKey.isEmpty()) {
+            throw GradleException(
+                "local.properties is missing SUPABASE_URL and/or SUPABASE_ANON_KEY " +
+                    "(see local.properties.example). An APK built without them cannot log in on any phone.",
+            )
+        }
+    }
 }
