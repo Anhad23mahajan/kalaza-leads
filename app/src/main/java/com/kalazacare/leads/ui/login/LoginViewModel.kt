@@ -16,6 +16,8 @@ data class LoginState(
     val isLoading: Boolean = false,
     val isLoggedIn: Boolean = false,
     val errorMessage: String? = null,
+    /** Technical cause for the "Show details" link; only set for connection/server failures. */
+    val errorDetails: String? = null,
 )
 
 class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
@@ -33,7 +35,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
         viewModelScope.launch {
             Log.d(TAG, "login() coroutine started, calling authRepository.login")
-            _state.value = _state.value.copy(isLoading = true, errorMessage = null)
+            _state.value = _state.value.copy(isLoading = true, errorMessage = null, errorDetails = null)
 
             val result = authRepository.login(adminName, password)
             Log.d(TAG, "authRepository.login returned: success=${result.isSuccess}, error=${result.exceptionOrNull()}")
@@ -51,6 +53,11 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
                     _state.value = _state.value.copy(
                         isLoading = false,
                         // The repository already words a refused login; network/rate-limit errors are mapped here.
+                        errorDetails = if (error is java.io.IOException || error is RestException) {
+                            com.kalazacare.leads.ui.technicalDetails(error)
+                        } else {
+                            null
+                        },
                         errorMessage = if (error is RestException || error is java.io.IOException) {
                             userFacingMessage(error, "Login failed. Please try again.")
                         } else {
