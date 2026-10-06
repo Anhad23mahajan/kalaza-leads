@@ -8,6 +8,7 @@ composeBom = "2024.12.01"
 navigationCompose = "2.8.5"
 supabaseBom = "3.5.0"
 ktorClientAndroid = "3.0.3"
+okhttp = "4.12.0"
 kotlinxSerializationJson = "1.7.3"
 workManager = "2.10.0"
 
@@ -38,6 +39,10 @@ supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgre
 supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
 supabase-realtime = { group = "io.github.jan-tennert.supabase", name = "realtime-kt" }
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktorClientAndroid" }
+# OkHttp engine + DNS-over-HTTPS: lets the app find the server even when a mobile network's DNS
+# blocks *.supabase.co (see SupabaseClients.kt).
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktorClientAndroid" }
+okhttp-dnsoverhttps = { group = "com.squareup.okhttp3", name = "okhttp-dnsoverhttps", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 # WorkManager -- local (device-only) periodic follow-up reminder checks (A4 part 2)
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }

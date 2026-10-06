@@ -90,6 +90,21 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
             )
+            state.errorDetails?.let { details ->
+                var showDetails by androidx.compose.runtime.remember(details) {
+                    androidx.compose.runtime.mutableStateOf(false)
+                }
+                androidx.compose.material3.TextButton(onClick = { showDetails = !showDetails }) {
+                    Text(if (showDetails) "Hide details" else "Show details")
+                }
+                if (showDetails) {
+                    Text(
+                        text = details,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         }
 
         androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 20.dp))

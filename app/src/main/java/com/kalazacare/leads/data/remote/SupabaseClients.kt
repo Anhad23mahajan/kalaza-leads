@@ -6,6 +6,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import io.ktor.client.engine.okhttp.OkHttp
 
 /**
  * The anon key is safe to embed client-side once Row-Level Security is enabled on every
@@ -24,6 +25,11 @@ object SupabaseClients {
             supabaseUrl = BuildConfig.SUPABASE_URL,
             supabaseKey = BuildConfig.SUPABASE_ANON_KEY,
         ) {
+            // OkHttp with our own DNS, so the app still reaches Supabase on networks whose DNS
+            // blocks *.supabase.co (see ResilientDns).
+            httpEngine = OkHttp.create {
+                config { dns(ResilientDns) }
+            }
             install(Auth)
             install(Postgrest)
             install(Realtime)
